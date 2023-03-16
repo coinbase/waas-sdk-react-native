@@ -39,7 +39,7 @@ yarn add @coinbase/waas-sdk-react-native
 
 ## Usage
 
-See [index.tsx](./src/index.tsx) for the list of supported APIs.
+[docs.cloud.coinbase.com/waas](https://docs.cloud.coinbase.com/waas/)
 
 ## Example App
 
