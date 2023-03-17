@@ -1,0 +1,15 @@
+develop:
+  documentation: ['http://go/waas']
+  email: ['jayasudha.jayakumaran@coinbase.com', 'yuga.cohler@coinbase.com']
+  slack_channels: ['#proj-waas-eng']
+
+build:
+  engines:
+    - BaldurNode:
+        name: waas-sdk-react-native
+        path: ./Dockerfile.publish
+
+secure:
+  required_reviews: 1
+  requires_mfa: true
+  codeowners_enabled: true
