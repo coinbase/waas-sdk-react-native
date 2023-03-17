@@ -2,6 +2,9 @@ import Foundation
 
 @objc(MPCWalletService)
 class MPCWalletService: NSObject {
+    // The URL of the MPCWalletService.
+    let mpcWalletServiceUrl = "https://api.developer.coinbase.com/waas/mpc_wallets"
+    
     // The error code for MPCWalletService-related errors.
     let walletsErr = "E_MPC_WALLET_SERVICE"
     
@@ -15,12 +18,12 @@ class MPCWalletService: NSObject {
      Initializes the MPCWalletService with the given Cloud API Key parameters. Resolves with the string "success" on success;
      rejects with an error otherwise.
      */
-    @objc(initialize:withApiKeyName:withPrivateKey:withResolver:withRejecter:)
-    func initialize(_ url: NSString, apiKeyName: NSString, privateKey: NSString,
+    @objc(initialize:withPrivateKey:withResolver:withRejecter:)
+    func initialize(_ apiKeyName: NSString, privateKey: NSString,
                     resolve: RCTPromiseResolveBlock, reject: RCTPromiseRejectBlock) {
         var error: NSError?
         
-        walletsClient = V1NewMPCWalletService(url as String, apiKeyName as String, privateKey as String, &error)
+        walletsClient = V1NewMPCWalletService(mpcWalletServiceUrl as String, apiKeyName as String, privateKey as String, &error)
         
         if error != nil {
             reject(walletsErr, error!.localizedDescription, nil)

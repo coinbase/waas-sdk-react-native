@@ -9,24 +9,76 @@ const LINKING_ERROR =
   '- You rebuilt the app after installing the package\n' +
   '- You are not using Expo Go\n';
 
+/**
+ * The native hook into the WaaS MPC SDK.
+ */
+const MPCSdk = NativeModules.MPCSdk
+  ? NativeModules.MPCSdk
+  : new Proxy(
+      {},
+      {
+        get() {
+          throw new Error(LINKING_ERROR);
+        },
+      }
+    );
+
+/**
+ * Initializes the MPC SDK. This function must be invoked before
+ * any MPC SDK methods are called.
+ * @returns A promise with the string "success" on successful initialization; a rejection
+ * otherwise.
+ */
+export function initMPCSdk(isSimulator?: boolean): Promise<string> {
+  return MPCSdk.initialize(isSimulator);
+}
+
+/**
+ Bootstraps the Device with the given passcode. The passcode is used to generate a private/public key pair
+ that encodes the back-up material for WaaS keys created on this Device. This function should be called exactly once per
+ Device per application, and should be called before the Device is registered with GetRegistrationData.
+ It is the responsibility of the application to track whether BootstrapDevice has been called for the Device.
+ * @param passcode: Passcode to protect all key materials in the secure enclave.
+ * @returns A promise with the string "bootstrap complete" on successful initialization or a rejection otherwise.
+ */
+export function bootstrapDevice(passcode: string): Promise<string> {
+  return MPCSdk.bootstrapDevice(passcode);
+}
+
+/**
+ * Retrieves the data required to call RegisterDeviceAPI on MPCKeyService.
+ * @returns A promise with the RegistrationData on success; a rejection otherwise.
+ */
+export function getRegistrationData(): Promise<String> {
+  return MPCSdk.getRegistrationData();
+}
+
+/**
+ * ComputeMPCOperation computes an MPC operation, given mpcData from the response of ListMPCOperations API on MPCKeyService.
+ * @param mpcData The mpcData from ListMPCOperationsResponse on MPCKeyService.
+ * @returns A promise with the string "success" on successful MPC computation; a rejection otherwise.
+ */
+export function computeMPCOperation(mpcData: string): Promise<String> {
+  return MPCSdk.computeMPCOperation(mpcData);
+}
 
 /**
  * The native hook into the WaaS PoolService.
  */
 const PoolService = NativeModules.PoolService
-? NativeModules.PoolService
-: new Proxy(
-    {},
-    {
-      get() {
-        throw new Error(LINKING_ERROR);
-      },
-    }
-  );
+  ? NativeModules.PoolService
+  : new Proxy(
+      {},
+      {
+        get() {
+          throw new Error(LINKING_ERROR);
+        },
+      }
+    );
 
 /**
-* The Pool resource.
-*/
+ * The Pool resource.
+ */
 export type Pool = {
   // The resource name of the Pool.
   // Format: pools/{pool_id}
@@ -35,7 +87,6 @@ export type Pool = {
   // Example: 'Acme Co. Retail Trading'
   displayName: string;
 };
-
 
 /**
  * Initializes the PoolService with Cloud API Key. This function must be invoked before
@@ -48,14 +99,9 @@ export type Pool = {
  */
 export function initPoolService(
   apiKeyName: string,
-  privateKey: string,
-  url?: string
+  privateKey: string
 ): Promise<string> {
-  if (url === undefined || url === '') {
-    url = 'https://api.developer.coinbase.com/waas/pools';
-  }
-
-  return PoolService.initialize(url, apiKeyName, privateKey);
+  return PoolService.initialize(apiKeyName, privateKey);
 }
 
 /**
@@ -90,59 +136,18 @@ const MPCKeyService = NativeModules.MPCKeyService
         },
       }
     );
-    
+
 /**
  * Initializes the MPCKeyService.
  * This function must be invoked before any MPCKeyService functions are called.
- * @param isSimulator(optional) Whether or not this API is being called from an iOS simulator, as opposed to a physical device.
  * @returns A promise with the string "success" on successful initialization; a rejection
  * otherwise.
  */
 export function initMPCKeyService(
   apiKeyName: string,
-  privateKey: string,
-  isSimulator?: boolean,
-  url?: string,
+  privateKey: string
 ): Promise<string> {
-  if (url === undefined || url === '') {
-    url = 'https://api.developer.coinbase.com/waas/mpc_keys';
-  }
-
-  return MPCKeyService.initialize(url, apiKeyName, privateKey, isSimulator);
-}
-
-/**
-  Bootstraps the Device with the given passcode. The passcode is used to generate a private/public key pair
-  that encodes the back-up material for WaaS keys created on this Device. This function should be called exactly once per
-  Device per application, and should be called before the Device is registered with GetRegistrationData.
-  It is the responsibility of the application to track whether BootstrapDevice has been called for the Device.
- * @param passcode: Passcode to protect all key materials in the secure enclave.
- * @returns A promise with the string "bootstrap complete" on successful initialization; a rejection
- * otherwise.
- */
-  export function bootstrapDevice(
-    passcode: string
-  ): Promise<string> {
-    return MPCKeyService.bootstrapDevice(passcode);
-  }
-  
-/**
- * Retrieves the data required to call RegisterDeviceAPI on MPCKeyService.
- * @returns A promise with the RegistrationData on success; a rejection otherwise.
- */
-export function getRegistrationData(): Promise<String> {
-  return MPCKeyService.getRegistrationData();
-}
-
-/**
- * ComputeMPCOperation computes an MPC operation, given mpcData from the response of ListMPCOperations API on MPCKeyService.
- * @param mpcData The mpcData from ListMPCOperationsResponse on MPCKeyService.
- * @returns A promise with the string "success" on successful MPC computation; a rejection otherwise.
- */
-export function computeMPCOperation(
-  mpcData: string,
-): Promise<String> {
-  return MPCKeyService.computeMPCOperation(mpcData);
+  return MPCKeyService.initialize(apiKeyName, privateKey);
 }
 
 /**
@@ -283,7 +288,10 @@ export function pollForPendingDeviceGroup(
   pollInterval?: number
 ): Promise<Array<CreateDeviceGroupOperation>> {
   const pollIntervalToUse = pollInterval === undefined ? 200 : pollInterval;
-  return MPCKeyService.pollForPendingDeviceGroup(deviceGroup, pollIntervalToUse);
+  return MPCKeyService.pollForPendingDeviceGroup(
+    deviceGroup,
+    pollIntervalToUse
+  );
 }
 
 /**
@@ -295,7 +303,6 @@ export function pollForPendingDeviceGroup(
 export function stopPollingForPendingDeviceGroup(): Promise<string> {
   return MPCKeyService.stopPollingForPendingDeviceGroup();
 }
-
 
 /**
  * Initiates an operation to create a Signature resource from the given Transaction using
@@ -359,10 +366,7 @@ export function getSignedTransaction(
   unsignedTx: Transaction,
   signature: Signature
 ): Promise<SignedTransaction> {
-  return MPCKeyService.getSignedTransaction(
-    unsignedTx,
-    signature
-  );
+  return MPCKeyService.getSignedTransaction(unsignedTx, signature);
 }
 
 /**
@@ -379,18 +383,17 @@ const MPCWalletService = NativeModules.MPCWalletService
       }
     );
 
-
 /**
  * The response for CreateMPCWallet.
  */
 export type CreateMPCWalletResponse = {
   // The resource name of the DeviceGroup associated with this MPCWallet.
   // Format: pools/{pool_id}/deviceGroups/{device_group_id}
-  DeviceGroup: string
+  DeviceGroup: string;
   // The resource name of the WaaS operation that creates this MPCWallet.
   // Format: operations/{operation_id}
-  Operation: string
-}
+  Operation: string;
+};
 
 /**
  * The Address resource.
@@ -406,7 +409,6 @@ export type Address = {
   // The resource name of the MPCWallet to which this Address belongs.
   MPCWallet: string;
 };
-
 
 /**
  * The MPCWallet resource.
@@ -432,14 +434,9 @@ export type MPCWallet = {
  */
 export function initMPCWalletService(
   apiKeyName: string,
-  privateKey: string,
-  url?: string
+  privateKey: string
 ): Promise<string> {
-  if (url === undefined || url === '') {
-    url = 'https://api.developer.coinbase.com/waas/mpc_wallets';
-  }
-
-  return MPCWalletService.initialize(url, apiKeyName, privateKey);
+  return MPCWalletService.initialize(apiKeyName, privateKey);
 }
 
 /**
@@ -450,9 +447,9 @@ export function initMPCWalletService(
  */
 export function createMPCWallet(
   parent: string,
-  device: string,
+  device: string
 ): Promise<CreateMPCWalletResponse> {
-  return MPCWalletService.createMPCWallet(parent,device);
+  return MPCWalletService.createMPCWallet(parent, device);
 }
 
 /**
@@ -472,7 +469,7 @@ export function waitPendingMPCWallet(operation: string): Promise<MPCWallet> {
  */
 export function generateAddress(
   wallet: string,
-  network: string,
+  network: string
 ): Promise<Address> {
   return MPCWalletService.generateAddress(wallet, network);
 }

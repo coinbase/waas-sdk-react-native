@@ -2,6 +2,8 @@ import Foundation
 
 @objc(MPCKeyService)
 class MPCKeyService: NSObject {
+    // The URL of the MPCKeyService.
+    let mpcKeyServiceUrl = "https://api.developer.coinbase.com/waas/mpc_keys"
     
     // The error code for MPCKeyService-related errors.
     let mpcKeyServiceErr = "E_MPC_KEY_SERVICE"
@@ -16,16 +18,14 @@ class MPCKeyService: NSObject {
      Initializes the MPCKeyService  with the given parameters.
      Resolves with the string "success" on success; rejects with an error otherwise.
      */
-    @objc(initialize:withApiKeyName:withPrivateKey:withIsSimulator:withResolver:withRejecter:)
-    func initialize(_ mpcKeyServiceURL: NSString, apiKeyName: NSString, privateKey: NSString,
-                    isSimulator: NSNumber, resolve: RCTPromiseResolveBlock, reject: RCTPromiseRejectBlock) {
+    @objc(initialize:withPrivateKey:withResolver:withRejecter:)
+    func initialize(_ apiKeyName: NSString, privateKey: NSString,
+                    resolve: RCTPromiseResolveBlock, reject: RCTPromiseRejectBlock) {
         var error: NSError?
         keyClient = V1NewMPCKeyService(
-            mpcKeyServiceURL as String,
+            mpcKeyServiceUrl as String,
             apiKeyName as String,
             privateKey as String,
-            isSimulator.intValue != 0,
-            nil,
             &error)
         
         if error != nil {
@@ -34,69 +34,7 @@ class MPCKeyService: NSObject {
             resolve("success" as NSString)
         }
     }
-    
-    /**
-     BootstrapDevice initializes the Device with the given passcode. The passcode is used to generate a private/public key pair
-     that encodes the back-up material for WaaS keys created on this Device. This function should be called exactly once per
-     Device per application, and should be called before the Device is registered with GetRegistrationData.
-     It is the responsibility of the application to track whether BootstrapDevice has been called for the Device.
-     On success, it resolves the string "bootstrap complete"; rejects with an error otherwise.
-     */
-    @objc(bootstrapDevice:withResolver:withRejecter:)
-    func bootstrapDevice(_ passcode: NSString, resolve: RCTPromiseResolveBlock, reject: RCTPromiseRejectBlock) {
-        if self.keyClient == nil {
-            reject(self.mpcKeyServiceErr, self.uninitializedErr, nil)
-            return
-        }
-        
-        var error: NSError?
-        
-        let res = self.keyClient?.bootstrapDevice(passcode as String, error: &error)
-        if error != nil{
-            reject(self.mpcKeyServiceErr, error!.localizedDescription, nil)
-        } else{
-            resolve(res)
-        }
-    }
-    
-    /**
-     GetRegistrationData returns the data required to call RegisterDeviceAPI on MPCKeyService.
-     Resolves with the RegistrationData on success; rejects with an error otherwise.
-     */
-    @objc(getRegistrationData:withRejecter:)
-    func getRegistrationData(_ resolve: RCTPromiseResolveBlock, reject: RCTPromiseRejectBlock) {
-        if self.keyClient == nil {
-            reject(self.mpcKeyServiceErr, self.uninitializedErr, nil)
-            return
-        }
-        var error: NSError?
-        
-        let registrationData = self.keyClient?.getRegistrationData(&error)
-        if error != nil {
-            reject(mpcKeyServiceErr, error!.localizedDescription, nil)
-        } else {
-            resolve(registrationData)
-        }
-    }
-    
-    /**
-     ComputeMPCOperation computes an MPC operation, given mpcData from the response of ListMPCOperations API on MPCKeyService.
-     Resolves with the string "success" on success; rejects with an error otherwise.
-     */
-    @objc(computeMPCOperation:withResolver:withRejecter:)
-    func computeMPCOperation(_ mpcData: NSString, resolve: RCTPromiseResolveBlock, reject: RCTPromiseRejectBlock) {
-        if self.keyClient == nil {
-            reject(self.mpcKeyServiceErr, self.uninitializedErr, nil)
-            return
-        }
-        
-        do {
-            try self.keyClient?.computeMPCOperation(mpcData as String)
-            resolve("success" as NSString)
-        } catch {
-            reject(self.mpcKeyServiceErr, error.localizedDescription, nil)
-        }
-    }
+ 
     
     /**
      Registers the current Device. Resolves with the Device object on success; rejects with an error otherwise.

@@ -4,8 +4,7 @@
 
 @interface RCT_EXTERN_MODULE(PoolService, NSObject)
 
-RCT_EXTERN_METHOD(initialize:(NSString)url
-                  withApiKeyName:(NSString)apiKeyName
+RCT_EXTERN_METHOD(initialize: (NSString)apiKeyName
                   withPrivateKey:(NSString)privateKey
                   withResolver:(RCTPromiseResolveBlock)resolve
                   withRejecter:(RCTPromiseRejectBlock)reject)

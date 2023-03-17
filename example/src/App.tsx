@@ -29,8 +29,14 @@ export default function App() {
         <Stack.Navigator>
           <Stack.Screen name="Home" component={HomeScreen} />
           <Stack.Screen name="PoolServiceDemo" component={PoolServiceDemo} />
-          <Stack.Screen name="MPCKeyServiceDemo" component={MPCKeyServiceDemo} />
-          <Stack.Screen name="MPCWalletServiceDemo" component={MPCWalletServiceDemo} />
+          <Stack.Screen
+            name="MPCKeyServiceDemo"
+            component={MPCKeyServiceDemo}
+          />
+          <Stack.Screen
+            name="MPCWalletServiceDemo"
+            component={MPCWalletServiceDemo}
+          />
           <Stack.Screen name="MPCSignatureDemo" component={MPCSignatureDemo} />
         </Stack.Navigator>
       </NavigationContainer>

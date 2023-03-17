@@ -3,6 +3,9 @@ import Foundation
 
 @objc(PoolService)
 class PoolService: NSObject {
+    // The URL of the PoolService.
+    let poolServiceUrl = "https://api.developer.coinbase.com/waas/pools"
+    
     // The error code for PoolService-related errors.
     let poolsErr = "E_POOL_SERVICE"
 
@@ -13,12 +16,12 @@ class PoolService: NSObject {
      Initializes the PoolService with the given Cloud API Key parameters. Resolves with the string "success" on success;
      rejects with an error otherwise.
      */
-    @objc(initialize:withApiKeyName:withPrivateKey:withResolver:withRejecter:)
-    func initialize(_ url: NSString, apiKeyName: NSString, privateKey: NSString,
+    @objc(initialize:withPrivateKey:withResolver:withRejecter:)
+    func initialize(_ apiKeyName: NSString, privateKey: NSString,
                     resolve: RCTPromiseResolveBlock, reject: RCTPromiseRejectBlock) {
         var error: NSError?
 
-        poolsClient = V1NewPoolService(url as String, apiKeyName as String, privateKey as String, &error)
+        poolsClient = V1NewPoolService(poolServiceUrl as String, apiKeyName as String, privateKey as String, &error)
 
         if error != nil {
             reject(poolsErr, error!.localizedDescription, nil)

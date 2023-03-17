@@ -1,16 +1,18 @@
 import * as React from 'react';
 
 import { ScrollView, StyleSheet } from 'react-native';
-import {  Address,
-          computeMPCOperation,
-          createMPCWallet,
-          generateAddress,
-          initMPCKeyService,
-          initMPCWalletService,
-          MPCWallet,
-          pollForPendingDeviceGroup,
-          waitPendingMPCWallet,
-        } from '@coinbase/waas-sdk-react-native';
+import {
+  Address,
+  computeMPCOperation,
+  createMPCWallet,
+  generateAddress,
+  initMPCKeyService,
+  initMPCSdk,
+  initMPCWalletService,
+  MPCWallet,
+  pollForPendingDeviceGroup,
+  waitPendingMPCWallet,
+} from '@coinbase/waas-sdk-react-native';
 import { ContinueButton } from '../components/ContinueButton';
 import { DemoStep } from '../components/DemoStep';
 import { DemoText } from '../components/DemoText';
@@ -24,10 +26,8 @@ export const MPCWalletServiceDemo = () => {
   const [deviceName, setDeviceName] = React.useState<string>('');
   const [poolName, setPoolName] = React.useState<string>('');
   const [deviceGroupName, setDeviceGroupName] = React.useState<string>('');
-  const [deviceEditable, setDeviceEditable] =
-    React.useState<boolean>(true);
-const [poolEditable, setPoolEditable] =
-    React.useState<boolean>(true);
+  const [deviceEditable, setDeviceEditable] = React.useState<boolean>(true);
+  const [poolEditable, setPoolEditable] = React.useState<boolean>(true);
   const [wallet, setWallet] = React.useState<MPCWallet>();
   const [address, setAddress] = React.useState<Address>();
   const [resultError, setResultError] = React.useState<Error>();
@@ -56,34 +56,42 @@ const [poolEditable, setPoolEditable] =
       }
 
       try {
-            // Initialize the MPCKeyService and MPCWalletService.
-            await initMPCKeyService(apiKeyName, privateKey, true);
-            await initMPCWalletService(apiKeyName, privateKey);
+        // Initialize the MPCSdk, MPCKeyService and MPCWalletService.
+        await initMPCSdk(true);
+        await initMPCKeyService(apiKeyName, privateKey);
+        await initMPCWalletService(apiKeyName, privateKey);
 
-            // Create MPCWallet if Device Group is not set.
-            if(deviceGroupName == ""){
-                const createMpcWalletResponse = await createMPCWallet(poolName, deviceName);
-                setDeviceGroupName(createMpcWalletResponse.DeviceGroup);
-                setShowStep3(true);
+        // Create MPCWallet if Device Group is not set.
+        if (deviceGroupName == '') {
+          const createMpcWalletResponse = await createMPCWallet(
+            poolName,
+            deviceName
+          );
+          setDeviceGroupName(createMpcWalletResponse.DeviceGroup);
+          setShowStep3(true);
 
-                const pendingDeviceGroup = await pollForPendingDeviceGroup(createMpcWalletResponse.DeviceGroup);
+          const pendingDeviceGroup = await pollForPendingDeviceGroup(
+            createMpcWalletResponse.DeviceGroup
+          );
 
-                for (let i = pendingDeviceGroup.length - 1; i >= 0; i--) {
-                    const deviceGroupOperation = pendingDeviceGroup[i];
-                    await computeMPCOperation(deviceGroupOperation?.MPCData as string);
-                }
+          for (let i = pendingDeviceGroup.length - 1; i >= 0; i--) {
+            const deviceGroupOperation = pendingDeviceGroup[i];
+            await computeMPCOperation(deviceGroupOperation?.MPCData as string);
+          }
 
-                const wallet = await waitPendingMPCWallet(createMpcWalletResponse.Operation as string)
-                setWallet(wallet)
+          const wallet = await waitPendingMPCWallet(
+            createMpcWalletResponse.Operation as string
+          );
+          setWallet(wallet);
 
-                setShowStep4(true);
+          setShowStep4(true);
 
-                const address = await generateAddress(
-                    wallet?.Name as string,
-                    'networks/ethereum-goerli',
-                    );
-                setAddress(address);
-                setShowStep5(true);
+          const address = await generateAddress(
+            wallet?.Name as string,
+            'networks/ethereum-goerli'
+          );
+          setAddress(address);
+          setShowStep5(true);
         }
       } catch (error) {
         setResultError(error as Error);
@@ -91,7 +99,14 @@ const [poolEditable, setPoolEditable] =
       }
     };
     demoFn();
-  }, [deviceName, apiKeyName, privateKey, showStep2]);
+  }, [
+    deviceName,
+    apiKeyName,
+    privateKey,
+    showStep2,
+    deviceGroupName,
+    poolName,
+  ]);
 
   return (
     <ScrollView
@@ -101,22 +116,20 @@ const [poolEditable, setPoolEditable] =
       <PageTitle title="GenerateAddress Demo" />
       <DemoStep>
         <DemoText>
-          1. Ensure you have run the KeyService demo. Input the name of your Pool resource below:
+          1. Ensure you have run the KeyService demo. Input the name of your
+          Pool resource below:
         </DemoText>
-        <InputText
-          onTextChange={setPoolName}
-          editable={poolEditable}
-        />
-        <DemoText> 2. Input the name of registered Device from MPCKeyServiceDemo below</DemoText>
-        <InputText
-          onTextChange={setDeviceName}
-          editable={deviceEditable}
-        />
+        <InputText onTextChange={setPoolName} editable={poolEditable} />
+        <DemoText>
+          {' '}
+          2. Input the name of registered Device from MPCKeyServiceDemo below
+        </DemoText>
+        <InputText onTextChange={setDeviceName} editable={deviceEditable} />
         <ContinueButton
           onPress={() => {
             setShowStep2(true);
             setDeviceEditable(false);
-            setPoolEditable(false)
+            setPoolEditable(false);
           }}
         />
       </DemoStep>
@@ -127,15 +140,23 @@ const [poolEditable, setPoolEditable] =
       )}
       {showStep3 && (
         <DemoStep>
-          <DemoText>3. Press the button below to copy your DeviceGroup that will be required for MPCSignatureDemo.</DemoText>
+          <DemoText>
+            3. Press the button below to copy your DeviceGroup that will be
+            required for MPCSignatureDemo.
+          </DemoText>
           <CopyButton text={deviceGroupName} />
-          <DemoText>4. Processing MPCOperation to create DeviceGroup {deviceGroupName}...</DemoText>
+          <DemoText>
+            4. Processing MPCOperation to create DeviceGroup {deviceGroupName}
+            ...
+          </DemoText>
         </DemoStep>
       )}
       {showStep4 && (
         <DemoStep>
           <DemoText>5. Created MPCWallet {wallet?.Name} </DemoText>
-          <DemoText>Press the button below to copy the name of your MPCWallet.</DemoText>
+          <DemoText>
+            Press the button below to copy the name of your MPCWallet.
+          </DemoText>
           <CopyButton text={wallet?.Name!} />
         </DemoStep>
       )}

@@ -80,7 +80,7 @@ In short, having a proxy server that you control in between your application and
 afford you significantly more control than using the WaaS backends directly in most cases.
 
 The methods from the WaaS SDK which are _required_ to be used for participation in MPC are:
-1. `initMPCKeyService`
+1. `initMPCSdk`
 2. `bootstrapDevice`
 3. `getRegistrationData`
 4. `computeMPCOperation`

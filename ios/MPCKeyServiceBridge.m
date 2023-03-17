@@ -3,21 +3,8 @@
 
 @interface RCT_EXTERN_MODULE(MPCKeyService, NSObject)
 
-RCT_EXTERN_METHOD(initialize:(NSString)mpcKeyServiceURL
-                  withApiKeyName:(NSString)apiKeyName
+RCT_EXTERN_METHOD(initialize:(NSString)apiKeyName
                   withPrivateKey:(NSString)privateKey
-                  withIsSimulator:(nonnull NSNumber)isSimulator
-                  withResolver:(RCTPromiseResolveBlock)resolve
-                  withRejecter:(RCTPromiseRejectBlock)reject)
-
-RCT_EXTERN_METHOD(bootstrapDevice:(NSString)passcode
-                  withResolver: (RCTPromiseResolveBlock)resolve
-                  withRejecter:(RCTPromiseRejectBlock)reject)
-
-RCT_EXTERN_METHOD(getRegistrationData:(RCTPromiseResolveBlock)resolve
-                  withRejecter:(RCTPromiseRejectBlock)reject)
-
-RCT_EXTERN_METHOD(computeMPCOperation:(NSString)mpcData
                   withResolver:(RCTPromiseResolveBlock)resolve
                   withRejecter:(RCTPromiseRejectBlock)reject)
 
