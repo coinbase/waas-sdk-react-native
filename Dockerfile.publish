@@ -1,0 +1,24 @@
+# Use the node v16 Docker container.
+FROM 652969937640.dkr.ecr.us-east-1.amazonaws.com/containers/node:v16
+
+# Path to use in the destination container.
+WORKDIR /src
+
+# Update and install system level packages.
+RUN apt-get update && apt-get install
+
+# Copy the current local directory into the Docker container's WORKDIR.
+COPY . .
+
+# Install dependencies using the internal registry, which has some protections built in for malicious packages.
+RUN yarn install --unsafe-perm --registry=https://registry-npm.cbhq.net
+
+# Uncompress xcframeworks.
+RUN yarn uncompress
+
+# Create a tarball of the package which will be uploaded to the registry.
+RUN npm pack
+
+# Move the source code to /shared, which is where Codeflow will look for the package by default.
+RUN mv /src /shared
+WORKDIR /shared
