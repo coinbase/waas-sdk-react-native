@@ -16,8 +16,10 @@ For iOS development:
 
 For Android development:
 - [Android Studio](https://developer.android.com/studio)
-  - 64-bit Android emulator
-- [Android NDK 30+](https://developer.android.com/ndk)
+  - x86_64 Android emulator running Android 30+ (Pixel 5 running S recommended)
+  - [Android NDK](https://developer.android.com/ndk)
+- [Java 8](https://www.java.com/download/ie_manual.jsp)
+  - [Java JDK 17](https://www.oracle.com/java/technologies/javase/jdk17-archive-downloads.html) (JDK 19 will not work with React Native)
 
 ## Installation
 
@@ -43,18 +45,41 @@ See [index.tsx](./src/index.tsx) for the list of supported APIs.
 
 ## Example App
 
-This repository provides an example app that demonstrates how the APIs should be used. To run it,
-ensure you have XCode open and run the following from the root directory of the repository:
-
-```bash
-yarn install # Install packages for the root directory
-yarn bootstrap # Install packages for the /example directory
-yarn example ios --simulator "iPhone 14" # Build and start the app on iOS simulator
-```
+This repository provides an example app that demonstrates how the APIs should be used.
 
 > NOTE: An example Cloud API Key json file is at `example/src/.coinbase_cloud_api_key.json`
 > To run the example app, populate, or replace, this file with the Cloud API Key file provided to you
 > by Coinbase.
+
+### iOS
+Ensure you have XCode open and run the following from the root directory of the repository:
+
+```bash
+yarn bootstrap # Install packages for the root and /example directories
+yarn example start # Start the Metro server
+yarn example ios --simulator "iPhone 14" # Build and start the app on iOS simulator
+```
+### Android
+Ensure you have the following [Android environment variables](https://developer.android.com/studio/command-line/variables) set correctly:
+
+-  `ANDROID_HOME`
+-  `ANDROID_SDK_ROOT="${ANDROID_HOME{"}`
+-  `ANDROID_NDK_HOME="${ANDROID_HOME}/ndk/<insert ndk version>"`
+-  `ANDROID_NDK_ROOT="${ANDROID_NDK_HOME}"`
+
+And then export the following to your `PATH`:
+
+`export PATH="${ANDROID_HOME}/emulator:${ANDROID_HOME}/cmdline-tools/latest/bin:${ANDROID_HOME}/tools:${ANDROID_HOME}/tools/bin:${ANDROID_HOME}/platform-tools:${PATH}"`
+
+
+Run the following from the root directory of the repository:
+
+```bash
+yarn install # Install packages for the root directory
+emulator -avd Pixel_5_API_31 # Use any x86_64 emulator with min SDK version: 30.
+yarn example start # Start the Metro server
+yarn example android # Build and start the app on Android emulator
+```
 
 ## Recommended Architecture
 

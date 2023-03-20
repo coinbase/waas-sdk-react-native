@@ -49,13 +49,13 @@ export const MPCKeyServiceDemo = () => {
 
         await bootstrapDevice(passcode);
 
-        let registrationData = await getRegistrationData();
-        setRegistrationData(registrationData as string);
+        const regData = await getRegistrationData();
+        setRegistrationData(regData as string);
         setShowStep3(true);
         setShowStep4(true);
 
-        const device = await registerDevice();
-        setDevice(device);
+        const registeredDevice = await registerDevice();
+        setDevice(registeredDevice);
 
         setShowStep5(true);
       } catch (error) {

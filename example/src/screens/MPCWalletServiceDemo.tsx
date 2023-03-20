@@ -62,7 +62,7 @@ export const MPCWalletServiceDemo = () => {
         await initMPCWalletService(apiKeyName, privateKey);
 
         // Create MPCWallet if Device Group is not set.
-        if (deviceGroupName == '') {
+        if (deviceGroupName === '') {
           const createMpcWalletResponse = await createMPCWallet(
             poolName,
             deviceName
@@ -79,18 +79,18 @@ export const MPCWalletServiceDemo = () => {
             await computeMPCOperation(deviceGroupOperation?.MPCData as string);
           }
 
-          const wallet = await waitPendingMPCWallet(
+          const walletCreated = await waitPendingMPCWallet(
             createMpcWalletResponse.Operation as string
           );
-          setWallet(wallet);
+          setWallet(walletCreated);
 
           setShowStep4(true);
 
-          const address = await generateAddress(
-            wallet?.Name as string,
+          const addressCreated = await generateAddress(
+            walletCreated?.Name as string,
             'networks/ethereum-goerli'
           );
-          setAddress(address);
+          setAddress(addressCreated);
           setShowStep5(true);
         }
       } catch (error) {

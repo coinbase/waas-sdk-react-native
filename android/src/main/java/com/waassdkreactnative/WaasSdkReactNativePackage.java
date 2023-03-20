@@ -17,6 +17,10 @@ public class WaasSdkReactNativePackage implements ReactPackage {
   public List<NativeModule> createNativeModules(@NonNull ReactApplicationContext reactContext) {
     List<NativeModule> modules = new ArrayList<>();
     modules.add(new WaasSdkReactNativeModule(reactContext));
+    modules.add(new MPCKeyService(reactContext));
+    modules.add(new PoolService(reactContext));
+    modules.add(new MPCWalletService(reactContext));
+    modules.add(new MPCSdk(reactContext));
     return modules;
   }
 
