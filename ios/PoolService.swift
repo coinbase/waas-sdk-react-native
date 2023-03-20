@@ -1,11 +1,10 @@
-
 import Foundation
 
 @objc(PoolService)
 class PoolService: NSObject {
     // The URL of the PoolService.
     let poolServiceUrl = "https://api.developer.coinbase.com/waas/pools"
-    
+
     // The error code for PoolService-related errors.
     let poolsErr = "E_POOL_SERVICE"
 
@@ -29,30 +28,30 @@ class PoolService: NSObject {
             resolve("success" as NSString)
         }
     }
-  
-  /**
-   Creates a Pool with the given parameters.  Resolves with the created Pool object on success; rejects with an error
-   otherwise.
-   */
-  @objc(createPool:withPoolID:withResolver:withRejecter:)
-  func createPool(_ displayName: NSString, poolID: NSString,
-                  resolve: RCTPromiseResolveBlock, reject: RCTPromiseRejectBlock) {
-    if self.poolsClient == nil {
-        reject(self.poolsErr, "pool service must be initialized", nil)
-        return
+
+    /**
+     Creates a Pool with the given parameters.  Resolves with the created Pool object on success; rejects with an error
+     otherwise.
+     */
+    @objc(createPool:withPoolID:withResolver:withRejecter:)
+    func createPool(_ displayName: NSString, poolID: NSString,
+                    resolve: RCTPromiseResolveBlock, reject: RCTPromiseRejectBlock) {
+        if self.poolsClient == nil {
+            reject(self.poolsErr, "pool service must be initialized", nil)
+            return
+        }
+
+        var pool: V1Pool?
+
+        do {
+            try pool = self.poolsClient?.createPool(displayName as String, poolID: poolID as String)
+            let res: NSDictionary = [
+                "name": pool?.name as Any,
+                "displayName": pool?.displayName as Any
+            ]
+            resolve(res)
+        } catch {
+            reject(self.poolsErr, error.localizedDescription, nil)
+        }
     }
-    
-    var pool: V1Pool?
-    
-    do {
-      try pool = self.poolsClient?.createPool(displayName as String, poolID: poolID as String)
-      let res: NSDictionary = [
-        "name": pool?.name as Any,
-        "displayName": pool?.displayName as Any
-      ]
-      resolve(res)
-    } catch {
-      reject(self.poolsErr, error.localizedDescription, nil)
-    }
-  }
 }

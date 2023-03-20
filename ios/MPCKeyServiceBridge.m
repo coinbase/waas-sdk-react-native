@@ -20,12 +20,12 @@ RCT_EXTERN_METHOD(stopPollingForPendingDeviceGroup:(RCTPromiseResolveBlock)resol
                   withRejecter:(RCTPromiseRejectBlock)reject)
 
 RCT_EXTERN_METHOD(createTxSignature:(NSString)keyName
-                  withTx: (NSDictionary)tx
+                  withTransaction: (NSDictionary)transaction
                   withResolver:(RCTPromiseResolveBlock)resolve
                   withRejecter:(RCTPromiseRejectBlock)reject)
 
 RCT_EXTERN_METHOD(createSignatureFromTx:(NSString)parent
-                  withTx:(NSDictionary)tx
+                  withTransaction:(NSDictionary)transaction
                   withResolver:(RCTPromiseResolveBlock)resolve
                   withRejecter:(RCTPromiseRejectBlock)reject)
 
