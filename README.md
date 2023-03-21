@@ -6,7 +6,7 @@ required for the completion of MPC operations such as Seed generation and Transa
 
 ### Prerequisites:
 
-- [node 17+](https://nodejs.org/en/download/)
+- [node 18+](https://nodejs.org/en/download/)
 - [yarn 1.22+](https://yarnpkg.com/getting-started/install)
 
 For iOS development:
@@ -63,7 +63,7 @@ yarn example ios --simulator "iPhone 14" # Build and start the app on iOS simula
 Ensure you have the following [Android environment variables](https://developer.android.com/studio/command-line/variables) set correctly:
 
 -  `ANDROID_HOME`
--  `ANDROID_SDK_ROOT="${ANDROID_HOME{"}`
+-  `ANDROID_SDK_ROOT="${ANDROID_HOME}"`
 -  `ANDROID_NDK_HOME="${ANDROID_HOME}/ndk/<insert ndk version>"`
 -  `ANDROID_NDK_ROOT="${ANDROID_NDK_HOME}"`
 
