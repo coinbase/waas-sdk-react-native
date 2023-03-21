@@ -7,7 +7,7 @@ required for the completion of MPC operations such as Seed generation and Transa
 ### Prerequisites:
 
 - [node 18+](https://nodejs.org/en/download/)
-- [yarn 1.22+](https://yarnpkg.com/getting-started/install)
+- [yarn classic 1.22+](https://classic.yarnpkg.com/en/docs/install)
 
 For iOS development:
 - [Xcode 14.0+](https://developer.apple.com/xcode/)
