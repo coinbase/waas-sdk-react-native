@@ -1,7 +1,7 @@
 {
   "name": "@coinbase/waas-sdk-react-native",
-  "version": "0.1.2",
-  "description": "test",
+  "version": "0.1.4",
+  "description": "Coinbase React Native SDK for Wallet-as-a-Service APIs",
   "main": "lib/commonjs/index",
   "module": "lib/module/index",
   "types": "lib/typescript/index.d.ts",
