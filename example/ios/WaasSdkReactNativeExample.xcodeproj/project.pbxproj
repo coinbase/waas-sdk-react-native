@@ -12,6 +12,8 @@
 		13B07FBC1A68108700A75B9A /* AppDelegate.mm in Sources */ = {isa = PBXBuildFile; fileRef = 13B07FB01A68108700A75B9A /* AppDelegate.mm */; };
 		13B07FBF1A68108700A75B9A /* Images.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 13B07FB51A68108700A75B9A /* Images.xcassets */; };
 		13B07FC11A68108700A75B9A /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 13B07FB71A68108700A75B9A /* main.m */; };
+		6015926129CCC1BB00A5AE8E /* libresolv.tbd in Frameworks */ = {isa = PBXBuildFile; fileRef = 6015926029CCC1BB00A5AE8E /* libresolv.tbd */; };
+		6015926329CCC2E000A5AE8E /* libresolv.9.tbd in Frameworks */ = {isa = PBXBuildFile; fileRef = 6015926229CCC2E000A5AE8E /* libresolv.9.tbd */; };
 		7699B88040F8A987B510C191 /* libPods-WaasSdkReactNativeExample-WaasSdkReactNativeExampleTests.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 19F6CBCC0A4E27FBF8BF4A61 /* libPods-WaasSdkReactNativeExample-WaasSdkReactNativeExampleTests.a */; };
 		81AB9BB82411601600AC10FF /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 81AB9BB72411601600AC10FF /* LaunchScreen.storyboard */; };
 /* End PBXBuildFile section */
@@ -41,6 +43,8 @@
 		5709B34CF0A7D63546082F79 /* Pods-WaasSdkReactNativeExample.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-WaasSdkReactNativeExample.release.xcconfig"; path = "Target Support Files/Pods-WaasSdkReactNativeExample/Pods-WaasSdkReactNativeExample.release.xcconfig"; sourceTree = "<group>"; };
 		5B7EB9410499542E8C5724F5 /* Pods-WaasSdkReactNativeExample-WaasSdkReactNativeExampleTests.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-WaasSdkReactNativeExample-WaasSdkReactNativeExampleTests.debug.xcconfig"; path = "Target Support Files/Pods-WaasSdkReactNativeExample-WaasSdkReactNativeExampleTests/Pods-WaasSdkReactNativeExample-WaasSdkReactNativeExampleTests.debug.xcconfig"; sourceTree = "<group>"; };
 		5DCACB8F33CDC322A6C60F78 /* libPods-WaasSdkReactNativeExample.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-WaasSdkReactNativeExample.a"; sourceTree = BUILT_PRODUCTS_DIR; };
+		6015926029CCC1BB00A5AE8E /* libresolv.tbd */ = {isa = PBXFileReference; lastKnownFileType = "sourcecode.text-based-dylib-definition"; name = libresolv.tbd; path = usr/lib/libresolv.tbd; sourceTree = SDKROOT; };
+		6015926229CCC2E000A5AE8E /* libresolv.9.tbd */ = {isa = PBXFileReference; lastKnownFileType = "sourcecode.text-based-dylib-definition"; name = libresolv.9.tbd; path = usr/lib/libresolv.9.tbd; sourceTree = SDKROOT; };
 		81AB9BB72411601600AC10FF /* LaunchScreen.storyboard */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.storyboard; name = LaunchScreen.storyboard; path = WaasSdkReactNativeExample/LaunchScreen.storyboard; sourceTree = "<group>"; };
 		89C6BE57DB24E9ADA2F236DE /* Pods-WaasSdkReactNativeExample-WaasSdkReactNativeExampleTests.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-WaasSdkReactNativeExample-WaasSdkReactNativeExampleTests.release.xcconfig"; path = "Target Support Files/Pods-WaasSdkReactNativeExample-WaasSdkReactNativeExampleTests/Pods-WaasSdkReactNativeExample-WaasSdkReactNativeExampleTests.release.xcconfig"; sourceTree = "<group>"; };
 		ED297162215061F000B7C4FE /* JavaScriptCore.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = JavaScriptCore.framework; path = System/Library/Frameworks/JavaScriptCore.framework; sourceTree = SDKROOT; };
@@ -59,6 +63,8 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				6015926329CCC2E000A5AE8E /* libresolv.9.tbd in Frameworks */,
+				6015926129CCC1BB00A5AE8E /* libresolv.tbd in Frameworks */,
 				0C80B921A6F3F58F76C31292 /* libPods-WaasSdkReactNativeExample.a in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -99,6 +105,8 @@
 		2D16E6871FA4F8E400B85C8A /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				6015926229CCC2E000A5AE8E /* libresolv.9.tbd */,
+				6015926029CCC1BB00A5AE8E /* libresolv.tbd */,
 				ED297162215061F000B7C4FE /* JavaScriptCore.framework */,
 				5DCACB8F33CDC322A6C60F78 /* libPods-WaasSdkReactNativeExample.a */,
 				19F6CBCC0A4E27FBF8BF4A61 /* libPods-WaasSdkReactNativeExample-WaasSdkReactNativeExampleTests.a */,
