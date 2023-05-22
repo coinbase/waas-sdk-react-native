@@ -20,7 +20,8 @@ Pod::Spec.new do |s|
 
   # Standard XCFrameworks that are used in this SDK.
   s.framework = "LocalAuthentication"
-  
+  s.libraries = 'resolv'
+
   s.dependency "React-Core"
 
   # Don't install the dependencies when we run `pod install` in the old architecture.

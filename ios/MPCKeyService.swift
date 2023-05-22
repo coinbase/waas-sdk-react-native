@@ -1,4 +1,5 @@
 import Foundation
+import WaasSdkGo
 
 @objc(MPCKeyService)
 class MPCKeyService: NSObject {
@@ -77,7 +78,6 @@ class MPCKeyService: NSObject {
                     deviceGroup as String,
                     pollInterval: pollInterval.int64Value)
                 let res = try JSONSerialization.jsonObject(with: pendingDeviceGroupData!) as? NSArray
-                print(res)
                 resolve(res)
             } catch {
                 reject(self.mpcKeyServiceErr, error.localizedDescription, nil)
@@ -126,7 +126,11 @@ class MPCKeyService: NSObject {
 
         do {
             let serializedTx = try JSONSerialization.data(withJSONObject: transaction)
-            try self.keyClient?.createTxSignature(parent as String, tx: serializedTx)
+            var error: NSError?
+            self.keyClient?.createTxSignature(parent as String, tx: serializedTx, error: &error)
+            if error != nil {
+                reject(self.mpcKeyServiceErr, error?.localizedDescription, nil)
+            }
             resolve("success")
         } catch {
             reject(self.mpcKeyServiceErr, error.localizedDescription, nil)
@@ -136,8 +140,8 @@ class MPCKeyService: NSObject {
     /**
      Polls for pending Signatures (i.e. CreateSignatureOperations), and returns the first set that materializes.
      Only one DeviceGroup can be polled at a time; thus, this function must return (by calling either
-     stopPollingForPendingSignatures or processPendingSignature before another call is made to this function.
-     Resolves with a list of the pending Signatures on success; rejects with an error otherwise.
+     stopPollingForPendingSignatures or computeMPCOperaton before another call is made to this
+     function. Resolves with a list of the pending Signatures on success; rejects with an error otherwise.
      */
     @objc(pollForPendingSignatures:withPollInterval:withResolver:withRejecter:)
     func pollForPendingSignatures(_ deviceGroup: NSString, pollInterval: NSNumber,
@@ -247,6 +251,269 @@ class MPCKeyService: NSObject {
             resolve(res)
         } catch {
             reject(self.mpcKeyServiceErr, error.localizedDescription, nil)
+        }
+    }
+
+    /**
+     Gets a DeviceGroup with the given name. Resolves with the DeviceGroup object on success; rejects with an error otherwise.
+     */
+    @objc(getDeviceGroup:withResolver:withRejecter:)
+    func getDeviceGroup(_ name: NSString, resolve: RCTPromiseResolveBlock, reject: RCTPromiseRejectBlock) {
+        if self.keyClient == nil {
+            reject(self.mpcKeyServiceErr, self.uninitializedErr, nil)
+            return
+        }
+
+        do {
+            let deviceGroupRes = try self.keyClient?.getDeviceGroup(name as String)
+
+            let devices = try JSONSerialization.jsonObject(with: deviceGroupRes!.devices! as Data)
+
+            let res: NSDictionary = [
+                "Name": deviceGroupRes?.name as Any,
+                "MPCKeyExportMetadata": deviceGroupRes?.mpcKeyExportMetadata as Any,
+                "Devices": devices as Any
+            ]
+            resolve(res)
+        } catch {
+            reject(self.mpcKeyServiceErr, error.localizedDescription, nil)
+        }
+    }
+
+    /**
+     Initiates an operation to prepare device archive for MPCKey export. Resolves with the operation name on successful initiation; rejects with
+     an error otherwise.
+     */
+    @objc(prepareDeviceArchive:withDevice:withResolver:withRejecter:)
+    func prepareDeviceArchive(_ deviceGroup: NSString, device: NSString,
+                              resolve: RCTPromiseResolveBlock, reject: RCTPromiseRejectBlock) {
+        if self.keyClient == nil {
+            reject(self.mpcKeyServiceErr, self.uninitializedErr, nil)
+            return
+        }
+
+        var error: NSError?
+
+        let operationName = self.keyClient?.prepareDeviceArchive(
+            deviceGroup as String, device: device as String, error: &error)
+        if error != nil {
+            reject(self.mpcKeyServiceErr, error!.localizedDescription, nil)
+        } else {
+            resolve(operationName! as NSString)
+        }
+    }
+
+    /**
+     Polls for pending DeviceArchives (i.e. DeviceArchiveOperations), and returns the first set that materializes.
+     Only one DeviceGroup can be polled at a time; thus, this function must return (by calling either
+     stopPollingForDeviceArchives or computePrepareDeviceArchiveMPCOperation) before another call is made to this function.
+     Resolves with a list of the pending DeviceArchives on success; rejects with an error otherwise.
+     */
+    @objc(pollForPendingDeviceArchives:withPollInterval:withResolver:withRejecter:)
+    func pollForPendingDeviceArchives(_ deviceGroup: NSString, pollInterval: NSNumber,
+                                      resolve: @escaping RCTPromiseResolveBlock, reject: @escaping RCTPromiseRejectBlock) {
+        // Polling occurs asynchronously, so dispatch it.
+        let dispatchWorkItem = DispatchWorkItem.init(qos: DispatchQoS.userInitiated, block: {
+            if self.keyClient == nil {
+                reject(self.mpcKeyServiceErr, self.uninitializedErr, nil)
+                return
+            }
+
+            do {
+                let pendingDeviceArchiveData = try self.keyClient?.pollPendingDeviceArchives(
+                    deviceGroup as String,
+                    pollInterval: pollInterval.int64Value)
+                // swiftlint:disable force_cast
+                let res = try JSONSerialization.jsonObject(with: pendingDeviceArchiveData!) as! NSArray
+                // swiftlint:enable force_cast
+                resolve(res)
+            } catch {
+                reject(self.mpcKeyServiceErr, error.localizedDescription, nil)
+            }
+        })
+
+        DispatchQueue.global().async(execute: dispatchWorkItem)
+    }
+
+    /**
+     Stops polling for pending DeviceArchive operations. This function should be called, e.g., before your app exits,
+     screen changes, etc. This function is a no-op if the SDK is not currently polling for a pending DeviceArchiveOperation.
+     Resolves with string "stopped polling for pending Device Archives" if polling is stopped successfully; resolves with the empty string otherwise.
+     */
+    @objc(stopPollingForPendingDeviceArchives:withRejecter:)
+    func stopPollingForPendingDeviceArchives(resolve: RCTPromiseResolveBlock, reject: RCTPromiseRejectBlock) {
+        if self.keyClient == nil {
+            reject(self.mpcKeyServiceErr, self.uninitializedErr, nil)
+            return
+        }
+
+        var result: String?
+        var error: NSError?
+
+        result = self.keyClient?.stopPollingPendingDeviceArchives(&error)
+
+        if error != nil {
+            reject(self.mpcKeyServiceErr, error!.localizedDescription, nil)
+        } else {
+            resolve(result! as NSString)
+        }
+    }
+
+    /**
+     Initiates an operation to prepare device backup to add a new Device to the DeviceGroup. Resolves with the operation name on successful initiation; rejects with
+     an error otherwise.
+     */
+    @objc(prepareDeviceBackup:withDevice:withResolver:withRejecter:)
+    func prepareDeviceBackup(_ deviceGroup: NSString, device: NSString,
+                             resolve: RCTPromiseResolveBlock, reject: RCTPromiseRejectBlock) {
+        if self.keyClient == nil {
+            reject(self.mpcKeyServiceErr, self.uninitializedErr, nil)
+            return
+        }
+
+        var error: NSError?
+
+        let operationName = self.keyClient?.prepareDeviceBackup(
+            deviceGroup as String, device: device as String, error: &error)
+        if error != nil {
+            reject(self.mpcKeyServiceErr, error!.localizedDescription, nil)
+        } else {
+            resolve(operationName! as NSString)
+        }
+    }
+
+    /**
+     Polls for pending DeviceBackups (i.e. DeviceBackupOperations), and returns the first set that materializes.
+     Only one DeviceGroup can be polled at a time; thus, this function must return (by calling either
+     stopPollingForDeviceBackups or computePrepareDeviceBackupMPCOperation) before another call is made to this function.
+     Resolves with a list of the pending DeviceBackups on success; rejects with an error otherwise.
+     */
+    @objc(pollForPendingDeviceBackups:withPollInterval:withResolver:withRejecter:)
+    func pollForPendingDeviceBackups(_ deviceGroup: NSString, pollInterval: NSNumber,
+                                     resolve: @escaping RCTPromiseResolveBlock, reject: @escaping RCTPromiseRejectBlock) {
+        // Polling occurs asynchronously, so dispatch it.
+        let dispatchWorkItem = DispatchWorkItem.init(qos: DispatchQoS.userInitiated, block: {
+            if self.keyClient == nil {
+                reject(self.mpcKeyServiceErr, self.uninitializedErr, nil)
+                return
+            }
+
+            do {
+                let pendingDeviceBackupData = try self.keyClient?.pollPendingDeviceBackups(
+                    deviceGroup as String,
+                    pollInterval: pollInterval.int64Value)
+                // swiftlint:disable force_cast
+                let res = try JSONSerialization.jsonObject(with: pendingDeviceBackupData!) as! NSArray
+                // swiftlint:enable force_cast
+                resolve(res)
+            } catch {
+                reject(self.mpcKeyServiceErr, error.localizedDescription, nil)
+            }
+        })
+
+        DispatchQueue.global().async(execute: dispatchWorkItem)
+    }
+
+    /**
+     Stops polling for pending DeviceBackup operations. This function should be called, e.g., before your app exits,
+     screen changes, etc. This function is a no-op if the SDK is not currently polling for a pending DeviceBackupOperation.
+     Resolves with string "stopped polling for pending Device Backups" if polling is stopped successfully; resolves with the empty string otherwise.
+     */
+    @objc(stopPollingForPendingDeviceBackups:withRejecter:)
+    func stopPollingForPendingDeviceBackups(resolve: RCTPromiseResolveBlock, reject: RCTPromiseRejectBlock) {
+        if self.keyClient == nil {
+            reject(self.mpcKeyServiceErr, self.uninitializedErr, nil)
+            return
+        }
+
+        var result: String?
+        var error: NSError?
+
+        result = self.keyClient?.stopPollingPendingDeviceBackups(&error)
+
+        if error != nil {
+            reject(self.mpcKeyServiceErr, error!.localizedDescription, nil)
+        } else {
+            resolve(result! as NSString)
+        }
+    }
+
+    /**
+     Initiates an operation to add a Device to the DeviceGroup. Resolves with the operation name on successful initiation; rejects with
+     an error otherwise.
+     */
+    @objc(addDevice:withDevice:withResolver:withRejecter:)
+    func addDevice(_ deviceGroup: NSString, device: NSString,
+                   resolve: RCTPromiseResolveBlock, reject: RCTPromiseRejectBlock) {
+        if self.keyClient == nil {
+            reject(self.mpcKeyServiceErr, self.uninitializedErr, nil)
+            return
+        }
+
+        var error: NSError?
+
+        let operationName = self.keyClient?.addDevice(
+            deviceGroup as String, device: device as String, error: &error)
+        if error != nil {
+            reject(self.mpcKeyServiceErr, error!.localizedDescription, nil)
+        } else {
+            resolve(operationName! as NSString)
+        }
+    }
+
+    /**
+     Polls for pending Devices (i.e. AddDeviceOperations), and returns the first set that materializes.
+     Only one DeviceGroup can be polled at a time; thus, this function must return (by calling either
+     stopPollingForPendingDevices or computeAddDeviceMPCOperation) before another call is made to this function.
+     Resolves with a list of the pending Devices on success; rejects with an error otherwise.
+     */
+    @objc(pollForPendingDevices:withPollInterval:withResolver:withRejecter:)
+    func pollForPendingDevices(_ deviceGroup: NSString, pollInterval: NSNumber,
+                               resolve: @escaping RCTPromiseResolveBlock, reject: @escaping RCTPromiseRejectBlock) {
+        // Polling occurs asynchronously, so dispatch it.
+        let dispatchWorkItem = DispatchWorkItem.init(qos: DispatchQoS.userInitiated, block: {
+            if self.keyClient == nil {
+                reject(self.mpcKeyServiceErr, self.uninitializedErr, nil)
+                return
+            }
+
+            do {
+                let pendingDeviceData = try self.keyClient?.pollPendingDevices(
+                    deviceGroup as String,
+                    pollInterval: pollInterval.int64Value)
+                // swiftlint:disable force_cast
+                let res = try JSONSerialization.jsonObject(with: pendingDeviceData!) as! NSArray
+                // swiftlint:enable force_cast
+                resolve(res)
+            } catch {
+                reject(self.mpcKeyServiceErr, error.localizedDescription, nil)
+            }
+        })
+
+        DispatchQueue.global().async(execute: dispatchWorkItem)
+    }
+
+    /**
+     Stops polling for pending AddDevice operations. This function should be called, e.g., before your app exits,
+     screen changes, etc. This function is a no-op if the SDK is not currently polling for a pending AddDeviceOperation.
+     Resolves with string "stopped polling for pending Devices" if polling is stopped successfully; resolves with the empty string otherwise.
+     */
+    @objc(stopPollingForPendingDevices:withRejecter:)
+    func stopPollingForPendingDevices(resolve: RCTPromiseResolveBlock, reject: RCTPromiseRejectBlock) {
+        if self.keyClient == nil {
+            reject(self.mpcKeyServiceErr, self.uninitializedErr, nil)
+            return
+        }
+
+        var result: String?
+        var error: NSError?
+
+        result = self.keyClient?.stopPollingPendingDevices(&error)
+
+        if error != nil {
+            reject(self.mpcKeyServiceErr, error!.localizedDescription, nil)
+        } else {
+            resolve(result! as NSString)
         }
     }
 }

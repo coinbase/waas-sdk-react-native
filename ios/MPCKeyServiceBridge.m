@@ -46,5 +46,68 @@ RCT_EXTERN_METHOD(getSignedTransaction:(NSDictionary)tx
                   withSignature:(NSDictionary)signature
                   withResolver:(RCTPromiseResolveBlock)resolve
                   withRejecter:(RCTPromiseRejectBlock)reject)
+RCT_EXTERN_METHOD(getDeviceGroup:(NSString)name
+                  withResolver:(RCTPromiseResolveBlock)resolve
+                  withRejecter:(RCTPromiseRejectBlock)reject)
+
+RCT_EXTERN_METHOD(prepareDeviceArchive:(NSString)deviceGroup
+                  withDevice:(NSString)device
+                  withResolver:(RCTPromiseResolveBlock)resolve
+                  withRejecter:(RCTPromiseRejectBlock)reject)
+
+
+RCT_EXTERN_METHOD(pollForPendingDeviceArchives:(NSString)deviceGroup
+                  withPollInterval:(nonnull NSNumber)pollInterval
+                  withResolver:(RCTPromiseResolveBlock)resolve
+                  withRejecter:(RCTPromiseRejectBlock)reject)
+
+RCT_EXTERN_METHOD(stopPollingForPendingDeviceArchives:(RCTPromiseResolveBlock)resolve
+                  withRejecter:(RCTPromiseRejectBlock)reject)
+
+RCT_EXTERN_METHOD(getDeviceGroup:(NSString)name
+                  withResolver:(RCTPromiseResolveBlock)resolve
+                  withRejecter:(RCTPromiseRejectBlock)reject)
+
+RCT_EXTERN_METHOD(prepareDeviceArchive:(NSString)deviceGroup
+                  withDevice:(NSString)device
+                  withResolver:(RCTPromiseResolveBlock)resolve
+                  withRejecter:(RCTPromiseRejectBlock)reject)
+
+
+RCT_EXTERN_METHOD(pollForPendingDeviceArchives:(NSString)deviceGroup
+                  withPollInterval:(nonnull NSNumber)pollInterval
+                  withResolver:(RCTPromiseResolveBlock)resolve
+                  withRejecter:(RCTPromiseRejectBlock)reject)
+
+RCT_EXTERN_METHOD(stopPollingForPendingDeviceArchives:(RCTPromiseResolveBlock)resolve
+                  withRejecter:(RCTPromiseRejectBlock)reject)
+
+RCT_EXTERN_METHOD(prepareDeviceBackup:(NSString)deviceGroup
+                  withDevice:(NSString)device
+                  withResolver:(RCTPromiseResolveBlock)resolve
+                  withRejecter:(RCTPromiseRejectBlock)reject)
+
+
+RCT_EXTERN_METHOD(pollForPendingDeviceBackups:(NSString)deviceGroup
+                  withPollInterval:(nonnull NSNumber)pollInterval
+                  withResolver:(RCTPromiseResolveBlock)resolve
+                  withRejecter:(RCTPromiseRejectBlock)reject)
+
+RCT_EXTERN_METHOD(stopPollingForPendingDeviceBackups:(RCTPromiseResolveBlock)resolve
+                  withRejecter:(RCTPromiseRejectBlock)reject)
+
+RCT_EXTERN_METHOD(addDevice:(NSString)deviceGroup
+                  withDevice:(NSString)device
+                  withResolver:(RCTPromiseResolveBlock)resolve
+                  withRejecter:(RCTPromiseRejectBlock)reject)
+
+
+RCT_EXTERN_METHOD(pollForPendingDevices:(NSString)deviceGroup
+                  withPollInterval:(nonnull NSNumber)pollInterval
+                  withResolver:(RCTPromiseResolveBlock)resolve
+                  withRejecter:(RCTPromiseRejectBlock)reject)
+
+RCT_EXTERN_METHOD(stopPollingForPendingDevices:(RCTPromiseResolveBlock)resolve
+                  withRejecter:(RCTPromiseRejectBlock)reject)
 
 @end

@@ -14,6 +14,7 @@ import { InputText } from '../components/InputText';
 import { PageTitle } from '../components/PageTitle';
 import { CopyButton } from '../components/CopyButton';
 import AppContext from '../components/AppContext';
+import { MonospaceText } from '../components/MonospaceText';
 
 export const PoolServiceDemo = () => {
   const [poolDisplayName, setPoolDisplayName] = React.useState<string>('');
@@ -61,7 +62,7 @@ export const PoolServiceDemo = () => {
       contentInsetAdjustmentBehavior="automatic"
       style={styles.container}
     >
-      <PageTitle title="Pool Demo" />
+      <PageTitle title="Pool Creation" />
       <DemoStep>
         <DemoText>1. Input your Pool's desired display name:</DemoText>
         <InputText
@@ -83,11 +84,13 @@ export const PoolServiceDemo = () => {
       {showStep3 && (
         <DemoStep>
           <DemoText>
-            3. Successfully created and got Pool with name {resultPool?.name}{' '}
-            and display name {resultPool?.displayName}
+            3. Successfully created and got Pool resource with display name "
+            {resultPool?.displayName}":
           </DemoText>
+          <MonospaceText verticalMargin={10}>{resultPool?.name}</MonospaceText>
           <DemoText>
-            Copy your poolName before proceeding to the next demo.
+            Copy your Pool resource name and paste it into a notepad before
+            proceeding to the next demo.
           </DemoText>
           <CopyButton text={resultPool?.name!} />
         </DemoStep>

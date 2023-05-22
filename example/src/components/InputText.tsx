@@ -6,13 +6,15 @@ import { StyleSheet, TextInput } from 'react-native';
  * @param onTextChange The function to call when the text changes.
  * @param editable Whether the input text is editable.
  * @param secret Whether the input text should be considered secret.
+ * @param placeholderText The placeholder text to display in the input field.
  * @returns The input text component.
  */
 export const InputText: React.FC<{
   onTextChange: (text: string) => void;
   editable: boolean;
   secret?: boolean;
-}> = ({ onTextChange, editable, secret }) => {
+  placeholderText?: string;
+}> = ({ onTextChange, editable, secret, placeholderText }) => {
   return (
     <TextInput
       style={styles.inputText}
@@ -20,6 +22,8 @@ export const InputText: React.FC<{
       onChangeText={onTextChange}
       secureTextEntry={!!secret}
       editable={!!editable}
+      placeholder={placeholderText}
+      placeholderTextColor="#999"
     />
   );
 };

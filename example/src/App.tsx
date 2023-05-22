@@ -7,7 +7,10 @@ import { PoolServiceDemo } from './screens/PoolServiceDemo';
 import { MPCKeyServiceDemo } from './screens/MPCKeyServiceDemo';
 import { MPCWalletServiceDemo } from './screens/MPCWalletServiceDemo';
 import { MPCSignatureDemo } from './screens/MPCSignatureDemo';
+import { MPCKeyExportDemo } from './screens/MPCKeyExportDemo';
 import AppContext from './components/AppContext';
+import { DeviceBackupDemo } from './screens/DeviceBackupDemo';
+import { DeviceAdditionDemo } from './screens/DeviceAdditionDemo';
 
 /** The navigation stack. */
 const Stack = createNativeStackNavigator();
@@ -38,6 +41,12 @@ export default function App() {
             component={MPCWalletServiceDemo}
           />
           <Stack.Screen name="MPCSignatureDemo" component={MPCSignatureDemo} />
+          <Stack.Screen name="MPCKeyExportDemo" component={MPCKeyExportDemo} />
+          <Stack.Screen name="DeviceBackupDemo" component={DeviceBackupDemo} />
+          <Stack.Screen
+            name="DeviceAdditionDemo"
+            component={DeviceAdditionDemo}
+          />
         </Stack.Navigator>
       </NavigationContainer>
     </AppContext.Provider>

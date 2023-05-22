@@ -24,6 +24,18 @@ const MPCSdk = NativeModules.MPCSdk
     );
 
 /**
+ * An object representing response to the ExportPrivateKeys request.
+ */
+export type ExportPrivateKeysResponse = {
+  // The 32 byte long elliptic curve private key of an MPCKey, as a non-prefixed hex string.
+  PrivateKey: string;
+  // The ethereum address as "0x"-prefixed hex string that corresponds to the exported private key.
+  // Note: This is NOT a WaaS Address resource of the form
+  // `networks/{networkID}/addresses/{addressID}.
+  Address: string;
+};
+
+/**
  * Initializes the MPC SDK. This function must be invoked before
  * any MPC SDK methods are called.
  * @returns A promise with the string "success" on successful initialization; a rejection
@@ -35,10 +47,10 @@ export function initMPCSdk(isSimulator?: boolean): Promise<string> {
 
 /**
  Bootstraps the Device with the given passcode. The passcode is used to generate a private/public key pair
- that encodes the back-up material for WaaS keys created on this Device. This function should be called exactly once per
- Device per application, and should be called before the Device is registered with GetRegistrationData.
- It is the responsibility of the application to track whether BootstrapDevice has been called for the Device.
- * @param passcode: Passcode to protect all key materials in the secure enclave.
+ that encrypts the backup and archive for the DeviceGroups containing this Device. This function should be called
+ exactly once per Device per application, and should be called before the Device is registered with GetRegistrationData.
+ It is the responsibility of the application to track whether bootstrapDevice has been called for the Device.
+ * @param passcode Passcode to protect all key materials in the secure enclave.
  * @returns A promise with the string "bootstrap complete" on successful initialization or a rejection otherwise.
  */
 export function bootstrapDevice(passcode: string): Promise<string> {
@@ -46,20 +58,109 @@ export function bootstrapDevice(passcode: string): Promise<string> {
 }
 
 /**
+ * Resets the passcode used to encrypt the backups and archives of the DeviceGroups containing this Device.
+ * While there is no need to call bootstrapDevice again, it is the client's responsibility to call and participate in
+ * PrepareDeviceArchive and PrepareDeviceBackup operations afterwards for each DeviceGroup the Device was in.
+ * This function can be used when/if the end user forgets their old passcode.
+ * @param newPasscode The new passcode to use to encrypt backups and archives associated with the Device.
+ * @returns A promise with the string "passcode reset" on successful initialization, or a rejection otherwise.
+ */
+export function resetPasscode(newPasscode: string): Promise<string> {
+  return MPCSdk.resetPasscode(newPasscode);
+}
+
+/**
  * Retrieves the data required to call RegisterDeviceAPI on MPCKeyService.
  * @returns A promise with the RegistrationData on success; a rejection otherwise.
  */
-export function getRegistrationData(): Promise<String> {
+export function getRegistrationData(): Promise<string> {
   return MPCSdk.getRegistrationData();
 }
 
 /**
- * ComputeMPCOperation computes an MPC operation, given mpcData from the response of ListMPCOperations API on MPCKeyService.
+ * Computes an MPC operation, given mpcData from the response of ListMPCOperations API on MPCKeyService.
+ * This function can be used to compute MPCOperations of types: CreateDeviceGroup and CreateSignature.
  * @param mpcData The mpcData from ListMPCOperationsResponse on MPCKeyService.
  * @returns A promise with the string "success" on successful MPC computation; a rejection otherwise.
  */
-export function computeMPCOperation(mpcData: string): Promise<String> {
+export function computeMPCOperation(mpcData: string): Promise<string> {
   return MPCSdk.computeMPCOperation(mpcData);
+}
+
+/**
+ * Computes a PrepareDeviceArchive MPCOperation,
+ * given mpcData from the response of ListMPCOperations API on MPCKeyService and passcode for the Device.
+ * @param mpcData The mpcData from ListMPCOperationsResponse on MPCKeyService.
+ * @param passcode The passcode set for the Device on BootstrapDevice call.
+ * @returns A promise with the string "success" on successful MPC computation; a rejection otherwise.
+ */
+export function computePrepareDeviceArchiveMPCOperation(
+  mpcData: string,
+  passcode: string
+): Promise<string> {
+  return MPCSdk.computePrepareDeviceArchiveMPCOperation(mpcData, passcode);
+}
+
+/**
+ * Exports private keys corresponding to MPCKeys derived from a particular DeviceGroup. This method only supports
+ * exporting private keys that back EVM addresses. This function is recommended to be called while the Device is
+ * on airplane mode.
+ * @param mpcKeyExportMetadata The metadata to be used to export MPCKeys. This metadata is obtained from the response
+ * of GetDeviceGroup RPC in MPCKeyService. This metadata is a dynamic value, ensure you pass the most recent value of
+ * this metadata.
+ * @param passcode Passcode protecting key materials in the device, set during the call to BootstrapDevice.
+ * @returns A promise with the ExportPrivateKeysResponse on success; a rejection otherwise.
+ */
+export function exportPrivateKeys(
+  mpcKeyExportMetadata: string,
+  passcode: string
+): Promise<Array<ExportPrivateKeysResponse>> {
+  return MPCSdk.exportPrivateKeys(mpcKeyExportMetadata, passcode);
+}
+
+/**
+ * Computes a PrepareDeviceBackup MPCOperation,
+ * given mpcData from the response of ListMPCOperations API on MPCKeyService and passcode for the Device.
+ * @param mpcData The mpcData from ListMPCOperationsResponse on MPCKeyService.
+ * @param passcode The passcode set for the Device on BootstrapDevice call.
+ * @returns A promise with the string "success" on successful MPC computation; a rejection otherwise.
+ */
+export function computePrepareDeviceBackupMPCOperation(
+  mpcData: string,
+  passcode: string
+): Promise<String> {
+  return MPCSdk.computePrepareDeviceBackupMPCOperation(mpcData, passcode);
+}
+
+/**
+ * Exports the device backup that is created after successfully computing a PrepareDeviceBackup MPCOperation.
+ * It is recommended to store this backup securely in a storage provider of your choice. If the existing Device is lost,
+ * follow the below steps:
+ * 1. Bootstrap the new Device with the same passcode as the old Device.
+ * 2. Register the new Device.
+ * 3. Initiate AddDevice MPCOperation using the AddDevice RPC in the MPCKeyService.
+ * 4. Compute AddDevice MPCOperation with the computeAddDeviceMPCOperation method using this exported device backup.
+ * @returns A promise with the backup as hex-encoded string; a rejection otherwise.
+ */
+export function exportDeviceBackup(): Promise<String> {
+  return MPCSdk.exportDeviceBackup();
+}
+
+/**
+ * Computes an AddDevice MPCOperation,
+ * given mpcData from the response of ListMPCOperations API on MPCKeyService and passcode for the Device.
+ * @param mpcData The mpcData from ListMPCOperationsResponse on MPCKeyService.
+ * @param passcode The passcode set for the Device on BootstrapDevice call.
+ * @param deviceBackup The backup retrieved from the exportDeviceBackup call after successful computation of a
+ * PrepareDeviceBackup MPCOperation.
+ * @returns A promise with the string "success" on successful MPC computation; a rejection otherwise.
+ */
+export function computeAddDeviceMPCOperation(
+  mpcData: string,
+  passcode: string,
+  deviceBackup: string
+): Promise<String> {
+  return MPCSdk.computeAddDeviceMPCOperation(mpcData, passcode, deviceBackup);
 }
 
 /**
@@ -266,6 +367,83 @@ export type CreateSignatureOperation = {
 };
 
 /**
+ * An object representing a WaaS DeviceGroup.
+ */
+export type DeviceGroup = {
+  // The resource name of the DeviceGroup.
+  // Format: pools/{pool_id}/deviceGroups/{device_group_id}
+  DeviceGroup: string;
+  // The metadata to be used to export MPCKeys derived from the Seed associated with the DeviceGroup.
+  // This metadata has to be passed to the ExportPrivateKeys function to export private keys corresponding to
+  // MPCKeys that are derived from the HardenedChildren of the Seed associated with the DeviceGroup.
+  // Format: base64 encoded string.
+  MPCKeyExportMetadata: string;
+  // The list of Device resource names in this DeviceGroup.
+  // Format: devices/{device_id}
+  Devices: Array<string>;
+};
+
+/**
+ * An object representing a pending PrepareDeviceArchive MPC operation.
+ * Another name for this is a "pending DeviceArchive".
+ */
+export type PrepareDeviceArchiveOperation = {
+  // The resource name of the DeviceGroup.
+  // Format: pools/{pool_id}/deviceGroups/{device_group_id}
+  DeviceGroup: string;
+  // The resource name of the Operation creating this DeviceGroup.
+  // The format: operations/{operation_id}
+  Operation: string;
+  // The resource name of the MPCOperation.
+  // Format: pools/{pool_id}/deviceGroups/{device_group_id}/mpcOperations/{mpc_operation_id}
+  MPCOperation: string;
+  // The MPCData associated with this operation. To process this operation, ComputePrepareDeviceArchiveMPCOperation
+  // API has to be invoked with this data.
+  // Format: base64 encoded string.
+  MPCData: string;
+};
+
+/**
+ * An object representing a pending PrepareDeviceBackup MPC operation.
+ * Another name for this is a "pending DeviceBackup".
+ */
+export type PrepareDeviceBackupOperation = {
+  // The resource name of the DeviceGroup.
+  // Format: pools/{pool_id}/deviceGroups/{device_group_id}
+  DeviceGroup: string;
+  // The resource name of the Operation preparing this DeviceBackup.
+  // The format: operations/{operation_id}
+  Operation: string;
+  // The resource name of the MPCOperation.
+  // Format: pools/{pool_id}/deviceGroups/{device_group_id}/mpcOperations/{mpc_operation_id}
+  MPCOperation: string;
+  // The MPCData associated with this operation. To process this operation, ComputePrepareDeviceBackupMPCOperation
+  // API has to be invoked with this data.
+  // Format: base64 encoded string.
+  MPCData: string;
+};
+
+/**
+ * An object representing a pending AddDevice MPC operation.
+ * Another name for this is a "pending Device".
+ */
+export type AddDeviceOperation = {
+  // The resource name of the DeviceGroup.
+  // Format: pools/{pool_id}/deviceGroups/{device_group_id}
+  DeviceGroup: string;
+  // The resource name of the Operation adding the Device to the DeviceGroup.
+  // The format: operations/{operation_id}
+  Operation: string;
+  // The resource name of the MPCOperation.
+  // Format: pools/{pool_id}/deviceGroups/{device_group_id}/mpcOperations/{mpc_operation_id}
+  MPCOperation: string;
+  // The MPCData associated with this operation. To process this operation, ComputeAddDeviceMPCOperation
+  // API has to be invoked with this data.
+  // Format: base64 encoded string.
+  MPCData: string;
+};
+
+/**
  * Registers the current Device.
  * @returns A promise with the registered Device on success; a rejection otherwise.
  */
@@ -279,6 +457,7 @@ export function registerDevice(): Promise<Device> {
  * stopPollingForPendingDeviceGroup or computeMPCOperation) before another call is made to this function.
  * @param deviceGroup The resource name of the DeviceGroup for which to poll the pending
  * CreateDeviceGroupOperation.
+ * Format: pools/{pool_id}/deviceGroups/{device_group_id}
  * @param pollInterval The interval at which to poll for the pending operation in milliseconds.
  * If not provided, a reasonable default will be used.
  * @returns A promise with a list of the pending CreateDeviceGroupOperations on success; a rejection otherwise.
@@ -297,7 +476,7 @@ export function pollForPendingDeviceGroup(
 /**
  * Stops polling for pending DeviceGroup. This function should be called, e.g., before your app exits,
  * screen changes, etc. This function is a no-op if the SDK is not currently polling for a pending DeviceGroup.
- * @returns A promise with string "stoped polling for pending DeviceGroup" if polling is stopped successfully;
+ * @returns A promise with string "stopped polling for pending DeviceGroup" if polling is stopped successfully;
  * a promise with the empty string otherwise.
  */
 export function stopPollingForPendingDeviceGroup(): Promise<string> {
@@ -324,8 +503,9 @@ export function createSignatureFromTx(
  * Polls for pending Signatures (i.e. CreateSignatureOperations), and returns the first set that materializes.
  * Only one DeviceGroup can be polled at a time; thus, this function must return (by calling either
  * stopPollingForPendingSignatures or processPendingSignature) before another call is made to this function.
- * @param deviceGroup The resource name of the deviceGroup for which to poll the pending
+ * @param deviceGroup The resource name of the DeviceGroup for which to poll the pending
  * CreateSignatureOperation.
+ * Format: pools/{pool_id}/deviceGroups/{device_group_id}
  * @param pollInterval The interval at which to poll for the pending operation in milliseconds.
  * If not provided, a reasonable default will be used.
  * @returns A promise with a list of the pending Signatures on success; a rejection otherwise.
@@ -367,6 +547,168 @@ export function getSignedTransaction(
   signature: Signature
 ): Promise<SignedTransaction> {
   return MPCKeyService.getSignedTransaction(unsignedTx, signature);
+}
+
+/**
+ * Gets a DeviceGroup.
+ * @param name The resource name of the DeviceGroup.
+ * @returns A promise with the Address on success; a rejection otherwise.
+ */
+export function getDeviceGroup(name: string): Promise<DeviceGroup> {
+  return MPCKeyService.getDeviceGroup(name);
+}
+
+/**
+ * Initiates an operation to prepare device archive for MPCKey export. Ensure this operation is run prior to any attempts
+ * generate Addresses for the DeviceGroup. The prepared archive will include cryptographic materials to export the
+ * private keys corresponding to each of the MPCKey in the DeviceGroup. Once the device archive is prepared, utilize
+ * ExportPrivateKeys function to export private keys for to your MPCKeys.
+ * @param deviceGroup The resource name of the DeviceGroup.
+ * Format: pools/{pool_id}/deviceGroups/{device_group_id}
+ * @param device The resource name of the Device that prepares the archive.
+ * Format: devices/{device_id}
+ * @returns A promise with the string "success" on successful initiation; a rejection
+ * otherwise.
+ */
+export function prepareDeviceArchive(
+  deviceGroup: string,
+  device: string
+): Promise<string> {
+  return MPCKeyService.prepareDeviceArchive(deviceGroup, device);
+}
+
+/**
+ * Polls for pending DeviceArchives (i.e. PrepareDeviceArchiveOperation), and returns the first set that materializes.
+ * Only one DeviceGroup can be polled at a time; thus, this function must return (by calling either
+ * stopPollingForPendingDeviceArchives or computePrepareDeviceArchiveMPCOperation)
+ * before another call is made to this function.
+ * @param deviceGroup The resource name of the DeviceGroup for which to poll the pending
+ * PrepareDeviceArchiveOperation.
+ * Format: pools/{pool_id}/deviceGroups/{device_group_id}
+ * @param pollInterval The interval at which to poll for the pending operation in milliseconds.
+ * If not provided, a reasonable default will be used.
+ * @returns A promise with a list of the pending operations on success; a rejection otherwise.
+ */
+export function pollForPendingDeviceArchives(
+  deviceGroup: string,
+  pollInterval?: number
+): Promise<Array<PrepareDeviceArchiveOperation>> {
+  const pollIntervalToUse = pollInterval === undefined ? 200 : pollInterval;
+  return MPCKeyService.pollForPendingDeviceArchives(
+    deviceGroup,
+    pollIntervalToUse
+  );
+}
+
+/**
+ * Stops polling for pending device archive operations. This function should be called, e.g., before your app exits,
+ * screen changes, etc. This function is a no-op if the SDK is not currently polling for a pending DeviceArchive.
+ * @returns A promise with string "stopped polling for pending Device Archives" if polling is
+ * stopped successfully; a promise with the empty string otherwise.
+ */
+export function stopPollingForPendingDeviceArchives(): Promise<string> {
+  return MPCKeyService.stopPollingForPendingDeviceArchives();
+}
+
+/**
+ * Initiates an operation to prepare a device backup for the given Device. The backup contains certain cryptographic
+ * materials that can be used to restore MPCKeys, which have the given DeviceGroup as their parent, on a new Device.
+ * The Device must retrieve the resulting MPCOperation using pollForPendingDeviceBackups and compute with
+ * computePrepareDeviceBackupMPCOperation method.
+ * @param deviceGroup The resource name of the DeviceGroup.
+ * Format: pools/{pool_id}/deviceGroups/{device_group_id}
+ * @param device The resource name of the Device that is preparing the device backup.
+ * Format: devices/{device_id}
+ * @returns A promise with the string "success" on successful initiation; a rejection
+ * otherwise.
+ */
+export function prepareDeviceBackup(
+  deviceGroup: string,
+  device: string
+): Promise<string> {
+  return MPCKeyService.prepareDeviceBackup(deviceGroup, device);
+}
+
+/**
+ * Polls for pending DeviceBackups (i.e. PrepareDeviceBackupOperation), and returns the first set that materializes.
+ * Only one DeviceGroup can be polled at a time; thus, this function must return (by calling either
+ * stopPollingForPendingDeviceBackups or computePrepareDeviceBackupMPCOperation) before another call is made
+ * to this function.
+ * @param deviceGroup The resource name of the DeviceGroup for which to poll the pending
+ * PrepareDeviceBackupOperation.
+ * Format: pools/{pool_id}/deviceGroups/{device_group_id}
+ * @param pollInterval The interval at which to poll for the pending operation in milliseconds.
+ * If not provided, a reasonable default will be used.
+ * @returns A promise with a list of the pending operations on success; a rejection otherwise.
+ */
+export function pollForPendingDeviceBackups(
+  deviceGroup: string,
+  pollInterval?: number
+): Promise<Array<PrepareDeviceBackupOperation>> {
+  const pollIntervalToUse = pollInterval === undefined ? 200 : pollInterval;
+  return MPCKeyService.pollForPendingDeviceBackups(
+    deviceGroup,
+    pollIntervalToUse
+  );
+}
+
+/**
+ * Stops polling for pending DeviceBackup operations. This function should be called, e.g., before your app exits,
+ * screen changes, etc. This function is a no-op if the SDK is not currently polling for a pending DeviceBackup.
+ * @returns A promise with string "stopped polling for pending Device Backups" if polling is stopped successfully;
+ * a promise with the empty string otherwise.
+ */
+export function stopPollingForPendingDeviceBackups(): Promise<string> {
+  return MPCKeyService.stopPollingForPendingDeviceBackups();
+}
+
+/**
+ * Initiates an operation to add a Device to the DeviceGroup,
+ * using a device backup prepared with PrepareDeviceBackupOperation.
+ * The Device must retrieve the resulting MPCOperation using pollForPendingDevices and compute with
+ * computeAddDeviceMPCOperation method.
+ * @param deviceGroup The resource name of the DeviceGroup to which the Device is to be added.
+ * Format: pools/{pool_id}/deviceGroups/{device_group_id}
+ * @param device The resource name of the Device that has to be added to the DeviceGroup.
+ * Format: devices/{device_id}
+ * @returns A promise with the string "success" on successful initiation; a rejection
+ * otherwise.
+ */
+export function addDevice(
+  deviceGroup: string,
+  device: string
+): Promise<string> {
+  return MPCKeyService.addDevice(deviceGroup, device);
+}
+
+/**
+ * Polls for pending Devices (i.e. AddDeviceOperations), and returns the first set that materializes.
+ * Only one DeviceGroup can be polled at a time; thus, this function must return (by calling either
+ * stopPollingForPendingDevices or computeAddDeviceMPCOperation) before another call is made
+ * to this function.
+ * @param deviceGroup The resource name of the deviceGroup for which to poll the pending
+ * AddDeviceOperation.
+ * Format: pools/{pool_id}/deviceGroups/{device_group_id}
+ * @param pollInterval The interval at which to poll for the pending operation in milliseconds.
+ * If not provided, a reasonable default will be used.
+ * @returns A promise with a list of the pending operations on success; a rejection otherwise.
+ */
+export function pollForPendingDevices(
+  deviceGroup: string,
+  pollInterval?: number
+): Promise<Array<AddDeviceOperation>> {
+  const pollIntervalToUse = pollInterval === undefined ? 200 : pollInterval;
+  return MPCKeyService.pollForPendingDevices(deviceGroup, pollIntervalToUse);
+}
+
+/**
+ * Stops polling for pending Device operations. This function should be called, e.g., before your app exits,
+ * screen changes, etc. This function is a no-op if the SDK is not currently polling for a pending Device.
+ * @returns A promise with string "stopped polling for pending Devices" if polling is stopped successfully;
+ * a promise with the empty string otherwise.
+ */
+export function stopPollingForPendingDevices(): Promise<string> {
+  return MPCKeyService.stopPollingForPendingDevices();
 }
 
 /**
@@ -450,6 +792,58 @@ export function createMPCWallet(
   device: string
 ): Promise<CreateMPCWalletResponse> {
   return MPCWalletService.createMPCWallet(parent, device);
+}
+
+/**
+ * Computes an MPCWallet.
+ * Computing an MPCWallet consists of two steps:
+ * 1. Compute the MPC operation to create the DeviceGroup.
+ * 2. Compute the MPC operation to prepare device archive for the DeviceGroup.
+ * Users are provided with this convenience API to compute both MPC operations using one single API call.
+ * Users have the choices to compute the two MPC operations separately.
+ * @param deviceGroup The resource name of the DeviceGroup from the createMPCWallet response.
+ * @param passcode Passcode protecting key materials in the device, set during the call to BootstrapDevice.
+ * @param pollInterval The interval at which to poll for the pending operation in milliseconds.
+ * If not provided, a reasonable default will be used.
+ * @returns A promise with the string "success" on successful MPC wallet computation; a rejection otherwise.
+ */
+export async function computeMPCWallet(
+  deviceGroup: string,
+  passcode: string,
+  pollInterval?: number
+): Promise<string> {
+  const pendingDeviceGroup = await pollForPendingDeviceGroup(
+    deviceGroup,
+    pollInterval
+  );
+
+  for (let i = pendingDeviceGroup.length - 1; i >= 0; i--) {
+    const deviceGroupOperation = pendingDeviceGroup[i];
+    const ret = await computeMPCOperation(
+      deviceGroupOperation?.MPCData as string
+    );
+    if (ret !== 'success') {
+      return ret;
+    }
+  }
+
+  const pendingDeviceArchiveOperations = await pollForPendingDeviceArchives(
+    deviceGroup,
+    pollInterval
+  );
+
+  for (let i = pendingDeviceArchiveOperations.length - 1; i >= 0; i--) {
+    const pendingOperation = pendingDeviceArchiveOperations[i];
+    const ret = await computePrepareDeviceArchiveMPCOperation(
+      pendingOperation!.MPCData,
+      passcode
+    );
+    if (ret !== 'success') {
+      return ret;
+    }
+  }
+
+  return 'success';
 }
 
 /**

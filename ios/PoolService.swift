@@ -1,4 +1,5 @@
 import Foundation
+import WaasSdkGo
 
 @objc(PoolService)
 class PoolService: NSObject {

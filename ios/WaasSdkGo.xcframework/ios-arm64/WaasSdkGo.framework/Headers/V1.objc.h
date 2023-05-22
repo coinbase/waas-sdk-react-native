@@ -9,13 +9,18 @@
 #include "Universe.objc.h"
 
 
+@class V1AddDeviceOperation;
 @class V1Address;
 @class V1CreateDeviceGroupOperation;
 @class V1CreateMPCWalletResponse;
 @class V1CreateSignatureOperation;
 @class V1Device;
+@class V1DeviceGroup;
+@class V1ExportPrivateKeysResponse;
 @class V1MPCWallet;
 @class V1Pool;
+@class V1PrepareDeviceArchiveOperation;
+@class V1PrepareDeviceBackupOperation;
 @class V1Signature;
 @class V1SignedTransaction;
 @class V1Transaction;
@@ -34,20 +39,36 @@
 @end
 
 @protocol V1MPCKeyService <NSObject>
-- (BOOL)createTxSignature:(NSString* _Nullable)keyName tx:(NSData* _Nullable)tx error:(NSError* _Nullable* _Nullable)error;
+- (NSString* _Nonnull)addDevice:(NSString* _Nullable)deviceGroup device:(NSString* _Nullable)device error:(NSError* _Nullable* _Nullable)error;
+- (NSString* _Nonnull)createTxSignature:(NSString* _Nullable)keyName tx:(NSData* _Nullable)tx error:(NSError* _Nullable* _Nullable)error;
+- (V1DeviceGroup* _Nullable)getDeviceGroup:(NSString* _Nullable)deviceGroupName error:(NSError* _Nullable* _Nullable)error;
 - (V1SignedTransaction* _Nullable)getSignedTransaction:(NSData* _Nullable)tx signature:(V1Signature* _Nullable)signature error:(NSError* _Nullable* _Nullable)error;
+- (NSData* _Nullable)pollPendingDeviceArchives:(NSString* _Nullable)deviceGroup pollInterval:(int64_t)pollInterval error:(NSError* _Nullable* _Nullable)error;
+- (NSData* _Nullable)pollPendingDeviceBackups:(NSString* _Nullable)deviceGroup pollInterval:(int64_t)pollInterval error:(NSError* _Nullable* _Nullable)error;
 - (NSData* _Nullable)pollPendingDeviceGroup:(NSString* _Nullable)deviceGroup pollInterval:(int64_t)pollInterval error:(NSError* _Nullable* _Nullable)error;
+- (NSData* _Nullable)pollPendingDevices:(NSString* _Nullable)deviceGroup pollInterval:(int64_t)pollInterval error:(NSError* _Nullable* _Nullable)error;
 - (NSData* _Nullable)pollPendingSignatures:(NSString* _Nullable)deviceGroup pollInterval:(int64_t)pollInterval error:(NSError* _Nullable* _Nullable)error;
+- (NSString* _Nonnull)prepareDeviceArchive:(NSString* _Nullable)deviceGroup device:(NSString* _Nullable)device error:(NSError* _Nullable* _Nullable)error;
+- (NSString* _Nonnull)prepareDeviceBackup:(NSString* _Nullable)deviceGroup device:(NSString* _Nullable)device error:(NSError* _Nullable* _Nullable)error;
 - (V1Device* _Nullable)registerDevice:(NSError* _Nullable* _Nullable)error;
+- (NSString* _Nonnull)stopPollingPendingDeviceArchives:(NSError* _Nullable* _Nullable)error;
+- (NSString* _Nonnull)stopPollingPendingDeviceBackups:(NSError* _Nullable* _Nullable)error;
 - (NSString* _Nonnull)stopPollingPendingDeviceGroup:(NSError* _Nullable* _Nullable)error;
+- (NSString* _Nonnull)stopPollingPendingDevices:(NSError* _Nullable* _Nullable)error;
 - (NSString* _Nonnull)stopPollingPendingSignatures:(NSError* _Nullable* _Nullable)error;
 - (V1Signature* _Nullable)waitPendingSignature:(NSString* _Nullable)operation error:(NSError* _Nullable* _Nullable)error;
 @end
 
 @protocol V1MPCSdk <NSObject>
 - (NSString* _Nonnull)bootstrapDevice:(NSString* _Nullable)passcode error:(NSError* _Nullable* _Nullable)error;
+- (BOOL)computeAddDeviceMPCOperation:(NSString* _Nullable)mpcData passcode:(NSString* _Nullable)passcode deviceBackup:(NSString* _Nullable)deviceBackup error:(NSError* _Nullable* _Nullable)error;
 - (BOOL)computeMPCOperation:(NSString* _Nullable)mpcData error:(NSError* _Nullable* _Nullable)error;
+- (BOOL)computePrepareDeviceArchiveMPCOperation:(NSString* _Nullable)mpcData passcode:(NSString* _Nullable)passcode error:(NSError* _Nullable* _Nullable)error;
+- (BOOL)computePrepareDeviceBackupMPCOperation:(NSString* _Nullable)mpcData passcode:(NSString* _Nullable)passcode error:(NSError* _Nullable* _Nullable)error;
+- (NSString* _Nonnull)exportDeviceBackup:(NSError* _Nullable* _Nullable)error;
+- (NSData* _Nullable)exportPrivateKeys:(NSString* _Nullable)mpcKeyExportMetadata passcode:(NSString* _Nullable)passcode error:(NSError* _Nullable* _Nullable)error;
 - (NSString* _Nonnull)getRegistrationData:(NSError* _Nullable* _Nullable)error;
+- (BOOL)resetPasscode:(NSString* _Nullable)newPasscode error:(NSError* _Nullable* _Nullable)error;
 @end
 
 @protocol V1MPCWalletService <NSObject>
@@ -59,6 +80,38 @@
 
 @protocol V1PoolService <NSObject>
 - (V1Pool* _Nullable)createPool:(NSString* _Nullable)displayName poolID:(NSString* _Nullable)poolID error:(NSError* _Nullable* _Nullable)error;
+@end
+
+/**
+ * AddDeviceOperation represents an MPCOperation for AddDevice.
+ */
+@interface V1AddDeviceOperation : NSObject <goSeqRefInterface, V1AndroidCallbacks> {
+}
+@property(strong, readonly) _Nonnull id _ref;
+
+- (nonnull instancetype)initWithRef:(_Nonnull id)ref;
+- (nonnull instancetype)init;
+/**
+ * The resource name of the DeviceGroup.
+Format: pools/{pool_id}/deviceGroups/{device_group_id}
+ */
+@property (nonatomic) NSString* _Nonnull deviceGroup;
+/**
+ * The resource name of the Operation adding the Device to the DeviceGroup.
+The format: operations/{operation_id}
+ */
+@property (nonatomic) NSString* _Nonnull operation;
+/**
+ * The resource name of the MPCOperation.
+Format: pools/{pool_id}/deviceGroups/{device_group_id}/mpcOperations/{mpc_operation_id}
+ */
+@property (nonatomic) NSString* _Nonnull mpcOperation;
+/**
+ * The MPCData associated with this operation. To process this operation, ComputeAddDeviceMPCOperation API
+has to be invoked with this data.
+Format: base64 encoded string.
+ */
+@property (nonatomic) NSString* _Nonnull mpcData;
 @end
 
 /**
@@ -172,6 +225,55 @@ Format: base64 encoded string.
 @end
 
 /**
+ * DeviceGroup represents a WaaS DeviceGroup resource.
+ */
+@interface V1DeviceGroup : NSObject <goSeqRefInterface, V1AndroidCallbacks> {
+}
+@property(strong, readonly) _Nonnull id _ref;
+
+- (nonnull instancetype)initWithRef:(_Nonnull id)ref;
+- (nonnull instancetype)init;
+/**
+ * The resource name of the DeviceGroup.
+Format: pools/{pool_id}/deviceGroups/{device_group_id}
+ */
+@property (nonatomic) NSString* _Nonnull name;
+/**
+ * The metadata to be used to export MPCKeys derived from the Seed associated with the DeviceGroup.
+This metadata has to be passed to the ExportPrivateKeys function to export private keys corresponding to
+MPCKeys that are derived from the HardenedChildren of the Seed associated with the DeviceGroup.
+Format: base64 encoded string.
+ */
+@property (nonatomic) NSString* _Nonnull mpcKeyExportMetadata;
+/**
+ * The list of Device resource names in this DeviceGroup.
+Format: A byte array that can be unmarshalled into a string array.
+ */
+@property (nonatomic) NSData* _Nullable devices;
+@end
+
+/**
+ * ExportPrivateKeysResponse represents the response to ExportPrivateKeys request.
+ */
+@interface V1ExportPrivateKeysResponse : NSObject <goSeqRefInterface, V1AndroidCallbacks> {
+}
+@property(strong, readonly) _Nonnull id _ref;
+
+- (nonnull instancetype)initWithRef:(_Nonnull id)ref;
+- (nonnull instancetype)init;
+/**
+ * The 32 byte long elliptic curve private key of an MPCKey, as a non-prefixed hex string.
+ */
+@property (nonatomic) NSString* _Nonnull privateKey;
+/**
+ * The ethereum address as "0x"-prefixed hex string that corresponds to the exported private key.
+Note: This is NOT a WaaS Address resource of the form
+`networks/{networkID}/addresses/{addressID}.
+ */
+@property (nonatomic) NSString* _Nonnull address;
+@end
+
+/**
  * MPCWallet represents a WaaS MPCWallet resource.
  */
 @interface V1MPCWallet : NSObject <goSeqRefInterface, V1AndroidCallbacks> {
@@ -195,6 +297,69 @@ Format: base64 encoded string.
 - (nonnull instancetype)init;
 @property (nonatomic) NSString* _Nonnull name;
 @property (nonatomic) NSString* _Nonnull displayName;
+@end
+
+/**
+ * PrepareDeviceArchiveOperation represents an MPCOperation for PrepareDeviceArchive.
+ */
+@interface V1PrepareDeviceArchiveOperation : NSObject <goSeqRefInterface, V1AndroidCallbacks> {
+}
+@property(strong, readonly) _Nonnull id _ref;
+
+- (nonnull instancetype)initWithRef:(_Nonnull id)ref;
+- (nonnull instancetype)init;
+/**
+ * The resource name of the DeviceGroup.
+Format: pools/{pool_id}/deviceGroups/{device_group_id}
+ */
+@property (nonatomic) NSString* _Nonnull deviceGroup;
+/**
+ * The resource name of the Operation creating this DeviceGroup.
+The format: operations/{operation_id}
+ */
+@property (nonatomic) NSString* _Nonnull operation;
+/**
+ * The resource name of the MPCOperation.
+Format: pools/{pool_id}/deviceGroups/{device_group_id}/mpcOperations/{mpc_operation_id}
+ */
+@property (nonatomic) NSString* _Nonnull mpcOperation;
+/**
+ * The MPCData associated with this operation. To process this operation, ComputeMPCOperation API has to be invoked with this data.
+Format: base64 encoded string.
+ */
+@property (nonatomic) NSString* _Nonnull mpcData;
+@end
+
+/**
+ * PrepareDeviceBackupOperation represents an MPCOperation for PrepareDeviceBackup.
+ */
+@interface V1PrepareDeviceBackupOperation : NSObject <goSeqRefInterface, V1AndroidCallbacks> {
+}
+@property(strong, readonly) _Nonnull id _ref;
+
+- (nonnull instancetype)initWithRef:(_Nonnull id)ref;
+- (nonnull instancetype)init;
+/**
+ * The resource name of the DeviceGroup.
+Format: pools/{pool_id}/deviceGroups/{device_group_id}
+ */
+@property (nonatomic) NSString* _Nonnull deviceGroup;
+/**
+ * The resource name of the Operation creating the Device backup.
+The format: operations/{operation_id}
+ */
+@property (nonatomic) NSString* _Nonnull operation;
+/**
+ * The resource name of the MPCOperation.
+Format: pools/{pool_id}/deviceGroups/{device_group_id}/mpcOperations/{mpc_operation_id}
+ */
+@property (nonatomic) NSString* _Nonnull mpcOperation;
+/**
+ * The MPCData associated with this operation. To process this operation, ComputePrepareDeviceBackupMPCOperation API
+has to be invoked with this data.
+Format: base64 encoded string.
+ */
+@property (nonatomic) NSString* _Nonnull mpcData;
 @end
 
 /**
@@ -347,12 +512,22 @@ FOUNDATION_EXPORT id<V1PoolService> _Nullable V1NewPoolService(NSString* _Nullab
 @property(strong, readonly) _Nonnull id _ref;
 
 - (nonnull instancetype)initWithRef:(_Nonnull id)ref;
-- (BOOL)createTxSignature:(NSString* _Nullable)keyName tx:(NSData* _Nullable)tx error:(NSError* _Nullable* _Nullable)error;
+- (NSString* _Nonnull)addDevice:(NSString* _Nullable)deviceGroup device:(NSString* _Nullable)device error:(NSError* _Nullable* _Nullable)error;
+- (NSString* _Nonnull)createTxSignature:(NSString* _Nullable)keyName tx:(NSData* _Nullable)tx error:(NSError* _Nullable* _Nullable)error;
+- (V1DeviceGroup* _Nullable)getDeviceGroup:(NSString* _Nullable)deviceGroupName error:(NSError* _Nullable* _Nullable)error;
 - (V1SignedTransaction* _Nullable)getSignedTransaction:(NSData* _Nullable)tx signature:(V1Signature* _Nullable)signature error:(NSError* _Nullable* _Nullable)error;
+- (NSData* _Nullable)pollPendingDeviceArchives:(NSString* _Nullable)deviceGroup pollInterval:(int64_t)pollInterval error:(NSError* _Nullable* _Nullable)error;
+- (NSData* _Nullable)pollPendingDeviceBackups:(NSString* _Nullable)deviceGroup pollInterval:(int64_t)pollInterval error:(NSError* _Nullable* _Nullable)error;
 - (NSData* _Nullable)pollPendingDeviceGroup:(NSString* _Nullable)deviceGroup pollInterval:(int64_t)pollInterval error:(NSError* _Nullable* _Nullable)error;
+- (NSData* _Nullable)pollPendingDevices:(NSString* _Nullable)deviceGroup pollInterval:(int64_t)pollInterval error:(NSError* _Nullable* _Nullable)error;
 - (NSData* _Nullable)pollPendingSignatures:(NSString* _Nullable)deviceGroup pollInterval:(int64_t)pollInterval error:(NSError* _Nullable* _Nullable)error;
+- (NSString* _Nonnull)prepareDeviceArchive:(NSString* _Nullable)deviceGroup device:(NSString* _Nullable)device error:(NSError* _Nullable* _Nullable)error;
+- (NSString* _Nonnull)prepareDeviceBackup:(NSString* _Nullable)deviceGroup device:(NSString* _Nullable)device error:(NSError* _Nullable* _Nullable)error;
 - (V1Device* _Nullable)registerDevice:(NSError* _Nullable* _Nullable)error;
+- (NSString* _Nonnull)stopPollingPendingDeviceArchives:(NSError* _Nullable* _Nullable)error;
+- (NSString* _Nonnull)stopPollingPendingDeviceBackups:(NSError* _Nullable* _Nullable)error;
 - (NSString* _Nonnull)stopPollingPendingDeviceGroup:(NSError* _Nullable* _Nullable)error;
+- (NSString* _Nonnull)stopPollingPendingDevices:(NSError* _Nullable* _Nullable)error;
 - (NSString* _Nonnull)stopPollingPendingSignatures:(NSError* _Nullable* _Nullable)error;
 - (V1Signature* _Nullable)waitPendingSignature:(NSString* _Nullable)operation error:(NSError* _Nullable* _Nullable)error;
 @end
@@ -366,8 +541,14 @@ FOUNDATION_EXPORT id<V1PoolService> _Nullable V1NewPoolService(NSString* _Nullab
 
 - (nonnull instancetype)initWithRef:(_Nonnull id)ref;
 - (NSString* _Nonnull)bootstrapDevice:(NSString* _Nullable)passcode error:(NSError* _Nullable* _Nullable)error;
+- (BOOL)computeAddDeviceMPCOperation:(NSString* _Nullable)mpcData passcode:(NSString* _Nullable)passcode deviceBackup:(NSString* _Nullable)deviceBackup error:(NSError* _Nullable* _Nullable)error;
 - (BOOL)computeMPCOperation:(NSString* _Nullable)mpcData error:(NSError* _Nullable* _Nullable)error;
+- (BOOL)computePrepareDeviceArchiveMPCOperation:(NSString* _Nullable)mpcData passcode:(NSString* _Nullable)passcode error:(NSError* _Nullable* _Nullable)error;
+- (BOOL)computePrepareDeviceBackupMPCOperation:(NSString* _Nullable)mpcData passcode:(NSString* _Nullable)passcode error:(NSError* _Nullable* _Nullable)error;
+- (NSString* _Nonnull)exportDeviceBackup:(NSError* _Nullable* _Nullable)error;
+- (NSData* _Nullable)exportPrivateKeys:(NSString* _Nullable)mpcKeyExportMetadata passcode:(NSString* _Nullable)passcode error:(NSError* _Nullable* _Nullable)error;
 - (NSString* _Nonnull)getRegistrationData:(NSError* _Nullable* _Nullable)error;
+- (BOOL)resetPasscode:(NSString* _Nullable)newPasscode error:(NSError* _Nullable* _Nullable)error;
 @end
 
 /**

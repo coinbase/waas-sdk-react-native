@@ -17,6 +17,7 @@ import { PageTitle } from '../components/PageTitle';
 import { CopyButton } from '../components/CopyButton';
 import { InputText } from '../components/InputText';
 import AppContext from '../components/AppContext';
+import { MonospaceText } from '../components/MonospaceText';
 
 export const MPCKeyServiceDemo = () => {
   const [registrationData, setRegistrationData] = React.useState<string>('');
@@ -72,11 +73,12 @@ export const MPCKeyServiceDemo = () => {
       contentInsetAdjustmentBehavior="automatic"
       style={styles.container}
     >
-      <PageTitle title="MPC Keys Demo" />
+      <PageTitle title="Device Registration" />
       <DemoStep>
         <DemoText>
-          1. To generate registration Data for device, enter a passcode with
-          at-least 6 characters
+          1. Enter a passcode of at least 6 digits. This passcode will be used
+          to encrypt your device archive and backup materials. Remember your
+          passcode!
         </DemoText>
         <InputText
           onTextChange={setPasscode}
@@ -92,16 +94,19 @@ export const MPCKeyServiceDemo = () => {
       </DemoStep>
       {showStep2 && (
         <DemoStep>
-          <DemoText>2. Generating Registration Data...</DemoText>
+          <DemoText>2. Generating Device registration data...</DemoText>
         </DemoStep>
       )}
       {showStep3 && (
         <DemoStep>
           <DemoText>
-            3. Copy Registration Data {registrationData} to invoke
-            RegisterDevice API in MPCKeyService
+            3. Your base64-encoded Device registration data is below:
           </DemoText>
-          <CopyButton text={registrationData} />
+          <MonospaceText verticalMargin={5}>{registrationData}</MonospaceText>
+          <DemoText>
+            Typically, you would use this data to call RegisterDevice from your
+            proxy server; however, for convenience, we'll do that directly here.
+          </DemoText>
         </DemoStep>
       )}
       {showStep4 && (
@@ -112,10 +117,14 @@ export const MPCKeyServiceDemo = () => {
       {showStep5 && (
         <DemoStep>
           <DemoText>
-            5. Registered device {device?.Name}. Copy the name of your Device to
-            use in MPCWalletServiceDemo.
+            5. Successfully registered Device with resource name:
           </DemoText>
-          <CopyButton text={device?.Name as string} />
+          <MonospaceText verticalMargin={10}>{device?.Name}</MonospaceText>
+          <DemoText>
+            Copy your Device resource name and paste it into a notepad before
+            proceeding to the next demo.
+          </DemoText>
+          <CopyButton text={device?.Name!} />
         </DemoStep>
       )}
       {showError && (

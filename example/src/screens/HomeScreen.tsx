@@ -34,27 +34,41 @@ export const HomeScreen = () => {
             backgroundColor: isDarkMode ? Colors.black : Colors.white,
           }}
         >
-          <PageTitle title="WaaS SDK Demo" />
-          <Section title="Pool Demo" runDestination="PoolServiceDemo">
-            Creates a WaaS Pool resource.
+          <PageTitle title="WaaS SDK Demos" />
+          <Section title="Pool Creation" runDestination="PoolServiceDemo">
+            Create a Pool resource.
           </Section>
           <Section
-            title="MPCKeyService Demo"
+            title="Device Registration"
             runDestination="MPCKeyServiceDemo"
           >
-            Generates Registration Data for the Device, registers the Device on
-            MPCKeyService.
+            Generate registration data for the Device and register the Device
+            with WaaS.
           </Section>
           <Section
-            title="MPCWalletService Demo"
+            title="Address Generation"
             runDestination="MPCWalletServiceDemo"
           >
-            Creates an MPCWallet, computes DeviceGroup associated with the
-            MPCWallet, generates an Ethereum Address in the MPCWallet.
+            Create an MPCWallet with an associated DeviceGroup and generate an
+            Ethereum Address in the MPCWallet.
           </Section>
-          <Section title="MPCSignature Demo" runDestination="MPCSignatureDemo">
-            Creates an Ethereum transaction with Address in MPCWallet, computes
-            an MPC Signature for it and returns the Signed Transaction.
+          <Section
+            title="Transaction Signing"
+            runDestination="MPCSignatureDemo"
+          >
+            Compute a signed transaction for the Ethereum Address.
+          </Section>
+          <Section title="Key Export" runDestination="MPCKeyExportDemo">
+            Export the private keys corresponding to the MPCKeys in the
+            DeviceGroup.
+          </Section>
+          <Section title="Device Backup" runDestination="DeviceBackupDemo">
+            Export a Device backup that can be used to restore a Device within a
+            DeviceGroup.
+          </Section>
+          <Section title="Device Restore" runDestination="DeviceAdditionDemo">
+            Restore an old Device by adding a new Device to an existing
+            DeviceGroup using the backup prepared by the old Device.
           </Section>
         </View>
       </ScrollView>

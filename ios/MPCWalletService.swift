@@ -1,4 +1,5 @@
 import Foundation
+import WaasSdkGo
 
 @objc(MPCWalletService)
 class MPCWalletService: NSObject {

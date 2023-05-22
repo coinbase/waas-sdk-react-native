@@ -3,14 +3,15 @@ import * as React from 'react';
 import { ScrollView, StyleSheet } from 'react-native';
 import {
   Address,
-  computeMPCOperation,
   createMPCWallet,
   generateAddress,
   initMPCKeyService,
   initMPCSdk,
   initMPCWalletService,
   MPCWallet,
+  computeMPCWallet,
   pollForPendingDeviceGroup,
+  computeMPCOperation,
   waitPendingMPCWallet,
 } from '@coinbase/waas-sdk-react-native';
 import { ContinueButton } from '../components/ContinueButton';
@@ -21,6 +22,8 @@ import { InputText } from '../components/InputText';
 import { PageTitle } from '../components/PageTitle';
 import AppContext from '../components/AppContext';
 import { CopyButton } from '../components/CopyButton';
+import { MonospaceText } from '../components/MonospaceText';
+import { Note } from '../components/Note';
 
 export const MPCWalletServiceDemo = () => {
   const [deviceName, setDeviceName] = React.useState<string>('');
@@ -32,15 +35,19 @@ export const MPCWalletServiceDemo = () => {
   const [address, setAddress] = React.useState<Address>();
   const [resultError, setResultError] = React.useState<Error>();
 
-  const [showStep2, setShowStep2] = React.useState<boolean>();
-  const [showStep3, setShowStep3] = React.useState<boolean>();
+  const [passcode, setPasscode] = React.useState<string>('');
+  const [passcodeEditable, setPasscodeEditable] = React.useState<boolean>(true);
   const [showStep4, setShowStep4] = React.useState<boolean>();
   const [showStep5, setShowStep5] = React.useState<boolean>();
+  const [showStep6, setShowStep6] = React.useState<boolean>();
+  const [showStep7, setShowStep7] = React.useState<boolean>();
   const [showError, setShowError] = React.useState<boolean>();
 
   const credentials = React.useContext(AppContext);
   const apiKeyName = credentials.apiKeyName as string;
   const privateKey = credentials.privateKey as string;
+
+  const prepareDeviceArchiveEnforced = true;
 
   //  Runs the WalletService demo.
   React.useEffect(() => {
@@ -50,7 +57,7 @@ export const MPCWalletServiceDemo = () => {
         deviceName === '' ||
         apiKeyName === '' ||
         privateKey === '' ||
-        !showStep2
+        !showStep4
       ) {
         return;
       }
@@ -68,30 +75,39 @@ export const MPCWalletServiceDemo = () => {
             deviceName
           );
           setDeviceGroupName(createMpcWalletResponse.DeviceGroup);
-          setShowStep3(true);
+          setShowStep5(true);
 
-          const pendingDeviceGroup = await pollForPendingDeviceGroup(
-            createMpcWalletResponse.DeviceGroup
-          );
-
-          for (let i = pendingDeviceGroup.length - 1; i >= 0; i--) {
-            const deviceGroupOperation = pendingDeviceGroup[i];
-            await computeMPCOperation(deviceGroupOperation?.MPCData as string);
+          if (prepareDeviceArchiveEnforced) {
+            await computeMPCWallet(
+              createMpcWalletResponse.DeviceGroup,
+              passcode
+            );
+          } else {
+            const pendingDeviceGroup = await pollForPendingDeviceGroup(
+              createMpcWalletResponse.DeviceGroup
+            );
+            for (let i = pendingDeviceGroup.length - 1; i >= 0; i--) {
+              const deviceGroupOperation = pendingDeviceGroup[i];
+              await computeMPCOperation(
+                deviceGroupOperation?.MPCData as string
+              );
+            }
           }
+          setShowStep4(true);
 
           const walletCreated = await waitPendingMPCWallet(
             createMpcWalletResponse.Operation as string
           );
           setWallet(walletCreated);
-
-          setShowStep4(true);
+          setShowStep6(true);
 
           const addressCreated = await generateAddress(
             walletCreated?.Name as string,
             'networks/ethereum-goerli'
           );
           setAddress(addressCreated);
-          setShowStep5(true);
+
+          setShowStep7(true);
         }
       } catch (error) {
         setResultError(error as Error);
@@ -103,69 +119,94 @@ export const MPCWalletServiceDemo = () => {
     deviceName,
     apiKeyName,
     privateKey,
-    showStep2,
+    showStep4,
     deviceGroupName,
+    passcode,
     poolName,
+    prepareDeviceArchiveEnforced,
   ]);
+
+  const requiredDemos = ['Pool Creation', 'Device Registration'];
 
   return (
     <ScrollView
       contentInsetAdjustmentBehavior="automatic"
       style={styles.container}
     >
-      <PageTitle title="GenerateAddress Demo" />
+      <PageTitle title="Address Generation" />
+      <Note items={requiredDemos}>
+        Note: Ensure you have run the following demos before this one:
+      </Note>
       <DemoStep>
+        <DemoText>1. Input your Pool resource name below:</DemoText>
+        <InputText
+          onTextChange={setPoolName}
+          editable={poolEditable}
+          placeholderText="pools/{pool_id}"
+        />
+        <DemoText>2. Input your Device resource name below:</DemoText>
+        <InputText
+          onTextChange={setDeviceName}
+          editable={deviceEditable}
+          placeholderText="devices/{device_id}"
+        />
         <DemoText>
-          1. Ensure you have run the KeyService demo. Input the name of your
-          Pool resource below:
+          3. Input the passcode of the registered Device below:
         </DemoText>
-        <InputText onTextChange={setPoolName} editable={poolEditable} />
-        <DemoText>
-          {' '}
-          2. Input the name of registered Device from MPCKeyServiceDemo below
-        </DemoText>
-        <InputText onTextChange={setDeviceName} editable={deviceEditable} />
+        <InputText
+          onTextChange={setPasscode}
+          editable={passcodeEditable}
+          secret={true}
+        />
         <ContinueButton
           onPress={() => {
-            setShowStep2(true);
+            setShowStep4(true);
             setDeviceEditable(false);
             setPoolEditable(false);
+            setPasscodeEditable(false);
           }}
         />
       </DemoStep>
-      {showStep2 && (
-        <DemoStep>
-          <DemoText>2. Creating your MPCWallet...</DemoText>
-        </DemoStep>
-      )}
-      {showStep3 && (
-        <DemoStep>
-          <DemoText>
-            3. Press the button below to copy your DeviceGroup that will be
-            required for MPCSignatureDemo.
-          </DemoText>
-          <CopyButton text={deviceGroupName} />
-          <DemoText>
-            4. Processing MPCOperation to create DeviceGroup {deviceGroupName}
-            ...
-          </DemoText>
-        </DemoStep>
-      )}
       {showStep4 && (
         <DemoStep>
-          <DemoText>5. Created MPCWallet {wallet?.Name} </DemoText>
-          <DemoText>
-            Press the button below to copy the name of your MPCWallet.
-          </DemoText>
-          <CopyButton text={wallet?.Name!} />
+          <DemoText>4. Creating your MPCWallet...</DemoText>
         </DemoStep>
       )}
       {showStep5 && (
         <DemoStep>
           <DemoText>
-            5. Generated Ethereum address {address?.Name} in MPC Wallet
+            5. Initiated DeviceGroup creation with resource name:
           </DemoText>
-          <DemoText>Press the button below to copy your address.</DemoText>
+          <MonospaceText verticalMargin={10}>{deviceGroupName}</MonospaceText>
+          <DemoText>
+            Copy your DeviceGroup resource name and paste it into a notepad
+            before proceeding to the next step.
+          </DemoText>
+          <CopyButton text={deviceGroupName!} />
+          <DemoText>
+            Creating MPCWallet. This may take some time (1 min)...
+          </DemoText>
+        </DemoStep>
+      )}
+      {showStep6 && (
+        <DemoStep>
+          <DemoText>6. Created MPCWallet with resource name:</DemoText>
+          <MonospaceText verticalMargin={10}>{wallet?.Name}</MonospaceText>
+          <DemoText>
+            Copy your MPCWallet resource name and paste it into a notepad before
+            proceeding to the next step.
+          </DemoText>
+          <CopyButton text={wallet?.Name!} />
+        </DemoStep>
+      )}
+      {showStep7 && (
+        <DemoStep>
+          <DemoText>7. Generated Ethereum Address with resource name:</DemoText>
+          <MonospaceText verticalMargin={10}>{address?.Name}</MonospaceText>
+          <DemoText>
+            Copy your Address resource name and paste it into a notepad before
+            proceeding to the next demo.
+          </DemoText>
           <CopyButton text={address?.Name!} />
         </DemoStep>
       )}

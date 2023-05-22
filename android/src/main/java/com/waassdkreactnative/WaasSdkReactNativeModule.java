@@ -30,7 +30,7 @@ public class WaasSdkReactNativeModule extends ReactContextBaseJavaModule {
     int gracePeriod = 0x7fffffff;
     return new AndroidCallbacks() {
       public long fGetAPIVersion() {
-        return 1;
+        return systemKeys.API_VERSION;
       }
 
       // Get the home dir of the device.
@@ -76,6 +76,11 @@ public class WaasSdkReactNativeModule extends ReactContextBaseJavaModule {
       // Sign with ECDSA key.
       public byte[] fSignECDSA(String tag, byte[] data) throws Exception {
         return systemKeys.signECDSA(tag, data, " ", " ");
+      }
+
+      @Override
+      public void fValidate(String tag) throws Exception {
+        systemKeys.validateKey(tag);
       }
 
       // Open a session.

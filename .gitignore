@@ -59,6 +59,7 @@ yarn-error.log
 buck-out/
 \.buckd/
 android/app/libs
+android/libs
 android/keystores/debug.keystore
 
 # Expo
@@ -74,3 +75,6 @@ lib/
 ios/WaasSdkGo.xcframework/ios-arm64/WaasSdkGo.framework
 ios/WaasSdkGo.xcframework/ios-arm64-simulator/WaasSdkGo.framework
 ios/WaasSdkGo.xcframework/ios-x86_64-simulator/WaasSdkGo.framework
+
+# Android built-frameworks
+android/libs/go-internal*.aar

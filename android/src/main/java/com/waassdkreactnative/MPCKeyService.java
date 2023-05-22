@@ -17,16 +17,18 @@ import com.facebook.react.bridge.WritableMap;
 import com.facebook.react.common.StandardCharsets;
 import com.facebook.react.module.annotations.ReactModule;
 import com.waassdkinternal.v1.Device;
+import com.waassdkinternal.v1.DeviceGroup;
 import com.waassdkinternal.v1.Signature;
 import com.waassdkinternal.v1.SignedTransaction;
 
 import org.json.JSONArray;
+import org.json.JSONException;
 import org.json.JSONObject;
 
 @ReactModule(name = MPCKeyService.NAME)
 public class MPCKeyService extends ReactContextBaseJavaModule {
   public static final String NAME = "MPCKeyService";
-  
+
   // The URL of the MPCKeyService.
   public static final String  mpcKeyServiceUrl = "https://api.developer.coinbase.com/waas/mpc_keys";
 
@@ -99,24 +101,30 @@ public void registerDevice(Promise promise) {
   */
   @ReactMethod
   public void pollForPendingDeviceGroup(String deviceGroup,int pollInterval,Promise promise) {
-    try{
+
       if(keyClient==null)
       {
         promise.reject(mpcKeyServiceErr,uninitializedErr);
       }
 
-      byte[] pendingDeviceGroupData = keyClient.pollPendingDeviceGroup(deviceGroup,pollInterval);
+       Thread newThread = new Thread(() -> {
+         try {
+          byte[] pendingDeviceGroupData = keyClient.pollPendingDeviceGroup(deviceGroup,pollInterval);
 
-      // Converting the bytes to String.
-      String pendingDeviceGroupDataBytesToStrings = new String(pendingDeviceGroupData, StandardCharsets.UTF_8);
-      JSONArray jsonArray=new JSONArray(new String(pendingDeviceGroupDataBytesToStrings));
+          // Converting the bytes to String.
+          String pendingDeviceGroupDataBytesToStrings = new String(pendingDeviceGroupData, StandardCharsets.UTF_8);
+          JSONArray jsonArray=new JSONArray(new String(pendingDeviceGroupDataBytesToStrings));
 
-      WritableArray array = convertJsonToArray(jsonArray);
-      promise.resolve(array);
+          WritableArray array = convertJsonToArray(jsonArray);
+          promise.resolve(array);
 
-    } catch(Exception e) {
-      promise.reject("pollForPendingDeviceGroup failed : ", e);
-    }
+         } catch (Exception e) {
+           promise.reject("pollForPendingDeviceGroup failed : ", e);
+        }
+
+         });
+        newThread.start();
+
   }
 
   /**
@@ -173,25 +181,32 @@ public void registerDevice(Promise promise) {
   */
   @ReactMethod
   public void pollForPendingSignatures(String deviceGroup,int pollInterval,Promise promise) {
-    try{
+
       if(keyClient==null)
       {
         promise.reject(mpcKeyServiceErr,uninitializedErr);
       }
 
-      byte[] pendingSeedsData = keyClient.pollPendingSignatures(deviceGroup,pollInterval);
+      Thread newThread = new Thread(() -> {
+        try {
 
-      // Converting the bytes to String.
-      String pendingSeedsDataBytesToStrings = new String(pendingSeedsData,StandardCharsets.UTF_8);
-      JSONArray jsonArray=new JSONArray(new String(pendingSeedsDataBytesToStrings));
+          byte[] pendingSeedsData = keyClient.pollPendingSignatures(deviceGroup,pollInterval);
 
-      WritableArray array = convertJsonToArray(jsonArray);
+          // Converting the bytes to String.
+          String pendingSeedsDataBytesToStrings = new String(pendingSeedsData,StandardCharsets.UTF_8);
+          JSONArray jsonArray=new JSONArray(new String(pendingSeedsDataBytesToStrings));
 
-      promise.resolve(array);
+          WritableArray array = convertJsonToArray(jsonArray);
 
-    } catch(Exception e) {
-      promise.reject("pollForPendingSignatures failed : ", e);
-    }
+          promise.resolve(array);
+
+        }  catch (Exception e) {
+          promise.reject("pollForPendingSignatures failed : ", e);
+        }
+
+      });
+      newThread.start();
+
   }
 
   /**
@@ -276,6 +291,279 @@ public void registerDevice(Promise promise) {
       promise.reject("getSignedTransaction failed : ", e);
     }
   }
+
+  /**
+   Gets a DeviceGroup with the given name. Resolves with the DeviceGroup object on success; rejects with an error otherwise.
+   */
+  @ReactMethod
+  public void getDeviceGroup(String name,Promise promise) {
+    try{
+
+      if(keyClient==null)
+      {
+        promise.reject(mpcKeyServiceErr,uninitializedErr);
+      }
+
+      DeviceGroup deviceGroupRes = keyClient.getDeviceGroup(name);
+
+      byte[] devicesData = deviceGroupRes.getDevices();
+
+      // Converting the bytes to String.
+      String devicesDataBytesToStrings = new String(devicesData,StandardCharsets.UTF_8);
+
+      WritableMap map = Arguments.createMap();
+      map.putString("Name", deviceGroupRes.getName());
+      map.putString("MPCKeyExportMetadata", deviceGroupRes.getMPCKeyExportMetadata());
+      map.putString("Devices", devicesDataBytesToStrings);
+
+
+      promise.resolve(map);
+
+    } catch(Exception e) {
+      promise.reject("getDeviceGroup failed : ", e);
+    }
+  }
+
+  /**
+   Initiates an operation to prepare device archive for MPCKey export. Resolves with the operation name on successful initiation; rejects with
+   an error otherwise.
+   */
+  @ReactMethod
+  public void prepareDeviceArchive(String deviceGroup,String device, Promise promise) {
+    try{
+
+      if(keyClient==null)
+      {
+        promise.reject(mpcKeyServiceErr,uninitializedErr);
+      }
+
+      String operationName =  keyClient.prepareDeviceArchive(deviceGroup,device);
+
+      promise.resolve(operationName);
+
+    } catch(Exception e) {
+      promise.reject("prepareDeviceArchive failed : ", e);
+    }
+  }
+
+  /**
+   Polls for pending DeviceArchives (i.e. DeviceArchiveOperations), and returns the first set that materializes.
+   Only one DeviceGroup can be polled at a time; thus, this function must return (by calling either
+   stopPollingForDeviceArchives or computePrepareDeviceArchiveMPCOperation) before another call is made to this function.
+   Resolves with a list of the pending DeviceArchives on success; rejects with an error otherwise.
+   */
+  @ReactMethod
+  public void pollForPendingDeviceArchives(String deviceGroup,int pollInterval,Promise promise) {
+      if(keyClient==null)
+      {
+        promise.reject(mpcKeyServiceErr,uninitializedErr);
+      }
+
+      Thread newThread = new Thread(() -> {
+        try {
+          byte[] pendingDeviceArchiveData = keyClient.pollPendingDeviceArchives(deviceGroup,pollInterval);
+
+          // Converting the bytes to String.
+          String pendingDeviceArchiveDataBytesToStrings = new String(pendingDeviceArchiveData,StandardCharsets.UTF_8);
+          JSONArray jsonArray=new JSONArray(new String(pendingDeviceArchiveDataBytesToStrings));
+
+          WritableArray array = convertJsonToArray(jsonArray);
+          promise.resolve(array);
+        } catch (Exception e) {
+          promise.reject("pollForPendingDeviceArchives failed : ", e);
+        }
+
+      });
+      newThread.start();
+
+
+  }
+
+  /**
+   Stops polling for pending DeviceArchive operations. This function should be called, e.g., before your app exits,
+   screen changes, etc. This function is a no-op if the SDK is not currently polling for a pending DeviceArchiveOperation.
+   Resolves with string "stopped polling for pending Device Archives" if polling is stopped successfully; resolves with the empty string otherwise.
+   */
+  @ReactMethod
+  public void stopPollingForPendingDeviceArchives(Promise promise) {
+    try{
+      if(keyClient==null)
+      {
+        promise.reject(mpcKeyServiceErr,uninitializedErr);
+      }
+
+      String result = keyClient.stopPollingPendingDeviceArchives();
+
+      promise.resolve(result);
+
+    } catch(Exception e) {
+      promise.reject("stopPollingForPendingDeviceArchives failed : ", e);
+    }
+  }
+
+
+  /**
+   Polls for pending DeviceBackups (i.e. DeviceBackupOperations), and returns the first set that materializes.
+   Only one DeviceBackup can be polled at a time; thus, this function must return (by calling either
+   stopPollingForDeviceBackups or computePrepareDeviceBackupMPCOperation) before another call is made to this function.
+   Resolves with a list of the pending DeviceBackups on success; rejects with an error otherwise.
+   */
+  @ReactMethod
+  public void pollForPendingDeviceBackups(String deviceGroup,int pollInterval,Promise promise) {
+      if(keyClient==null)
+      {
+        promise.reject(mpcKeyServiceErr,uninitializedErr);
+      }
+
+      Thread newThread = new Thread(() -> {
+        try {
+
+          byte[] pendingDeviceBackupData = keyClient.pollPendingDeviceBackups(deviceGroup, pollInterval);
+
+          // Converting the bytes to String.
+          String pendingDeviceBackupDataBytesToStrings = new String(pendingDeviceBackupData, StandardCharsets.UTF_8);
+          JSONArray jsonArray = new JSONArray(new String(pendingDeviceBackupDataBytesToStrings));
+
+          WritableArray array = convertJsonToArray(jsonArray);
+
+          promise.resolve(array);
+
+        }
+        catch (Exception e) {
+          promise.reject("pollForPendingDeviceBackups failed : ", e);
+        }
+
+      });
+      newThread.start();
+
+  }
+
+  /**
+   Stops polling for pending DeviceBackup operations. This function should be called, e.g., before your app exits,
+   screen changes, etc. This function is a no-op if the SDK is not currently polling for a pending DeviceBackup.
+   Resolves with string "stopped polling for pending Device Backups" if polling is stopped successfully; resolves with the empty string otherwise.
+   */
+  @ReactMethod
+  public void stopPollingForPendingDeviceBackups(Promise promise) {
+    try{
+      if(keyClient==null)
+      {
+        promise.reject(mpcKeyServiceErr,uninitializedErr);
+      }
+
+      String result = keyClient.stopPollingPendingDeviceBackups();
+
+      promise.resolve(result);
+
+    } catch(Exception e) {
+      promise.reject("stopPollingForPendingDeviceBackups failed : ", e);
+    }
+  }
+
+
+  /**
+   Initiates an operation to prepare device backup to add new Devices to the DeviceGroup. Resolves with the operation name on successful initiation; rejects with
+   an error otherwise.
+   */
+  @ReactMethod
+  public void prepareDeviceBackup(String deviceGroup,String device, Promise promise) {
+    try{
+
+      if(keyClient==null)
+      {
+        promise.reject(mpcKeyServiceErr,uninitializedErr);
+      }
+
+      String operationName =  keyClient.prepareDeviceBackup(deviceGroup,device);
+
+      promise.resolve(operationName);
+
+    } catch(Exception e) {
+      promise.reject("prepareDeviceBackup failed : ", e);
+    }
+  }
+
+  /**
+   Initiates an operation to add a Device to the DeviceGroup. Resolves with the operation name on successful initiation; rejects with
+   an error otherwise.
+   */
+  @ReactMethod
+  public void addDevice(String deviceGroup,String device,Promise promise) {
+    try {
+
+      if(keyClient==null)
+      {
+        promise.reject(mpcKeyServiceErr,uninitializedErr);
+      }
+
+      String operationName = keyClient.addDevice(deviceGroup,device);
+
+      promise.resolve(operationName);
+
+    } catch(Exception e) {
+      promise.reject("addDevice failed : ", e);
+    }
+  }
+
+
+  /**
+   Polls for pending Devices (i.e. AddDeviceOperations), and returns the first set that materializes.
+   Only one Device can be polled at a time; thus, this function must return (by calling either
+   stopPollingForDevices or computeAddDeviceMPCOperation) before another call is made to this function.
+   Resolves with a list of the pending Devices on success; rejects with an error otherwise.
+   */
+  @ReactMethod
+  public void pollForPendingDevices(String deviceGroup,int pollInterval,Promise promise) {
+      if(keyClient==null)
+      {
+        promise.reject(mpcKeyServiceErr,uninitializedErr);
+      }
+
+      Thread newThread = new Thread(() -> {
+        try {
+
+          byte[] pendingDeviceData = keyClient.pollPendingDevices(deviceGroup,pollInterval);
+
+          // Converting the bytes to String.
+          String pendingDeviceDataBytesToStrings = new String(pendingDeviceData,StandardCharsets.UTF_8);
+          JSONArray jsonArray=new JSONArray(new String(pendingDeviceDataBytesToStrings));
+
+          WritableArray array = convertJsonToArray(jsonArray);
+
+          promise.resolve(array);
+
+        } catch (Exception e) {
+          promise.reject("pollForPendingDevices failed : ", e);
+        }
+
+      });
+      newThread.start();
+
+  }
+
+  /**
+   Stops polling for pending AddDevice operations. This function should be called, e.g., before your app exits,
+   screen changes, etc. This function is a no-op if the SDK is not currently polling for a pending Device.
+   Resolves with string "stopped polling for pending Devices" if polling is stopped successfully; resolves with the empty string otherwise.
+   */
+  @ReactMethod
+  public void stopPollingForPendingDevices(Promise promise) {
+    try{
+      if(keyClient==null)
+      {
+        promise.reject(mpcKeyServiceErr,uninitializedErr);
+      }
+
+      String result = keyClient.stopPollingPendingDevices();
+
+      promise.resolve(result);
+
+    } catch(Exception e) {
+      promise.reject("stopPollingForPendingDevices failed : ", e);
+    }
+  }
+
+
 
 /********END MPCKeyService  API'S********************* */
 

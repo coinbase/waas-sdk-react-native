@@ -19,5 +19,6 @@ const styles = StyleSheet.create({
   demoText: {
     fontSize: 14,
     fontWeight: '600',
+    marginVertical: 10,
   },
 });
