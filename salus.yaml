@@ -1,7 +1,0 @@
-scanner_configs:
-  NodeAudit:
-    exceptions:
-      - advisory_id: 1091814
-        changed_by: yuga-cohler
-        notes: Unavoidable dependency of React Native with no patch; wait and see.
-        expiration: 2024-4-24
