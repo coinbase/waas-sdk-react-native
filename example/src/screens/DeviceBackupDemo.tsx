@@ -9,6 +9,7 @@ import {
   initMPCWalletService,
   pollForPendingDeviceBackups,
   prepareDeviceBackup,
+  PrepareDeviceBackupOperation,
 } from '@coinbase/waas-sdk-react-native';
 import { ContinueButton } from '../components/ContinueButton';
 import { DemoStep } from '../components/DemoStep';
@@ -60,21 +61,36 @@ export const DeviceBackupDemo = () => {
         await initMPCSdk(true);
         await initMPCKeyService(apiKeyName, privateKey);
         await initMPCWalletService(apiKeyName, privateKey);
-        await prepareDeviceBackup(deviceGroupName, deviceName);
+        let operationName = await prepareDeviceBackup(
+          deviceGroupName,
+          deviceName
+        );
 
         // Process operation.
         const pendingDeviceBackupOperations = await pollForPendingDeviceBackups(
           deviceGroupName
         );
 
+        let pendingOperation!: PrepareDeviceBackupOperation;
         for (let i = pendingDeviceBackupOperations.length - 1; i >= 0; i--) {
-          const pendingOperation = pendingDeviceBackupOperations[i];
-          await computePrepareDeviceBackupMPCOperation(
-            pendingOperation!.MPCData,
-            passcode
-          );
-          setShowStep5(true);
+          if (pendingDeviceBackupOperations[i]?.Operation === operationName) {
+            pendingOperation = pendingDeviceBackupOperations[
+              i
+            ] as PrepareDeviceBackupOperation;
+          }
         }
+
+        if (!pendingOperation) {
+          throw new Error(
+            `could not find operation with name ${operationName}`
+          );
+        }
+
+        await computePrepareDeviceBackupMPCOperation(
+          pendingOperation!.MPCData,
+          passcode
+        );
+        setShowStep5(true);
       } catch (error) {
         setResultError(error as Error);
         setShowError(true);

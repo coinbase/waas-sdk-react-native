@@ -489,8 +489,8 @@ export function stopPollingForPendingDeviceGroup(): Promise<string> {
  * @param parent The resource name of the parent Key.
  * Format: pools/{pool_id}/deviceGroups/{device_group_id}/mpcKeys/{mpc_key_id}
  * @param tx The transaction to sign.
- * @returns A promise with the string "success" on successful initiation; a rejection
- * otherwise.
+ * @returns A promise with the resource name of the WaaS operation creating the Signature on successful initiation;
+ * a rejection otherwise.
  */
 export function createSignatureFromTx(
   parent: string,
@@ -567,8 +567,8 @@ export function getDeviceGroup(name: string): Promise<DeviceGroup> {
  * Format: pools/{pool_id}/deviceGroups/{device_group_id}
  * @param device The resource name of the Device that prepares the archive.
  * Format: devices/{device_id}
- * @returns A promise with the string "success" on successful initiation; a rejection
- * otherwise.
+ * @returns A promise with the resource name of the WaaS operation creating the Device Archive on successful initiation;
+ * a rejection otherwise.
  */
 export function prepareDeviceArchive(
   deviceGroup: string,
@@ -619,7 +619,7 @@ export function stopPollingForPendingDeviceArchives(): Promise<string> {
  * Format: pools/{pool_id}/deviceGroups/{device_group_id}
  * @param device The resource name of the Device that is preparing the device backup.
  * Format: devices/{device_id}
- * @returns A promise with the string "success" on successful initiation; a rejection
+ * @returns A promise with the resource name of the WaaS operation creating the Device Backup; a rejection
  * otherwise.
  */
 export function prepareDeviceBackup(

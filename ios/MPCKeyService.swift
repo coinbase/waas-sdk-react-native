@@ -114,7 +114,7 @@ class MPCKeyService: NSObject {
 
     /**
      Initiates an operation to create a Signature resource from the given transaction.
-     Resolves with the string "success" on successful initiation; rejects with an error otherwise.
+     Resolves with the resource name of the WaaS operation creating the Signature on successful initiation; rejects with an error otherwise.
      */
     @objc(createSignatureFromTx:withTransaction:withResolver:withRejecter:)
     func createSignatureFromTx(_ parent: NSString, transaction: NSDictionary,
@@ -127,11 +127,11 @@ class MPCKeyService: NSObject {
         do {
             let serializedTx = try JSONSerialization.data(withJSONObject: transaction)
             var error: NSError?
-            self.keyClient?.createTxSignature(parent as String, tx: serializedTx, error: &error)
+            let operationName = self.keyClient?.createTxSignature(parent as String, tx: serializedTx, error: &error)
             if error != nil {
                 reject(self.mpcKeyServiceErr, error?.localizedDescription, nil)
             }
-            resolve("success")
+            resolve(operationName)
         } catch {
             reject(self.mpcKeyServiceErr, error.localizedDescription, nil)
         }
@@ -281,7 +281,7 @@ class MPCKeyService: NSObject {
     }
 
     /**
-     Initiates an operation to prepare device archive for MPCKey export. Resolves with the operation name on successful initiation; rejects with
+     Initiates an operation to prepare device archive for MPCKey export. Resolves with the resource name of the WaaS operation creating the Device Archive on successful initiation; rejects with
      an error otherwise.
      */
     @objc(prepareDeviceArchive:withDevice:withResolver:withRejecter:)
@@ -360,8 +360,8 @@ class MPCKeyService: NSObject {
     }
 
     /**
-     Initiates an operation to prepare device backup to add a new Device to the DeviceGroup. Resolves with the operation name on successful initiation; rejects with
-     an error otherwise.
+     Initiates an operation to prepare device backup to add a new Device to the DeviceGroup. Resolves with the resource name of the WaaS operation creating the Device Backup on
+     successful initiation; rejects with an error otherwise.
      */
     @objc(prepareDeviceBackup:withDevice:withResolver:withRejecter:)
     func prepareDeviceBackup(_ deviceGroup: NSString, device: NSString,

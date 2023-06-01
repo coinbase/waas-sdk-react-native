@@ -61,24 +61,32 @@ export const DeviceAdditionDemo = () => {
           await initMPCWalletService(apiKeyName, privateKey);
 
           if (!showStep5) {
-            await addDevice(deviceGroupName, deviceName);
-          }
+            const operationName = await addDevice(deviceGroupName, deviceName);
+            setShowStep5(true);
 
-          setShowStep5(true);
-
-          // Process operation.
-          const pendingDeviceOperations = await pollForPendingDevices(
-            deviceGroupName
-          );
-
-          for (let i = pendingDeviceOperations.length - 1; i >= 0; i--) {
-            const pendingOperation = pendingDeviceOperations[i];
-            await computeAddDeviceMPCOperation(
-              pendingOperation!.MPCData,
-              passcode,
-              deviceBackup
+            // Process operation.
+            const pendingDeviceOperations = await pollForPendingDevices(
+              deviceGroupName
             );
-            setShowStep6(true);
+
+            for (let i = pendingDeviceOperations.length - 1; i >= 0; i--) {
+              const pendingOperation = pendingDeviceOperations[i];
+
+              if (pendingOperation?.Operation === operationName) {
+                await computeAddDeviceMPCOperation(
+                  pendingOperation!.MPCData,
+                  passcode,
+                  deviceBackup
+                );
+                setShowStep6(true);
+
+                return;
+              }
+            }
+
+            throw new Error(
+              `could not find operation with name ${operationName}`
+            );
           }
         } catch (error) {
           setResultError(error as Error);

@@ -90,7 +90,7 @@ export const MPCSignatureDemo = () => {
         const keyName = retrievedAddress.MPCKeys[0]!;
         // Initiate the operation to create a signature.
         const resultTx = JSON.parse(tx) as Transaction;
-        await createSignatureFromTx(keyName, resultTx);
+        const operationName = await createSignatureFromTx(keyName, resultTx);
         setShowStep4(true);
 
         // Poll for pending signatures.
@@ -98,16 +98,32 @@ export const MPCSignatureDemo = () => {
         const pendingSignatures = await pollForPendingSignatures(
           deviceGroupName
         );
-        setPendingSignature(pendingSignatures[0]);
+
+        let pendingSignatureOp!: CreateSignatureOperation;
+        for (let i = 0; i < pendingSignatures.length; i++) {
+          if (pendingSignatures[i]?.Operation === operationName) {
+            pendingSignatureOp = pendingSignatures[
+              i
+            ] as CreateSignatureOperation;
+          }
+        }
+
+        if (!pendingSignatureOp) {
+          throw new Error(
+            `could not find operation with name ${operationName}`
+          );
+        }
+
+        setPendingSignature(pendingSignatureOp);
         setShowStep6(true);
 
         // Process the pending signature.
         setShowStep7(true);
-        await computeMPCOperation(pendingSignatures[0]!.MPCData);
+        await computeMPCOperation(pendingSignatureOp!.MPCData);
 
         // Get Signature from MPCKeyService.
         let signatureResult = await waitPendingSignature(
-          pendingSignatures[0]!.Operation
+          pendingSignatureOp!.Operation
         );
 
         setSignature(signatureResult);

@@ -10,6 +10,7 @@ import {
   computePrepareDeviceArchiveMPCOperation,
   getDeviceGroup,
   pollForPendingDeviceArchives,
+  PrepareDeviceArchiveOperation,
 } from '@coinbase/waas-sdk-react-native';
 import { ContinueButton } from '../components/ContinueButton';
 import { DemoStep } from '../components/DemoStep';
@@ -62,7 +63,6 @@ export const MPCKeyExportDemo = () => {
         apiKeyName === '' ||
         privateKey === '' ||
         !showStep2 ||
-        showStep4 ||
         showStep7
       ) {
         return;
@@ -75,22 +75,38 @@ export const MPCKeyExportDemo = () => {
         await initMPCWalletService(apiKeyName, privateKey);
 
         if (!showStep3) {
-          await prepareDeviceArchive(deviceGroupName, deviceName);
-        }
+          const operationName = (await prepareDeviceArchive(
+            deviceGroupName,
+            deviceName
+          )) as string;
+          setShowStep3(true);
 
-        setShowStep3(true);
-
-        if (showStep3 && !showStep4) {
           const pendingDeviceArchiveOperations =
             await pollForPendingDeviceArchives(deviceGroupName);
 
+          let pendingOperation!: PrepareDeviceArchiveOperation;
+
           for (let i = pendingDeviceArchiveOperations.length - 1; i >= 0; i--) {
-            const pendingOperation = pendingDeviceArchiveOperations[i];
-            await computePrepareDeviceArchiveMPCOperation(
-              pendingOperation!.MPCData,
-              passcode
+            if (
+              pendingDeviceArchiveOperations[i]?.Operation === operationName
+            ) {
+              pendingOperation = pendingDeviceArchiveOperations[
+                i
+              ] as PrepareDeviceArchiveOperation;
+
+              break;
+            }
+          }
+
+          if (!pendingOperation) {
+            throw new Error(
+              `could not find operation with name ${operationName}`
             );
           }
+          await computePrepareDeviceArchiveMPCOperation(
+            pendingOperation!.MPCData,
+            passcode
+          );
 
           const retrievedDeviceGroup = await getDeviceGroup(deviceGroupName);
           setMpcKeyExportMetadata(retrievedDeviceGroup.MPCKeyExportMetadata);
