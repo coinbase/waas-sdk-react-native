@@ -66,6 +66,9 @@ dependencies {
   implementation 'com.google.code.gson:gson:2.8.7'
   implementation fileTree(dir: "libs", include: ["*.jar","*.aar"])
   implementation "com.facebook.react:react-native"
+
+  implementation project(':go-internal-sdk')
+  implementation project(':mpc-sdk')
 }
 
 if (isNewArchitectureEnabled()) {
