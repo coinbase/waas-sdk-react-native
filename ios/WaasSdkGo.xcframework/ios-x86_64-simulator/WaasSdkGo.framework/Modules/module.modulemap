@@ -1,0 +1,8 @@
+framework module "WaasSdkGo" {
+	header "ref.h"
+    header "V1.objc.h"
+    header "Universe.objc.h"
+    header "WaasSdkGo.h"
+
+    export *
+}
