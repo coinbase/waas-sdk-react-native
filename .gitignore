@@ -76,5 +76,8 @@ ios/WaasSdkGo.xcframework/ios-arm64/WaasSdkGo.framework
 ios/WaasSdkGo.xcframework/ios-arm64-simulator/WaasSdkGo.framework
 ios/WaasSdkGo.xcframework/ios-x86_64-simulator/WaasSdkGo.framework
 
+# OpenSSL
+ios/openssl_libcrypto.xcframework
+
 # Android built-frameworks
 android/libs/go-internal*.aar

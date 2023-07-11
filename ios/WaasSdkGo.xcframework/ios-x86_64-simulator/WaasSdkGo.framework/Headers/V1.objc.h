@@ -26,6 +26,8 @@
 @class V1Transaction;
 @protocol V1AndroidCallbacks;
 @class V1AndroidCallbacks;
+@protocol V1ApiResponseReceiver;
+@class V1ApiResponseReceiver;
 @protocol V1MPCKeyService;
 @class V1MPCKeyService;
 @protocol V1MPCSdk;
@@ -38,9 +40,13 @@
 @protocol V1AndroidCallbacks <NSObject>
 @end
 
+@protocol V1ApiResponseReceiver <NSObject>
+- (void)returnValue:(NSString* _Nullable)data err:(NSError* _Nullable)err;
+@end
+
 @protocol V1MPCKeyService <NSObject>
-- (NSString* _Nonnull)addDevice:(NSString* _Nullable)deviceGroup device:(NSString* _Nullable)device error:(NSError* _Nullable* _Nullable)error;
-- (NSString* _Nonnull)createTxSignature:(NSString* _Nullable)keyName tx:(NSData* _Nullable)tx error:(NSError* _Nullable* _Nullable)error;
+- (void)addDevice:(NSString* _Nullable)deviceGroup device:(NSString* _Nullable)device receiver:(id<V1ApiResponseReceiver> _Nullable)receiver;
+- (void)createTxSignature:(NSString* _Nullable)keyName tx:(NSData* _Nullable)tx receiver:(id<V1ApiResponseReceiver> _Nullable)receiver;
 - (V1DeviceGroup* _Nullable)getDeviceGroup:(NSString* _Nullable)deviceGroupName error:(NSError* _Nullable* _Nullable)error;
 - (V1SignedTransaction* _Nullable)getSignedTransaction:(NSData* _Nullable)tx signature:(V1Signature* _Nullable)signature error:(NSError* _Nullable* _Nullable)error;
 - (NSData* _Nullable)pollPendingDeviceArchives:(NSString* _Nullable)deviceGroup pollInterval:(int64_t)pollInterval error:(NSError* _Nullable* _Nullable)error;
@@ -48,26 +54,26 @@
 - (NSData* _Nullable)pollPendingDeviceGroup:(NSString* _Nullable)deviceGroup pollInterval:(int64_t)pollInterval error:(NSError* _Nullable* _Nullable)error;
 - (NSData* _Nullable)pollPendingDevices:(NSString* _Nullable)deviceGroup pollInterval:(int64_t)pollInterval error:(NSError* _Nullable* _Nullable)error;
 - (NSData* _Nullable)pollPendingSignatures:(NSString* _Nullable)deviceGroup pollInterval:(int64_t)pollInterval error:(NSError* _Nullable* _Nullable)error;
-- (NSString* _Nonnull)prepareDeviceArchive:(NSString* _Nullable)deviceGroup device:(NSString* _Nullable)device error:(NSError* _Nullable* _Nullable)error;
-- (NSString* _Nonnull)prepareDeviceBackup:(NSString* _Nullable)deviceGroup device:(NSString* _Nullable)device error:(NSError* _Nullable* _Nullable)error;
+- (void)prepareDeviceArchive:(NSString* _Nullable)deviceGroup device:(NSString* _Nullable)device receiver:(id<V1ApiResponseReceiver> _Nullable)receiver;
+- (void)prepareDeviceBackup:(NSString* _Nullable)deviceGroup device:(NSString* _Nullable)device receiver:(id<V1ApiResponseReceiver> _Nullable)receiver;
 - (V1Device* _Nullable)registerDevice:(NSError* _Nullable* _Nullable)error;
-- (NSString* _Nonnull)stopPollingPendingDeviceArchives:(NSError* _Nullable* _Nullable)error;
-- (NSString* _Nonnull)stopPollingPendingDeviceBackups:(NSError* _Nullable* _Nullable)error;
-- (NSString* _Nonnull)stopPollingPendingDeviceGroup:(NSError* _Nullable* _Nullable)error;
-- (NSString* _Nonnull)stopPollingPendingDevices:(NSError* _Nullable* _Nullable)error;
-- (NSString* _Nonnull)stopPollingPendingSignatures:(NSError* _Nullable* _Nullable)error;
+- (void)stopPollingPendingDeviceArchives:(id<V1ApiResponseReceiver> _Nullable)receiver;
+- (void)stopPollingPendingDeviceBackups:(id<V1ApiResponseReceiver> _Nullable)receiver;
+- (void)stopPollingPendingDeviceGroup:(id<V1ApiResponseReceiver> _Nullable)receiver;
+- (void)stopPollingPendingDevices:(id<V1ApiResponseReceiver> _Nullable)receiver;
+- (void)stopPollingPendingSignatures:(id<V1ApiResponseReceiver> _Nullable)receiver;
 - (V1Signature* _Nullable)waitPendingSignature:(NSString* _Nullable)operation error:(NSError* _Nullable* _Nullable)error;
 @end
 
 @protocol V1MPCSdk <NSObject>
-- (NSString* _Nonnull)bootstrapDevice:(NSString* _Nullable)passcode error:(NSError* _Nullable* _Nullable)error;
+- (void)bootstrapDevice:(NSString* _Nullable)passcode receiver:(id<V1ApiResponseReceiver> _Nullable)receiver;
 - (BOOL)computeAddDeviceMPCOperation:(NSString* _Nullable)mpcData passcode:(NSString* _Nullable)passcode deviceBackup:(NSString* _Nullable)deviceBackup error:(NSError* _Nullable* _Nullable)error;
 - (BOOL)computeMPCOperation:(NSString* _Nullable)mpcData error:(NSError* _Nullable* _Nullable)error;
 - (BOOL)computePrepareDeviceArchiveMPCOperation:(NSString* _Nullable)mpcData passcode:(NSString* _Nullable)passcode error:(NSError* _Nullable* _Nullable)error;
 - (BOOL)computePrepareDeviceBackupMPCOperation:(NSString* _Nullable)mpcData passcode:(NSString* _Nullable)passcode error:(NSError* _Nullable* _Nullable)error;
-- (NSString* _Nonnull)exportDeviceBackup:(NSError* _Nullable* _Nullable)error;
+- (void)exportDeviceBackup:(id<V1ApiResponseReceiver> _Nullable)receiver;
 - (NSData* _Nullable)exportPrivateKeys:(NSString* _Nullable)mpcKeyExportMetadata passcode:(NSString* _Nullable)passcode error:(NSError* _Nullable* _Nullable)error;
-- (NSString* _Nonnull)getRegistrationData:(NSError* _Nullable* _Nullable)error;
+- (void)getRegistrationData:(id<V1ApiResponseReceiver> _Nullable)receiver;
 - (BOOL)resetPasscode:(NSString* _Nullable)newPasscode error:(NSError* _Nullable* _Nullable)error;
 @end
 
@@ -486,6 +492,8 @@ FOUNDATION_EXPORT id<V1PoolService> _Nullable V1NewPoolService(NSString* _Nullab
 
 @class V1AndroidCallbacks;
 
+@class V1ApiResponseReceiver;
+
 @class V1MPCKeyService;
 
 @class V1MPCSdk;
@@ -505,6 +513,18 @@ FOUNDATION_EXPORT id<V1PoolService> _Nullable V1NewPoolService(NSString* _Nullab
 @end
 
 /**
+ * ApiResponseReceiver represents the interface to get the return values of a method.
+NOTE: gomobile can't return (string,error) back to native code on arm64 platforms.
+ */
+@interface V1ApiResponseReceiver : NSObject <goSeqRefInterface, V1ApiResponseReceiver> {
+}
+@property(strong, readonly) _Nonnull id _ref;
+
+- (nonnull instancetype)initWithRef:(_Nonnull id)ref;
+- (void)returnValue:(NSString* _Nullable)data err:(NSError* _Nullable)err;
+@end
+
+/**
  * MPCKeyService is the interface for the WaaS MPCKeyService that is exposed to native code.
  */
 @interface V1MPCKeyService : NSObject <goSeqRefInterface, V1MPCKeyService> {
@@ -512,8 +532,8 @@ FOUNDATION_EXPORT id<V1PoolService> _Nullable V1NewPoolService(NSString* _Nullab
 @property(strong, readonly) _Nonnull id _ref;
 
 - (nonnull instancetype)initWithRef:(_Nonnull id)ref;
-- (NSString* _Nonnull)addDevice:(NSString* _Nullable)deviceGroup device:(NSString* _Nullable)device error:(NSError* _Nullable* _Nullable)error;
-- (NSString* _Nonnull)createTxSignature:(NSString* _Nullable)keyName tx:(NSData* _Nullable)tx error:(NSError* _Nullable* _Nullable)error;
+- (void)addDevice:(NSString* _Nullable)deviceGroup device:(NSString* _Nullable)device receiver:(id<V1ApiResponseReceiver> _Nullable)receiver;
+- (void)createTxSignature:(NSString* _Nullable)keyName tx:(NSData* _Nullable)tx receiver:(id<V1ApiResponseReceiver> _Nullable)receiver;
 - (V1DeviceGroup* _Nullable)getDeviceGroup:(NSString* _Nullable)deviceGroupName error:(NSError* _Nullable* _Nullable)error;
 - (V1SignedTransaction* _Nullable)getSignedTransaction:(NSData* _Nullable)tx signature:(V1Signature* _Nullable)signature error:(NSError* _Nullable* _Nullable)error;
 - (NSData* _Nullable)pollPendingDeviceArchives:(NSString* _Nullable)deviceGroup pollInterval:(int64_t)pollInterval error:(NSError* _Nullable* _Nullable)error;
@@ -521,14 +541,14 @@ FOUNDATION_EXPORT id<V1PoolService> _Nullable V1NewPoolService(NSString* _Nullab
 - (NSData* _Nullable)pollPendingDeviceGroup:(NSString* _Nullable)deviceGroup pollInterval:(int64_t)pollInterval error:(NSError* _Nullable* _Nullable)error;
 - (NSData* _Nullable)pollPendingDevices:(NSString* _Nullable)deviceGroup pollInterval:(int64_t)pollInterval error:(NSError* _Nullable* _Nullable)error;
 - (NSData* _Nullable)pollPendingSignatures:(NSString* _Nullable)deviceGroup pollInterval:(int64_t)pollInterval error:(NSError* _Nullable* _Nullable)error;
-- (NSString* _Nonnull)prepareDeviceArchive:(NSString* _Nullable)deviceGroup device:(NSString* _Nullable)device error:(NSError* _Nullable* _Nullable)error;
-- (NSString* _Nonnull)prepareDeviceBackup:(NSString* _Nullable)deviceGroup device:(NSString* _Nullable)device error:(NSError* _Nullable* _Nullable)error;
+- (void)prepareDeviceArchive:(NSString* _Nullable)deviceGroup device:(NSString* _Nullable)device receiver:(id<V1ApiResponseReceiver> _Nullable)receiver;
+- (void)prepareDeviceBackup:(NSString* _Nullable)deviceGroup device:(NSString* _Nullable)device receiver:(id<V1ApiResponseReceiver> _Nullable)receiver;
 - (V1Device* _Nullable)registerDevice:(NSError* _Nullable* _Nullable)error;
-- (NSString* _Nonnull)stopPollingPendingDeviceArchives:(NSError* _Nullable* _Nullable)error;
-- (NSString* _Nonnull)stopPollingPendingDeviceBackups:(NSError* _Nullable* _Nullable)error;
-- (NSString* _Nonnull)stopPollingPendingDeviceGroup:(NSError* _Nullable* _Nullable)error;
-- (NSString* _Nonnull)stopPollingPendingDevices:(NSError* _Nullable* _Nullable)error;
-- (NSString* _Nonnull)stopPollingPendingSignatures:(NSError* _Nullable* _Nullable)error;
+- (void)stopPollingPendingDeviceArchives:(id<V1ApiResponseReceiver> _Nullable)receiver;
+- (void)stopPollingPendingDeviceBackups:(id<V1ApiResponseReceiver> _Nullable)receiver;
+- (void)stopPollingPendingDeviceGroup:(id<V1ApiResponseReceiver> _Nullable)receiver;
+- (void)stopPollingPendingDevices:(id<V1ApiResponseReceiver> _Nullable)receiver;
+- (void)stopPollingPendingSignatures:(id<V1ApiResponseReceiver> _Nullable)receiver;
 - (V1Signature* _Nullable)waitPendingSignature:(NSString* _Nullable)operation error:(NSError* _Nullable* _Nullable)error;
 @end
 
@@ -540,14 +560,14 @@ FOUNDATION_EXPORT id<V1PoolService> _Nullable V1NewPoolService(NSString* _Nullab
 @property(strong, readonly) _Nonnull id _ref;
 
 - (nonnull instancetype)initWithRef:(_Nonnull id)ref;
-- (NSString* _Nonnull)bootstrapDevice:(NSString* _Nullable)passcode error:(NSError* _Nullable* _Nullable)error;
+- (void)bootstrapDevice:(NSString* _Nullable)passcode receiver:(id<V1ApiResponseReceiver> _Nullable)receiver;
 - (BOOL)computeAddDeviceMPCOperation:(NSString* _Nullable)mpcData passcode:(NSString* _Nullable)passcode deviceBackup:(NSString* _Nullable)deviceBackup error:(NSError* _Nullable* _Nullable)error;
 - (BOOL)computeMPCOperation:(NSString* _Nullable)mpcData error:(NSError* _Nullable* _Nullable)error;
 - (BOOL)computePrepareDeviceArchiveMPCOperation:(NSString* _Nullable)mpcData passcode:(NSString* _Nullable)passcode error:(NSError* _Nullable* _Nullable)error;
 - (BOOL)computePrepareDeviceBackupMPCOperation:(NSString* _Nullable)mpcData passcode:(NSString* _Nullable)passcode error:(NSError* _Nullable* _Nullable)error;
-- (NSString* _Nonnull)exportDeviceBackup:(NSError* _Nullable* _Nullable)error;
+- (void)exportDeviceBackup:(id<V1ApiResponseReceiver> _Nullable)receiver;
 - (NSData* _Nullable)exportPrivateKeys:(NSString* _Nullable)mpcKeyExportMetadata passcode:(NSString* _Nullable)passcode error:(NSError* _Nullable* _Nullable)error;
-- (NSString* _Nonnull)getRegistrationData:(NSError* _Nullable* _Nullable)error;
+- (void)getRegistrationData:(id<V1ApiResponseReceiver> _Nullable)receiver;
 - (BOOL)resetPasscode:(NSString* _Nullable)newPasscode error:(NSError* _Nullable* _Nullable)error;
 @end
 

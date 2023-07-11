@@ -13,6 +13,7 @@ For iOS development:
 - [Xcode 14.0+](https://developer.apple.com/xcode/)
   - iOS15.2+ simulator (iPhone 14 recommended)
 - [CocoaPods](https://guides.cocoapods.org/using/getting-started.html)
+- [make](https://www.gnu.org/software/make/)
 
 For Android development:
 - [Android Studio](https://developer.android.com/studio)
@@ -55,6 +56,16 @@ yarn bootstrap # Install packages for the root and /example directories
 yarn example start # Start the Metro server
 yarn example ios --simulator "iPhone 14" # Build and start the app on iOS simulator
 ```
+
+> *NOTE:* To build an app that depends on the WaaS SDK, you'll also need a compatible version of OpenSSL.
+> You can build the OpenSSL framework by running the following on your Mac from the root of this repository:
+> 
+> `yarn ssl-ios`
+> 
+> You can alternatively depend on an open-compiled version of OpenSSL, like [OpenSSL-Universal](https://cocoapods.org/pods/OpenSSL-Universal), by adding the following to your app's Podfile:
+> 
+> `pod "OpenSSL-Universal"`
+
 ### Android
 Ensure you have the following [Android environment variables](https://developer.android.com/studio/command-line/variables) set correctly:
 

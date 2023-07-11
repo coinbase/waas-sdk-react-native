@@ -1,6 +1,23 @@
 import Foundation
 import WaasSdkGo
 
+class ApiResponseReceiverWrapper: NSObject, V1ApiResponseReceiverProtocol {
+    private let callback: (String?, Error?) -> Void
+
+    init(callback: @escaping (String?, Error?) -> Void) {
+        self.callback = callback
+        super.init()
+    }
+
+    func returnValue(_ data: String?, err: Error?) {
+        callback(data, err)
+    }
+}
+
+func wrapGo(_ callback: @escaping (String?, Error?) -> Void) -> ApiResponseReceiverWrapper {
+    return ApiResponseReceiverWrapper(callback: callback)
+}
+
 @objc(MPCSdk)
 class MPCSdk: NSObject {
 
@@ -45,20 +62,21 @@ class MPCSdk: NSObject {
      or a rejection otherwise.
      */
     @objc(bootstrapDevice:withResolver:withRejecter:)
-    func bootstrapDevice(_ passcode: NSString, resolve: RCTPromiseResolveBlock, reject: RCTPromiseRejectBlock) {
+    func bootstrapDevice(_ passcode: NSString, resolve: @escaping RCTPromiseResolveBlock, reject: @escaping RCTPromiseRejectBlock) {
         if self.sdk == nil {
             reject(self.mpcSdkErr, self.uninitializedErr, nil)
             return
         }
 
-        var error: NSError?
-
-        let res = self.sdk?.bootstrapDevice(passcode as String, error: &error)
-        if error != nil {
-            reject(self.mpcSdkErr, error!.localizedDescription, nil)
-        } else {
-            resolve(res)
+        let callback: (String?, Error?) -> Void = { data, error in
+            if let error = error {
+                reject(self.mpcSdkErr, error.localizedDescription, nil)
+            } else {
+                resolve(data ?? "")
+            }
         }
+
+        self.sdk?.bootstrapDevice(passcode as String, receiver: wrapGo(callback))
     }
 
     /**
@@ -88,19 +106,21 @@ class MPCSdk: NSObject {
      Resolves with the RegistrationData on success; rejects with an error otherwise.
      */
     @objc(getRegistrationData:withRejecter:)
-    func getRegistrationData(_ resolve: RCTPromiseResolveBlock, reject: RCTPromiseRejectBlock) {
+    func getRegistrationData(_ resolve: @escaping RCTPromiseResolveBlock, reject: @escaping RCTPromiseRejectBlock) {
         if self.sdk == nil {
             reject(self.mpcSdkErr, self.uninitializedErr, nil)
             return
         }
-        var error: NSError?
 
-        let registrationData = self.sdk?.getRegistrationData(&error)
-        if error != nil {
-            reject(mpcSdkErr, error!.localizedDescription, nil)
-        } else {
-            resolve(registrationData)
+        let callback: (String?, Error?) -> Void = { data, error in
+            if let error = error {
+                reject(self.mpcSdkErr, error.localizedDescription, nil)
+            } else {
+                resolve(data ?? "")
+            }
         }
+
+        self.sdk?.getRegistrationData(wrapGo(callback))
     }
 
     /**
@@ -214,18 +234,19 @@ class MPCSdk: NSObject {
      Resolves with backup data as a hex-encoded string on success; rejects with an error otherwise.
      */
     @objc(exportDeviceBackup:withRejecter:)
-    func exportDeviceBackup(_ resolve: RCTPromiseResolveBlock, reject: RCTPromiseRejectBlock) {
+    func exportDeviceBackup(_ resolve: @escaping RCTPromiseResolveBlock, reject: @escaping RCTPromiseRejectBlock) {
         if self.sdk == nil {
             reject(self.mpcSdkErr, self.uninitializedErr, nil)
         }
 
-        var error: NSError?
-
-        let response = self.sdk?.exportDeviceBackup(&error)
-        if error == nil {
-            resolve(response)
-        } else {
-            reject(self.mpcSdkErr, error!.localizedDescription, nil)
+        let callback: (String?, Error?) -> Void = { data, error in
+            if let error = error {
+                reject(self.mpcSdkErr, error.localizedDescription, nil)
+            } else {
+                resolve(data ?? "")
+            }
         }
+
+        self.sdk?.exportDeviceBackup(wrapGo(callback))
     }
 }

@@ -93,23 +93,22 @@ class MPCKeyService: NSObject {
      Resolves with string "stopped polling for pending DeviceGroup" if polling is stopped successfully;
      resolves with the empty string otherwise.
      */
-    @objc(stopPollingForPendingSeeds:withRejecter:)
-    func stopPollingForPendingSeed(resolve: RCTPromiseResolveBlock, reject: RCTPromiseRejectBlock) {
+    @objc(stopPollingForPendingDeviceGroup:withRejecter:)
+    func stopPollingForPendingDeviceGroup(resolve: @escaping RCTPromiseResolveBlock, reject: @escaping RCTPromiseRejectBlock) {
         if self.keyClient == nil {
             reject(self.mpcKeyServiceErr, self.uninitializedErr, nil)
             return
         }
 
-        var result: String?
-        var error: NSError?
-
-        result = self.keyClient?.stopPollingPendingDeviceGroup(&error)
-
-        if error != nil {
-            reject(self.mpcKeyServiceErr, error!.localizedDescription, nil)
-        } else {
-            resolve(result! as NSString)
+        let callback: (String?, Error?) -> Void = { data, error in
+            if let error = error {
+                reject(self.mpcKeyServiceErr, error.localizedDescription, nil)
+            } else {
+                resolve(data ?? "")
+            }
         }
+
+        self.keyClient?.stopPollingPendingDeviceBackups(wrapGo(callback))
     }
 
     /**
@@ -118,20 +117,23 @@ class MPCKeyService: NSObject {
      */
     @objc(createSignatureFromTx:withTransaction:withResolver:withRejecter:)
     func createSignatureFromTx(_ parent: NSString, transaction: NSDictionary,
-                               resolve: RCTPromiseResolveBlock, reject: RCTPromiseRejectBlock) {
+                               resolve: @escaping RCTPromiseResolveBlock, reject: @escaping RCTPromiseRejectBlock) {
         if self.keyClient == nil {
             reject(self.mpcKeyServiceErr, self.uninitializedErr, nil)
             return
         }
 
+        let callback: (String?, Error?) -> Void = { data, error in
+            if let error = error {
+                reject(self.mpcKeyServiceErr, error.localizedDescription, nil)
+            } else {
+                resolve(data ?? "")
+            }
+        }
+
         do {
             let serializedTx = try JSONSerialization.data(withJSONObject: transaction)
-            var error: NSError?
-            let operationName = self.keyClient?.createTxSignature(parent as String, tx: serializedTx, error: &error)
-            if error != nil {
-                reject(self.mpcKeyServiceErr, error?.localizedDescription, nil)
-            }
-            resolve(operationName)
+            self.keyClient?.createTxSignature(parent as String, tx: serializedTx, receiver: wrapGo(callback))
         } catch {
             reject(self.mpcKeyServiceErr, error.localizedDescription, nil)
         }
@@ -174,22 +176,21 @@ class MPCKeyService: NSObject {
      resolves with the empty string otherwise.
      */
     @objc(stopPollingForPendingSignatures:withRejecter:)
-    func stopPollingForPendingSignatures(resolve: RCTPromiseResolveBlock, reject: RCTPromiseRejectBlock) {
+    func stopPollingForPendingSignatures(resolve: @escaping RCTPromiseResolveBlock, reject: @escaping RCTPromiseRejectBlock) {
         if self.keyClient == nil {
             reject(self.mpcKeyServiceErr, self.uninitializedErr, nil)
             return
         }
 
-        var result: String?
-        var error: NSError?
-
-        result = self.keyClient?.stopPollingPendingSignatures(&error)
-
-        if error != nil {
-            reject(mpcKeyServiceErr, error!.localizedDescription, nil)
-        } else {
-            resolve(result! as NSString)
+        let callback: (String?, Error?) -> Void = { data, error in
+            if let error = error {
+                reject(self.mpcKeyServiceErr, error.localizedDescription, nil)
+            } else {
+                resolve(data ?? "")
+            }
         }
+
+        self.keyClient?.stopPollingPendingSignatures(wrapGo(callback))
     }
 
     /**
@@ -286,21 +287,22 @@ class MPCKeyService: NSObject {
      */
     @objc(prepareDeviceArchive:withDevice:withResolver:withRejecter:)
     func prepareDeviceArchive(_ deviceGroup: NSString, device: NSString,
-                              resolve: RCTPromiseResolveBlock, reject: RCTPromiseRejectBlock) {
+                              resolve: @escaping RCTPromiseResolveBlock, reject: @escaping RCTPromiseRejectBlock) {
         if self.keyClient == nil {
             reject(self.mpcKeyServiceErr, self.uninitializedErr, nil)
             return
         }
 
-        var error: NSError?
-
-        let operationName = self.keyClient?.prepareDeviceArchive(
-            deviceGroup as String, device: device as String, error: &error)
-        if error != nil {
-            reject(self.mpcKeyServiceErr, error!.localizedDescription, nil)
-        } else {
-            resolve(operationName! as NSString)
+        let callback: (String?, Error?) -> Void = { data, error in
+            if let error = error {
+                reject(self.mpcKeyServiceErr, error.localizedDescription, nil)
+            } else {
+                resolve(data ?? "")
+            }
         }
+
+        self.keyClient?.prepareDeviceArchive(
+            deviceGroup as String, device: device as String, receiver: wrapGo(callback))
     }
 
     /**
@@ -341,22 +343,21 @@ class MPCKeyService: NSObject {
      Resolves with string "stopped polling for pending Device Archives" if polling is stopped successfully; resolves with the empty string otherwise.
      */
     @objc(stopPollingForPendingDeviceArchives:withRejecter:)
-    func stopPollingForPendingDeviceArchives(resolve: RCTPromiseResolveBlock, reject: RCTPromiseRejectBlock) {
+    func stopPollingForPendingDeviceArchives(resolve: @escaping RCTPromiseResolveBlock, reject: @escaping RCTPromiseRejectBlock) {
         if self.keyClient == nil {
             reject(self.mpcKeyServiceErr, self.uninitializedErr, nil)
             return
         }
 
-        var result: String?
-        var error: NSError?
-
-        result = self.keyClient?.stopPollingPendingDeviceArchives(&error)
-
-        if error != nil {
-            reject(self.mpcKeyServiceErr, error!.localizedDescription, nil)
-        } else {
-            resolve(result! as NSString)
+        let callback: (String?, Error?) -> Void = { data, error in
+            if let error = error {
+                reject(self.mpcKeyServiceErr, error.localizedDescription, nil)
+            } else {
+                resolve(data ?? "")
+            }
         }
+
+        self.keyClient?.stopPollingPendingDeviceArchives(wrapGo(callback))
     }
 
     /**
@@ -365,21 +366,22 @@ class MPCKeyService: NSObject {
      */
     @objc(prepareDeviceBackup:withDevice:withResolver:withRejecter:)
     func prepareDeviceBackup(_ deviceGroup: NSString, device: NSString,
-                             resolve: RCTPromiseResolveBlock, reject: RCTPromiseRejectBlock) {
+                             resolve: @escaping RCTPromiseResolveBlock, reject: @escaping RCTPromiseRejectBlock) {
         if self.keyClient == nil {
             reject(self.mpcKeyServiceErr, self.uninitializedErr, nil)
             return
         }
 
-        var error: NSError?
-
-        let operationName = self.keyClient?.prepareDeviceBackup(
-            deviceGroup as String, device: device as String, error: &error)
-        if error != nil {
-            reject(self.mpcKeyServiceErr, error!.localizedDescription, nil)
-        } else {
-            resolve(operationName! as NSString)
+        let callback: (String?, Error?) -> Void = { data, error in
+            if let error = error {
+                reject(self.mpcKeyServiceErr, error.localizedDescription, nil)
+            } else {
+                resolve(data ?? "")
+            }
         }
+
+        self.keyClient?.prepareDeviceBackup(
+            deviceGroup as String, device: device as String, receiver: wrapGo(callback))
     }
 
     /**
@@ -420,22 +422,21 @@ class MPCKeyService: NSObject {
      Resolves with string "stopped polling for pending Device Backups" if polling is stopped successfully; resolves with the empty string otherwise.
      */
     @objc(stopPollingForPendingDeviceBackups:withRejecter:)
-    func stopPollingForPendingDeviceBackups(resolve: RCTPromiseResolveBlock, reject: RCTPromiseRejectBlock) {
+    func stopPollingForPendingDeviceBackups(resolve: @escaping RCTPromiseResolveBlock, reject: @escaping RCTPromiseRejectBlock) {
         if self.keyClient == nil {
             reject(self.mpcKeyServiceErr, self.uninitializedErr, nil)
             return
         }
 
-        var result: String?
-        var error: NSError?
-
-        result = self.keyClient?.stopPollingPendingDeviceBackups(&error)
-
-        if error != nil {
-            reject(self.mpcKeyServiceErr, error!.localizedDescription, nil)
-        } else {
-            resolve(result! as NSString)
+        let callback: (String?, Error?) -> Void = { data, error in
+            if let error = error {
+                reject(self.mpcKeyServiceErr, error.localizedDescription, nil)
+            } else {
+                resolve(data ?? "")
+            }
         }
+
+        self.keyClient?.stopPollingPendingDeviceBackups(wrapGo(callback))
     }
 
     /**
@@ -444,21 +445,22 @@ class MPCKeyService: NSObject {
      */
     @objc(addDevice:withDevice:withResolver:withRejecter:)
     func addDevice(_ deviceGroup: NSString, device: NSString,
-                   resolve: RCTPromiseResolveBlock, reject: RCTPromiseRejectBlock) {
+                   resolve: @escaping RCTPromiseResolveBlock, reject: @escaping RCTPromiseRejectBlock) {
         if self.keyClient == nil {
             reject(self.mpcKeyServiceErr, self.uninitializedErr, nil)
             return
         }
 
-        var error: NSError?
-
-        let operationName = self.keyClient?.addDevice(
-            deviceGroup as String, device: device as String, error: &error)
-        if error != nil {
-            reject(self.mpcKeyServiceErr, error!.localizedDescription, nil)
-        } else {
-            resolve(operationName! as NSString)
+        let callback: (String?, Error?) -> Void = { data, error in
+            if let error = error {
+                reject(self.mpcKeyServiceErr, error.localizedDescription, nil)
+            } else {
+                resolve(data ?? "")
+            }
         }
+
+        self.keyClient?.addDevice(
+            deviceGroup as String, device: device as String, receiver: wrapGo(callback))
     }
 
     /**
@@ -499,21 +501,20 @@ class MPCKeyService: NSObject {
      Resolves with string "stopped polling for pending Devices" if polling is stopped successfully; resolves with the empty string otherwise.
      */
     @objc(stopPollingForPendingDevices:withRejecter:)
-    func stopPollingForPendingDevices(resolve: RCTPromiseResolveBlock, reject: RCTPromiseRejectBlock) {
+    func stopPollingForPendingDevices(resolve: @escaping RCTPromiseResolveBlock, reject: @escaping RCTPromiseRejectBlock) {
         if self.keyClient == nil {
             reject(self.mpcKeyServiceErr, self.uninitializedErr, nil)
             return
         }
 
-        var result: String?
-        var error: NSError?
-
-        result = self.keyClient?.stopPollingPendingDevices(&error)
-
-        if error != nil {
-            reject(self.mpcKeyServiceErr, error!.localizedDescription, nil)
-        } else {
-            resolve(result! as NSString)
+        let callback: (String?, Error?) -> Void = { data, error in
+            if let error = error {
+                reject(self.mpcKeyServiceErr, error.localizedDescription, nil)
+            } else {
+                resolve(data ?? "")
+            }
         }
+
+        self.keyClient?.stopPollingPendingDevices(wrapGo(callback))
     }
 }
