@@ -36,6 +36,17 @@ With `yarn`:
 yarn add @coinbase/waas-sdk-react-native
 ```
 
+### Android
+
+In your Android application's `settings.gradle` file, make sure to add the following:
+
+```gradle
+include(':go-internal-sdk')
+project(':go-internal-sdk').projectDir = new File(settingsDir, '../node_modules/@coinbase/waas-sdk-react-native/android/go-internal-sdk')
+include(':mpc-sdk')
+project(':mpc-sdk').projectDir = new File(settingsDir, '../node_modules/@coinbase/waas-sdk-react-native/android/mpc-sdk')
+```
+
 ## Usage
 
 See [index.tsx](./src/index.tsx) for the list of supported APIs.
