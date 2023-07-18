@@ -3,6 +3,21 @@ apply plugin: "com.facebook.react"
 
 import com.android.build.OutputFile
 
+buildscript {
+  ext {
+    kotlinVersion = "1.8.0"
+  }
+  repositories {
+    google()
+    mavenCentral()
+  }
+
+  dependencies {
+    classpath "com.android.tools.build:gradle:7.4.0"
+    classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:1.8.0"
+  }
+}
+
 /**
  * This is the configuration block to customize your React Native Android app.
  * By default you don't need to apply any configuration, just uncomment the lines you need.
@@ -93,9 +108,9 @@ android {
 
     compileSdkVersion rootProject.ext.compileSdkVersion
 
-    namespace "com.waassdkreactnativeexample"
+    namespace "com.coinbase.waassdkreactnativeexample"
     defaultConfig {
-        applicationId "com.waassdkreactnativeexample"
+        applicationId "com.coinbase.waassdkreactnativeexample"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
         versionCode 1

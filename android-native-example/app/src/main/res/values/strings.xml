@@ -1,0 +1,5 @@
+<resources>
+    <string name="app_name">Native Waas Example</string>
+    <string name="api_key">TODO: enter api key</string>
+    <string name="private_key">TODO: private key</string>
+</resources>

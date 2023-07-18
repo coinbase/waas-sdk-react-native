@@ -38,10 +38,10 @@ export type ExportPrivateKeysResponse = {
 /**
  * Initializes the MPC SDK. This function must be invoked before
  * any MPC SDK methods are called.
- * @returns A promise with the string "success" on successful initialization; a rejection
+ * @returns A void promise, that either succeeds or rejects.
  * otherwise.
  */
-export function initMPCSdk(isSimulator?: boolean): Promise<string> {
+export function initMPCSdk(isSimulator?: boolean): Promise<void> {
   return MPCSdk.initialize(isSimulator);
 }
 
@@ -51,9 +51,9 @@ export function initMPCSdk(isSimulator?: boolean): Promise<string> {
  exactly once per Device per application, and should be called before the Device is registered with GetRegistrationData.
  It is the responsibility of the application to track whether bootstrapDevice has been called for the Device.
  * @param passcode Passcode to protect all key materials in the secure enclave.
- * @returns A promise with the string "bootstrap complete" on successful initialization or a rejection otherwise.
+ * @returns A void promise, that either succeeds or rejects..
  */
-export function bootstrapDevice(passcode: string): Promise<string> {
+export function bootstrapDevice(passcode: string): Promise<void> {
   return MPCSdk.bootstrapDevice(passcode);
 }
 
@@ -63,9 +63,9 @@ export function bootstrapDevice(passcode: string): Promise<string> {
  * PrepareDeviceArchive and PrepareDeviceBackup operations afterwards for each DeviceGroup the Device was in.
  * This function can be used when/if the end user forgets their old passcode.
  * @param newPasscode The new passcode to use to encrypt backups and archives associated with the Device.
- * @returns A promise with the string "passcode reset" on successful initialization, or a rejection otherwise.
+ * @returns A void promise, that either succeeds or rejects.
  */
-export function resetPasscode(newPasscode: string): Promise<string> {
+export function resetPasscode(newPasscode: string): Promise<void> {
   return MPCSdk.resetPasscode(newPasscode);
 }
 
@@ -81,9 +81,9 @@ export function getRegistrationData(): Promise<string> {
  * Computes an MPC operation, given mpcData from the response of ListMPCOperations API on MPCKeyService.
  * This function can be used to compute MPCOperations of types: CreateDeviceGroup and CreateSignature.
  * @param mpcData The mpcData from ListMPCOperationsResponse on MPCKeyService.
- * @returns A promise with the string "success" on successful MPC computation; a rejection otherwise.
+ * @returns A void promise, that either succeeds or rejects.
  */
-export function computeMPCOperation(mpcData: string): Promise<string> {
+export function computeMPCOperation(mpcData: string): Promise<void> {
   return MPCSdk.computeMPCOperation(mpcData);
 }
 
@@ -92,12 +92,12 @@ export function computeMPCOperation(mpcData: string): Promise<string> {
  * given mpcData from the response of ListMPCOperations API on MPCKeyService and passcode for the Device.
  * @param mpcData The mpcData from ListMPCOperationsResponse on MPCKeyService.
  * @param passcode The passcode set for the Device on BootstrapDevice call.
- * @returns A promise with the string "success" on successful MPC computation; a rejection otherwise.
+ * @returns A void promise, that either succeeds or rejects.
  */
 export function computePrepareDeviceArchiveMPCOperation(
   mpcData: string,
   passcode: string
-): Promise<string> {
+): Promise<void> {
   return MPCSdk.computePrepareDeviceArchiveMPCOperation(mpcData, passcode);
 }
 
@@ -123,12 +123,12 @@ export function exportPrivateKeys(
  * given mpcData from the response of ListMPCOperations API on MPCKeyService and passcode for the Device.
  * @param mpcData The mpcData from ListMPCOperationsResponse on MPCKeyService.
  * @param passcode The passcode set for the Device on BootstrapDevice call.
- * @returns A promise with the string "success" on successful MPC computation; a rejection otherwise.
+ * @returns A void promise, that either succeeds or rejects.
  */
 export function computePrepareDeviceBackupMPCOperation(
   mpcData: string,
   passcode: string
-): Promise<String> {
+): Promise<void> {
   return MPCSdk.computePrepareDeviceBackupMPCOperation(mpcData, passcode);
 }
 
@@ -153,13 +153,13 @@ export function exportDeviceBackup(): Promise<String> {
  * @param passcode The passcode set for the Device on BootstrapDevice call.
  * @param deviceBackup The backup retrieved from the exportDeviceBackup call after successful computation of a
  * PrepareDeviceBackup MPCOperation.
- * @returns A promise with the string "success" on successful MPC computation; a rejection otherwise.
+ * @returns A void promise, that either succeeds or rejects.
  */
 export function computeAddDeviceMPCOperation(
   mpcData: string,
   passcode: string,
   deviceBackup: string
-): Promise<String> {
+): Promise<void> {
   return MPCSdk.computeAddDeviceMPCOperation(mpcData, passcode, deviceBackup);
 }
 
@@ -195,13 +195,13 @@ export type Pool = {
  * @param apiKeyName The API key name.
  * @param privateKey The private key.
  * @param url The URL of the PoolService. Optional.
- * @returns A promise with the string "success" on successful initialization; a rejection
+ * @returns A void promise, that either succeeds or rejects.
  * otherwise.
  */
 export function initPoolService(
   apiKeyName: string,
   privateKey: string
-): Promise<string> {
+): Promise<void> {
   return PoolService.initialize(apiKeyName, privateKey);
 }
 
@@ -241,13 +241,13 @@ const MPCKeyService = NativeModules.MPCKeyService
 /**
  * Initializes the MPCKeyService.
  * This function must be invoked before any MPCKeyService functions are called.
- * @returns A promise with the string "success" on successful initialization; a rejection
+ * @returns A void promise, that either succeeds or rejects.
  * otherwise.
  */
 export function initMPCKeyService(
   apiKeyName: string,
   privateKey: string
-): Promise<string> {
+): Promise<void> {
   return MPCKeyService.initialize(apiKeyName, privateKey);
 }
 
@@ -671,13 +671,10 @@ export function stopPollingForPendingDeviceBackups(): Promise<string> {
  * Format: pools/{pool_id}/deviceGroups/{device_group_id}
  * @param device The resource name of the Device that has to be added to the DeviceGroup.
  * Format: devices/{device_id}
- * @returns A promise with the string "success" on successful initiation; a rejection
+ * @returns A void promise, that either succeeds or rejects.
  * otherwise.
  */
-export function addDevice(
-  deviceGroup: string,
-  device: string
-): Promise<string> {
+export function addDevice(deviceGroup: string, device: string): Promise<void> {
   return MPCKeyService.addDevice(deviceGroup, device);
 }
 
@@ -771,13 +768,13 @@ export type MPCWallet = {
  * @param apiKeyName The API key name.
  * @param privateKey The private key.
  * @param url The URL of the WalletService. Optional.
- * @returns A promise with the string "success" on successful initialization; a rejection
+ * @returns A void promise, that either succeeds or rejects.
  * otherwise.
  */
 export function initMPCWalletService(
   apiKeyName: string,
   privateKey: string
-): Promise<string> {
+): Promise<void> {
   return MPCWalletService.initialize(apiKeyName, privateKey);
 }
 
@@ -805,13 +802,13 @@ export function createMPCWallet(
  * @param passcode Passcode protecting key materials in the device, set during the call to BootstrapDevice.
  * @param pollInterval The interval at which to poll for the pending operation in milliseconds.
  * If not provided, a reasonable default will be used.
- * @returns A promise with the string "success" on successful MPC wallet computation; a rejection otherwise.
+ * @returns A void promise, that either succeeds or rejects.
  */
 export async function computeMPCWallet(
   deviceGroup: string,
   passcode: string,
   pollInterval?: number
-): Promise<string> {
+): Promise<void> {
   const pendingDeviceGroup = await pollForPendingDeviceGroup(
     deviceGroup,
     pollInterval
@@ -819,12 +816,8 @@ export async function computeMPCWallet(
 
   for (let i = pendingDeviceGroup.length - 1; i >= 0; i--) {
     const deviceGroupOperation = pendingDeviceGroup[i];
-    const ret = await computeMPCOperation(
-      deviceGroupOperation?.MPCData as string
-    );
-    if (ret !== 'success') {
-      return ret;
-    }
+
+    await computeMPCOperation(deviceGroupOperation?.MPCData as string);
   }
 
   const pendingDeviceArchiveOperations = await pollForPendingDeviceArchives(
@@ -834,16 +827,13 @@ export async function computeMPCWallet(
 
   for (let i = pendingDeviceArchiveOperations.length - 1; i >= 0; i--) {
     const pendingOperation = pendingDeviceArchiveOperations[i];
-    const ret = await computePrepareDeviceArchiveMPCOperation(
+    await computePrepareDeviceArchiveMPCOperation(
       pendingOperation!.MPCData,
       passcode
     );
-    if (ret !== 'success') {
-      return ret;
-    }
   }
 
-  return 'success';
+  return;
 }
 
 /**

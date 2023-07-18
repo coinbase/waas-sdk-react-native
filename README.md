@@ -24,6 +24,8 @@ For Android development:
 
 ## Installation
 
+### React Native
+
 With `npm`:
 
 ```
@@ -41,10 +43,12 @@ yarn add @coinbase/waas-sdk-react-native
 In your Android application's `settings.gradle` file, make sure to add the following:
 
 ```gradle
-include(':go-internal-sdk')
-project(':go-internal-sdk').projectDir = new File(settingsDir, '../node_modules/@coinbase/waas-sdk-react-native/android/go-internal-sdk')
-include(':mpc-sdk')
-project(':mpc-sdk').projectDir = new File(settingsDir, '../node_modules/@coinbase/waas-sdk-react-native/android/mpc-sdk')
+
+include ":android-native", ":android-native:go-internal-sdk", ":android-native:mpc-sdk" 
+
+project(':android-native').projectDir = new File(rootProject.projectDir, '../node_modules/@coinbase/waas-sdk-react-native/android-native')
+project(':android-native:mpc-sdk').projectDir = new File(rootProject.projectDir, '../node_modules/@coinbase/waas-sdk-react-native/android-native/mpc-sdk')
+project(':android-native:go-internal-sdk').projectDir = new File(rootProject.projectDir, '../node_modules/@coinbase/waas-sdk-react-native/android-native/go-internal-sdk')
 ```
 
 ## Usage
@@ -128,3 +132,45 @@ The methods from the WaaS SDK which are _required_ to be used for participation 
 3. `getRegistrationData`
 4. `computeMPCOperation`
 
+# Native Waas SDK
+
+We expose a Java 8+, `java.util.concurrent.Future`-based SDK for use with Java/Kotlin. An example
+app is included in `android-native-example/` for more information.
+
+## Requirements
+
+- Java 8+
+- Gradle 7.*
+  - If using central gradle repositories, you may need to update your `settings.gradle` to not fail on project repos.
+    - i.e (`repositoriesMode.set(RepositoriesMode.PREFER_SETTINGS)`)
+
+## Installation
+To begin, place the `android-native` directory relative to your project.
+
+In your `settings.gradle`, include the following:
+
+```
+include ':android-native', ':android-native:mpc-sdk', ':android-native:go-internal-sdk'
+project(':android-native').projectDir = new File(rootProject.projectDir, '../android-native')
+project(':android-native:mpc-sdk').projectDir = new File(rootProject.projectDir, '../android-native/mpc-sdk')
+project(':android-native:go-internal-sdk').projectDir = new File(rootProject.projectDir, '../android-native/go-internal-sdk')
+```
+
+Remember to specify the correct relative-location of `android-native`.
+
+In your `build.gradle`, you should now take dependencies on
+
+```
+implementation project(":android-native")
+implementation project(':android-native:mpc-sdk')
+implementation project(':android-native:go-internal-sdk')
+```
+
+## Demo App
+A demo app of the native SDK is included in `android-native/`. Opening this directory with Android Studio should be 
+sufficient to build and run the app.
+
+## Considerations
+
+- The SDK should import cleanly into Kotlin as-is -- the sample app includes a demonstration of utilizing Waas's Futures
+with Kotlin task-closures. Please reach out with any questions.

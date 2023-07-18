@@ -1,5 +1,2 @@
-include(":go-internal-sdk")
-project(':go-internal-sdk').projectDir = new File(settingsDir, 'go-internal-sdk')
-
-include(":mpc-sdk")
-project(':mpc-sdk').projectDir = new File(settingsDir, 'mpc-sdk')
+rootProject.name = "android"
+include ":android-native", ":android-native:go-internal-sdk", ":android-native:mpc-sdk" 

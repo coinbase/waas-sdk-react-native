@@ -5,7 +5,8 @@ buildscript {
   }
 
   dependencies {
-    classpath "com.android.tools.build:gradle:7.2.1"
+    classpath "com.android.tools.build:gradle:7.4.0"
+    classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:1.8.0"
   }
 }
 
@@ -28,13 +29,14 @@ def getExtOrIntegerDefault(name) {
 }
 
 android {
-  namespace "com.waassdkreactnative"
+  namespace "com.coinbase.waassdkreactnative"
   compileSdkVersion getExtOrIntegerDefault("compileSdkVersion")
 
   defaultConfig {
     minSdkVersion getExtOrIntegerDefault("minSdkVersion")
     targetSdkVersion getExtOrIntegerDefault("targetSdkVersion")
     buildConfigField "boolean", "IS_NEW_ARCHITECTURE_ENABLED", isNewArchitectureEnabled().toString()
+    buildConfigField "boolean", "IS_HERMES_ENABLED", "false"
   }
   buildTypes {
     release {
@@ -51,6 +53,10 @@ android {
     targetCompatibility JavaVersion.VERSION_1_8
   }
 
+
+  buildFeatures {
+      buildConfig = true
+  }
 }
 
 repositories {
@@ -63,19 +69,17 @@ dependencies {
   // For < 0.71, this will be from the local maven repo
   // For > 0.71, this will be replaced by `com.facebook.react:react-android:$version` by react gradle plugin
   //noinspection GradleDynamicVersion
-  implementation 'com.google.code.gson:gson:2.8.7'
-  implementation fileTree(dir: "libs", include: ["*.jar","*.aar"])
+  implementation project(':android-native')
+  implementation project(':android-native:mpc-sdk')
+  implementation project(':android-native:go-internal-sdk')
+  implementation 'androidx.annotation:annotation:1.3.0'
   implementation "com.facebook.react:react-native"
-
-  implementation project(':go-internal-sdk') 
-  implementation project(':mpc-sdk')
 }
 
 if (isNewArchitectureEnabled()) {
   react {
     jsRootDir = file("../src/")
     libraryName = "WaasSdkReactNative"
-    codegenJavaPackageName = "com.waassdkreactnative"
+    codegenJavaPackageName = "com.coinbase.waassdkreactnative"
   }
 }
-

@@ -100,9 +100,8 @@ export const MPCWalletServiceDemo = () => {
           );
           setWallet(walletCreated);
           setShowStep6(true);
-
           const addressCreated = await generateAddress(
-            walletCreated?.Name as string,
+            walletCreated.Name,
             'networks/ethereum-goerli'
           );
           setAddress(addressCreated);
@@ -110,6 +109,7 @@ export const MPCWalletServiceDemo = () => {
           setShowStep7(true);
         }
       } catch (error) {
+        console.error(error);
         setResultError(error as Error);
         setShowError(true);
       }

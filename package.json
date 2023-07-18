@@ -1,6 +1,6 @@
 {
   "name": "@coinbase/waas-sdk-react-native",
-  "version": "1.0.4",
+  "version": "2.0.1",
   "description": "Coinbase React Native SDK for Wallet-as-a-Service APIs",
   "main": "lib/commonjs/index",
   "module": "lib/module/index",
@@ -11,6 +11,7 @@
     "src",
     "lib",
     "android",
+    "android-native",
     "ios",
     "cpp",
     "*.podspec",
@@ -53,7 +54,6 @@
     "@commitlint/config-conventional": "^17.0.2",
     "@evilmartians/lefthook": "^1.2.2",
     "@react-native-community/eslint-config": "^3.0.2",
-    "@release-it/conventional-changelog": "^5.0.0",
     "@types/jest": "^28.1.2",
     "@types/react": "~17.0.21",
     "@types/react-native": "0.70.0",
@@ -68,7 +68,6 @@
     "react": "18.2.0",
     "react-native": "0.71.3",
     "react-native-builder-bob": "^0.20.3",
-    "release-it": "^15.0.0",
     "typescript": "^4.5.2"
   },
   "resolutions": {
@@ -155,6 +154,7 @@
     ]
   },
   "dependencies": {
+    "@babel/runtime": "^7.22.6",
     "eslint-plugin-ft-flow": "^2.0.3"
   }
 }
