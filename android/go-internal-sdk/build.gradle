@@ -1,2 +1,0 @@
-configurations.maybeCreate("default")
-artifacts.add("default", file('go-internal-sdk-0.1.1.aar'))
