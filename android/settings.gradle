@@ -1,0 +1,2 @@
+rootProject.name = "android"
+include ":android-native", ":android-native:go-internal-sdk", ":android-native:mpc-sdk" 

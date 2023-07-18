@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+  xmlns:app="http://schemas.android.com/apk/res-auto"
+  android:layout_width="match_parent"
+  android:layout_height="match_parent"
+  android:padding="16dp">
+
+  <LinearLayout
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical">
+
+    <TextView
+      android:id="@+id/title"
+      android:layout_width="wrap_content"
+      android:layout_height="wrap_content"
+      android:text="Coinbase Wallet-as-a-service"
+      android:textSize="24sp"
+      android:textStyle="bold" />
+
+    <com.google.android.material.button.MaterialButton
+      android:id="@+id/button_register_device"
+      android:layout_width="match_parent"
+      android:layout_height="wrap_content"
+      android:layout_marginTop="24dp"
+      android:text="Register your device"
+      app:backgroundTint="@color/lighterColor" />
+
+    <com.google.android.material.button.MaterialButton
+      android:id="@+id/button_create_pool"
+      android:layout_width="match_parent"
+      android:layout_height="wrap_content"
+      android:layout_marginTop="16dp"
+      android:text="Create a pool"
+      app:backgroundTint="@color/lighterColor" />
+
+    <com.google.android.material.button.MaterialButton
+      android:id="@+id/button_get_eth_address"
+      android:layout_width="match_parent"
+      android:layout_height="wrap_content"
+      android:layout_marginTop="16dp"
+      android:text="Get an ETH Address"
+      app:backgroundTint="@color/lighterColor" />
+
+    <com.google.android.material.button.MaterialButton
+      android:id="@+id/button_sign_transaction"
+      android:layout_width="match_parent"
+      android:layout_height="wrap_content"
+      android:layout_marginTop="16dp"
+      android:text="Sign a transaction"
+      app:backgroundTint="@color/lighterColor" />
+
+    <com.google.android.material.button.MaterialButton
+      android:id="@+id/button_export_keys"
+      android:layout_width="match_parent"
+      android:layout_height="wrap_content"
+      android:layout_marginTop="16dp"
+      android:text="Export your keys"
+      app:backgroundTint="@color/lighterColor" />
+
+    <com.google.android.material.button.MaterialButton
+      android:id="@+id/button_export_device_backup"
+      android:layout_width="match_parent"
+      android:layout_height="wrap_content"
+      android:layout_marginTop="16dp"
+      android:text="Export a device backup"
+      app:backgroundTint="@color/lighterColor" />
+
+    <com.google.android.material.button.MaterialButton
+      android:id="@+id/button_restore_device_backup"
+      android:layout_width="match_parent"
+      android:layout_height="wrap_content"
+      android:layout_marginTop="16dp"
+      android:text="Restore a device backup"
+      app:backgroundTint="@color/lighterColor" />
+  </LinearLayout>
+</ScrollView>

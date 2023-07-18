@@ -1,0 +1,7 @@
+rootProject.name = "NativeExample"
+include ':app'
+include ':android-native', ':android-native:mpc-sdk', ':android-native:go-internal-sdk'
+project(':android-native').projectDir = new File(rootProject.projectDir, '../android-native')
+project(':android-native:mpc-sdk').projectDir = new File(rootProject.projectDir, '../android-native/mpc-sdk')
+project(':android-native:go-internal-sdk').projectDir = new File(rootProject.projectDir, '../android-native/go-internal-sdk')
+

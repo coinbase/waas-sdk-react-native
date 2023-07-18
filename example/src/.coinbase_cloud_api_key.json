@@ -1,0 +1,6 @@
+
+
+{
+    "name": "organizations/organizationID/apiKeys/apiKeyName",
+    "privateKey": "-----BEGIN ECDSA Private Key-----ExamplePrivateKey-----END ECDSA Private Key-----\n"
+}
