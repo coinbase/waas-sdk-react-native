@@ -7,8 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		5E555C0D2413F4C50049A1A2 /* WaasSdk.m in Sources */ = {isa = PBXBuildFile; fileRef = B3E7B5891CC2AC0600A0062D /* WaasSdk.m */; };
-		F4FF95D7245B92E800C19C63 /*  WaasSdk.swift in Sources */ = {isa = PBXBuildFile; fileRef = F4FF95D6245B92E800C19C63 /*  WaasSdk.swift */; };
+		BDCFAD9F3B808DBC06E8FE21 /* Pods_WaasSdk.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A17305174FC287A8D1BC6558 /* Pods_WaasSdk.framework */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -24,10 +23,10 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
-		134814201AA4EA6300B7C361 /* libWaasSdk.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = libWaasSdk.a; sourceTree = BUILT_PRODUCTS_DIR; };
-		B3E7B5891CC2AC0600A0062D /* WaasSdk.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = WaasSdk.m; sourceTree = "<group>"; };
-		F4FF95D5245B92E700C19C63 /* WaasSdk-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "WaasSdk-Bridging-Header.h"; sourceTree = "<group>"; };
-		F4FF95D6245B92E800C19C63 /* WaasSdk.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WaasSdk.swift; sourceTree = "<group>"; };
+		134814201AA4EA6300B7C361 /* libWaasSdkReactNative.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = libWaasSdkReactNative.a; sourceTree = BUILT_PRODUCTS_DIR; };
+		A17305174FC287A8D1BC6558 /* Pods_WaasSdk.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_WaasSdk.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		AA926DB4CCF8A3997536049B /* Pods-WaasSdk.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-WaasSdk.debug.xcconfig"; path = "Target Support Files/Pods-WaasSdk/Pods-WaasSdk.debug.xcconfig"; sourceTree = "<group>"; };
+		CEB2276DAC8398445DF8DE44 /* Pods-WaasSdk.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-WaasSdk.release.xcconfig"; path = "Target Support Files/Pods-WaasSdk/Pods-WaasSdk.release.xcconfig"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -35,37 +34,55 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				BDCFAD9F3B808DBC06E8FE21 /* Pods_WaasSdk.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		0B6525FA86D79266DA90FD21 /* Pods */ = {
+			isa = PBXGroup;
+			children = (
+				AA926DB4CCF8A3997536049B /* Pods-WaasSdk.debug.xcconfig */,
+				CEB2276DAC8398445DF8DE44 /* Pods-WaasSdk.release.xcconfig */,
+			);
+			path = Pods;
+			sourceTree = "<group>";
+		};
 		134814211AA4EA7D00B7C361 /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				134814201AA4EA6300B7C361 /* libWaasSdk.a */,
+				134814201AA4EA6300B7C361 /* libWaasSdkReactNative.a */,
 			);
 			name = Products;
+			sourceTree = "<group>";
+		};
+		3439C229FAD510872D89C48E /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				A17305174FC287A8D1BC6558 /* Pods_WaasSdk.framework */,
+			);
+			name = Frameworks;
 			sourceTree = "<group>";
 		};
 		58B511D21A9E6C8500147676 = {
 			isa = PBXGroup;
 			children = (
-				F4FF95D6245B92E800C19C63 /* WaasSdk.swift */,
-				B3E7B5891CC2AC0600A0062D /* WaasSdk.m */,
-				F4FF95D5245B92E700C19C63 /* WaasSdk-Bridging-Header.h */,
 				134814211AA4EA7D00B7C361 /* Products */,
+				0B6525FA86D79266DA90FD21 /* Pods */,
+				3439C229FAD510872D89C48E /* Frameworks */,
 			);
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
-		58B511DA1A9E6C8500147676 /* WaasSdk */ = {
+		58B511DA1A9E6C8500147676 /* WaasSdkReactNative */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = 58B511EF1A9E6C8500147676 /* Build configuration list for PBXNativeTarget "WaasSdk" */;
+			buildConfigurationList = 58B511EF1A9E6C8500147676 /* Build configuration list for PBXNativeTarget "WaasSdkReactNative" */;
 			buildPhases = (
+				36BA5B4ADA9B4587F3FC24FC /* [CP] Check Pods Manifest.lock */,
 				58B511D71A9E6C8500147676 /* Sources */,
 				58B511D81A9E6C8500147676 /* Frameworks */,
 				58B511D91A9E6C8500147676 /* CopyFiles */,
@@ -74,9 +91,9 @@
 			);
 			dependencies = (
 			);
-			name = WaasSdk;
+			name = WaasSdkReactNative;
 			productName = RCTDataManager;
-			productReference = 134814201AA4EA6300B7C361 /* libWaasSdk.a */;
+			productReference = 134814201AA4EA6300B7C361 /* libWaasSdkReactNative.a */;
 			productType = "com.apple.product-type.library.static";
 		};
 /* End PBXNativeTarget section */
@@ -93,7 +110,7 @@
 					};
 				};
 			};
-			buildConfigurationList = 58B511D61A9E6C8500147676 /* Build configuration list for PBXProject "WaasSdk" */;
+			buildConfigurationList = 58B511D61A9E6C8500147676 /* Build configuration list for PBXProject "WaasSdkReactNative" */;
 			compatibilityVersion = "Xcode 3.2";
 			developmentRegion = English;
 			hasScannedForEncodings = 0;
@@ -106,18 +123,41 @@
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
-				58B511DA1A9E6C8500147676 /* WaasSdk */,
+				58B511DA1A9E6C8500147676 /* WaasSdkReactNative */,
 			);
 		};
 /* End PBXProject section */
+
+/* Begin PBXShellScriptBuildPhase section */
+		36BA5B4ADA9B4587F3FC24FC /* [CP] Check Pods Manifest.lock */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+			);
+			inputPaths = (
+				"${PODS_PODFILE_DIR_PATH}/Podfile.lock",
+				"${PODS_ROOT}/Manifest.lock",
+			);
+			name = "[CP] Check Pods Manifest.lock";
+			outputFileListPaths = (
+			);
+			outputPaths = (
+				"$(DERIVED_FILE_DIR)/Pods-WaasSdk-checkManifestLockResult.txt",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "diff \"${PODS_PODFILE_DIR_PATH}/Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n# This output is used by Xcode 'outputs' to avoid re-running this script phase.\necho \"SUCCESS\" > \"${SCRIPT_OUTPUT_FILE_0}\"\n";
+			showEnvVarsInLog = 0;
+		};
+/* End PBXShellScriptBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
 		58B511D71A9E6C8500147676 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				F4FF95D7245B92E800C19C63 /* WaasSdk.swift in Sources */,
-				B3E7B58A1CC2AC0600A0062D /* WaasSdk.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -221,6 +261,7 @@
 		};
 		58B511F01A9E6C8500147676 /* Debug */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = AA926DB4CCF8A3997536049B /* Pods-WaasSdk.debug.xcconfig */;
 			buildSettings = {
 				HEADER_SEARCH_PATHS = (
 					"$(inherited)",
@@ -230,7 +271,7 @@
 				);
 				LIBRARY_SEARCH_PATHS = "$(inherited)";
 				OTHER_LDFLAGS = "-ObjC";
-				PRODUCT_NAME = WaasSdk;
+				PRODUCT_NAME = WaasSdkReactNative;
 				SKIP_INSTALL = YES;
 				SWIFT_OBJC_BRIDGING_HEADER = "WaasSdk-Bridging-Header.h";
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
@@ -240,6 +281,7 @@
 		};
 		58B511F11A9E6C8500147676 /* Release */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = CEB2276DAC8398445DF8DE44 /* Pods-WaasSdk.release.xcconfig */;
 			buildSettings = {
 				HEADER_SEARCH_PATHS = (
 					"$(inherited)",
@@ -249,7 +291,7 @@
 				);
 				LIBRARY_SEARCH_PATHS = "$(inherited)";
 				OTHER_LDFLAGS = "-ObjC";
-				PRODUCT_NAME = WaasSdk;
+				PRODUCT_NAME = WaasSdkReactNative;
 				SKIP_INSTALL = YES;
 				SWIFT_OBJC_BRIDGING_HEADER = "WaasSdk-Bridging-Header.h";
 				SWIFT_VERSION = 5.0;
@@ -259,7 +301,7 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
-		58B511D61A9E6C8500147676 /* Build configuration list for PBXProject "WaasSdk" */ = {
+		58B511D61A9E6C8500147676 /* Build configuration list for PBXProject "WaasSdkReactNative" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				58B511ED1A9E6C8500147676 /* Debug */,
@@ -268,7 +310,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		58B511EF1A9E6C8500147676 /* Build configuration list for PBXNativeTarget "WaasSdk" */ = {
+		58B511EF1A9E6C8500147676 /* Build configuration list for PBXNativeTarget "WaasSdkReactNative" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				58B511F01A9E6C8500147676 /* Debug */,

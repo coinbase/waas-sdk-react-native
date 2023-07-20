@@ -14,15 +14,13 @@ Pod::Spec.new do |s|
   s.platforms    = { :ios => "11.0" }
   s.source       = { :git => "https://github.com/coinbase/waas-sdk-react-native.git", :tag => "#{s.version}" }
 
-  s.source_files = "ios/**/*.{h,m,mm,swift}"
+  s.source_files = "ios/react-native/**/*.{h,m,mm,swift}"
 
-  s.vendored_frameworks = 'ios/WaasSdkGo.xcframework', 'ios/openssl_libcrypto.xcframework'
-
-  # Standard XCFrameworks that are used in this SDK.
   s.framework = "LocalAuthentication"
   s.libraries = 'resolv'
 
   s.dependency "React-Core"
+  s.dependency "waas-sdk"
 
   # Don't install the dependencies when we run `pod install` in the old architecture.
   if ENV['RCT_NEW_ARCH_ENABLED'] == '1' then

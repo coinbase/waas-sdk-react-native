@@ -1,0 +1,16 @@
+PODS:
+  - waas-sdk (0.0.1)
+
+DEPENDENCIES:
+  - waas-sdk (from `../../waas-sdk.podspec`)
+
+EXTERNAL SOURCES:
+  waas-sdk:
+    :path: "../../waas-sdk.podspec"
+
+SPEC CHECKSUMS:
+  waas-sdk: 014a1a1ab31ca9a59289f667b75215d25b5f7f3c
+
+PODFILE CHECKSUM: d5583c53c7258091e413f47b927abcf202fd28c4
+
+COCOAPODS: 1.12.0
