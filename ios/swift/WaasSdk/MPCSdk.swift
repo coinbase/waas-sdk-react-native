@@ -1,56 +1,37 @@
 import Foundation
 import WaasSdkGo
+import Combine
 
-class ApiResponseReceiverWrapper: NSObject, V1ApiResponseReceiverProtocol {
-    private let callback: (String?, Error?) -> Void
-
-    init(callback: @escaping (String?, Error?) -> Void) {
-        self.callback = callback
-        super.init()
-    }
-
-    func returnValue(_ data: String?, err: Error?) {
-        callback(data, err)
-    }
-}
-
-func wrapGo(_ callback: @escaping (String?, Error?) -> Void) -> ApiResponseReceiverWrapper {
-    return ApiResponseReceiverWrapper(callback: callback)
-}
-
-@objc(MPCSdk)
+@objc
 class MPCSdk: NSObject {
 
     // The config to be used for MPCSdk initialization.
     let mpcSdkConfig = "default"
 
-    // The error code for MPC-SDK related errors.
-    let mpcSdkErr = "E_MPC_SDK"
-
-    // The error message for calls made without initializing SDK.
-    let uninitializedErr = "MPCSdk must be initialized"
-
     // The handle to the Go MPCSdk class.
-    var sdk: V1MPCSdkProtocol?
+    var sdk: V1MPCSdkProtocol
 
     /**
      Initializes the MPCSdk  with the given parameters.
      Resolves with the string "success" on success; rejects with an error otherwise.
      */
-    @objc(initialize:withResolver:withRejecter:)
-    func initialize(_ isSimulator: NSNumber, resolve: RCTPromiseResolveBlock, reject: RCTPromiseRejectBlock) {
+    init(_ isSimulator: NSNumber) throws {
         var error: NSError?
-        sdk = V1NewMPCSdk(
+        let _sdk = V1NewMPCSdk(
             mpcSdkConfig as String,
             isSimulator.intValue != 0,
             nil,
             &error)
 
         if error != nil {
-            reject(mpcSdkErr, error!.localizedDescription, nil)
-        } else {
-            resolve("success" as NSString)
+            throw WaasError.mpcSdkFailedToInitialize(error)
         }
+        
+        sdk = _sdk!
+    }
+    
+    func wrapError(err: Error) -> WaasError {
+        return WaasError.mpcSdkUnspecifiedError(err as NSError)
     }
 
     /**
@@ -61,22 +42,12 @@ class MPCSdk: NSObject {
      has been called for the Device. It resolves with the string "bootstrap complete" on successful initialization;
      or a rejection otherwise.
      */
-    @objc(bootstrapDevice:withResolver:withRejecter:)
-    func bootstrapDevice(_ passcode: NSString, resolve: @escaping RCTPromiseResolveBlock, reject: @escaping RCTPromiseRejectBlock) {
-        if self.sdk == nil {
-            reject(self.mpcSdkErr, self.uninitializedErr, nil)
-            return
+    func bootstrapDevice(_ passcode: NSString) -> Future<String, WaasError> {
+        return Future() { promise in
+            DispatchQueue.main.async(execute: {
+                self.sdk.bootstrapDevice(passcode as String, receiver: goReturnsString(promise: promise, wrapAsError: self.wrapError))
+            })
         }
-
-        let callback: (String?, Error?) -> Void = { data, error in
-            if let error = error {
-                reject(self.mpcSdkErr, error.localizedDescription, nil)
-            } else {
-                resolve(data ?? "")
-            }
-        }
-
-        self.sdk?.bootstrapDevice(passcode as String, receiver: wrapGo(callback))
     }
 
     /**
@@ -84,20 +55,18 @@ class MPCSdk: NSObject {
      While there is no need to call bootstrapDevice again, it is the client's responsibility to call and participate in
      PrepareDeviceArchive and PrepareDeviceBackup operations afterwards for each DeviceGroup the Device was in.
      This function can be used when/if the end user forgets their old passcode.
-     It resolves with the string "passcode reset" on success; a rejection otherwise.
+     It resolves on success; a rejection otherwise.
      */
-    @objc(resetPasscode:withResolver:withRejecter:)
-    func resetPasscode(_ newPasscode: NSString, resolve: RCTPromiseResolveBlock, reject: RCTPromiseRejectBlock) {
-        if self.sdk == nil {
-            reject(self.mpcSdkErr, self.uninitializedErr, nil)
-            return
-        }
-
-        do {
-            try self.sdk?.resetPasscode(newPasscode as String)
-            resolve("passcode reset" as NSString)
-        } catch {
-            reject(self.mpcSdkErr, error.localizedDescription, nil)
+    func resetPasscode(_ newPasscode: NSString) -> Future<Void, WaasError> {
+        return Future() { promise in
+            DispatchQueue.main.async(execute: {
+                do {
+                    try self.sdk.resetPasscode(newPasscode as String)
+                    promise(Result.success(()))
+                } catch {
+                    promise(Result.failure(WaasError.mpcSdkUnspecifiedError(error)))
+                }
+            })
         }
     }
 
@@ -105,102 +74,85 @@ class MPCSdk: NSObject {
      Returns the data required to call RegisterDeviceAPI on MPCKeyService.
      Resolves with the RegistrationData on success; rejects with an error otherwise.
      */
-    @objc(getRegistrationData:withRejecter:)
-    func getRegistrationData(_ resolve: @escaping RCTPromiseResolveBlock, reject: @escaping RCTPromiseRejectBlock) {
-        if self.sdk == nil {
-            reject(self.mpcSdkErr, self.uninitializedErr, nil)
-            return
+    func getRegistrationData() -> Future<String, WaasError> {
+        return Future() { promise in
+            DispatchQueue.main.async(execute: {
+                self.sdk.getRegistrationData(goReturnsString(promise: promise, wrapAsError: self.wrapError))
+            })
         }
-
-        let callback: (String?, Error?) -> Void = { data, error in
-            if let error = error {
-                reject(self.mpcSdkErr, error.localizedDescription, nil)
-            } else {
-                resolve(data ?? "")
-            }
-        }
-
-        self.sdk?.getRegistrationData(wrapGo(callback))
     }
 
     /**
      Computes an MPC operation, given mpcData from the response of ListMPCOperations API on
      MPCKeyService. This function can be used to compute MPCOperations of types: CreateDeviceGroup and CreateSignature.
-     Resolves with the string "success" on success; rejects with an error otherwise.
+     Resolves on success; rejects with an error otherwise.
      */
-    @objc(computeMPCOperation:withResolver:withRejecter:)
-    func computeMPCOperation(_ mpcData: NSString, resolve: RCTPromiseResolveBlock, reject: RCTPromiseRejectBlock) {
-        if self.sdk == nil {
-            reject(self.mpcSdkErr, self.uninitializedErr, nil)
-            return
-        }
-
-        do {
-            try self.sdk?.computeMPCOperation(mpcData as String)
-            resolve("success" as NSString)
-        } catch {
-            reject(self.mpcSdkErr, error.localizedDescription, nil)
+    func computeMPCOperation(_ mpcData: NSString) -> Future<Void, WaasError> {
+        return Future() { promise in
+            DispatchQueue.main.async(execute: {
+                do {
+                    try self.sdk.computeMPCOperation(mpcData as String)
+                    promise(Result.success(()))
+                } catch {
+                    promise(Result.failure(WaasError.mpcSdkUnspecifiedError(error)))
+                }
+            })
         }
     }
 
     /**
      Computes an MPC operation of type PrepareDeviceArchive, given mpcData from the response of ListMPCOperations API on
-     MPCKeyService and passcode of the Device. Resolves with the string "success" on success; rejects with an error otherwise.
+     MPCKeyService and passcode of the Device. Resolves on success; rejects with an error otherwise.
      */
-    @objc(computePrepareDeviceArchiveMPCOperation:withPasscode:withResolver:withRejecter:)
-    func computePrepareDeviceArchiveMPCOperation(_ mpcData: NSString, passcode: NSString, resolve: RCTPromiseResolveBlock, reject: RCTPromiseRejectBlock) {
-        if self.sdk == nil {
-            reject(self.mpcSdkErr, self.uninitializedErr, nil)
-            return
-        }
-
-        do {
-            try self.sdk?.computePrepareDeviceArchiveMPCOperation(mpcData as String, passcode: passcode as String)
-            resolve("success" as NSString)
-        } catch {
-            reject(self.mpcSdkErr, error.localizedDescription, nil)
+    func computePrepareDeviceArchiveMPCOperation(_ mpcData: NSString, passcode: NSString) -> Future<Void, WaasError> {
+        return Future() { promise in
+            DispatchQueue.main.async(execute: {
+                do {
+                    try self.sdk.computePrepareDeviceArchiveMPCOperation(mpcData as String, passcode: passcode as String)
+                    promise(Result.success(()))
+                } catch {
+                    promise(Result.failure(WaasError.mpcSdkUnspecifiedError(error)))
+                }
+            })
         }
     }
 
     /**
      Computes an MPC operation of type PrepareDeviceBackup, given mpcData from the response of ListMPCOperations API on
-     MPCKeyService and passcode of the Device. Resolves with the string "success" on success; rejects with an error otherwise.
+     MPCKeyService and passcode of the Device. Resolves on success; rejects with an error otherwise.
      */
-    @objc(computePrepareDeviceBackupMPCOperation:withPasscode:withResolver:withRejecter:)
-    func computePrepareDeviceBackupMPCOperation(_ mpcData: NSString, passcode: NSString, resolve: RCTPromiseResolveBlock, reject: RCTPromiseRejectBlock) {
-        if self.sdk == nil {
-            reject(self.mpcSdkErr, self.uninitializedErr, nil)
-            return
-        }
-
-        do {
-            try self.sdk?.computePrepareDeviceBackupMPCOperation(mpcData as String, passcode: passcode as String)
-            resolve("success" as NSString)
-        } catch {
-            reject(self.mpcSdkErr, error.localizedDescription, nil)
+    func computePrepareDeviceBackupMPCOperation(_ mpcData: NSString, passcode: NSString) -> Future<Void, WaasError> {
+        return Future() { promise in
+            DispatchQueue.main.async(execute: {
+                do {
+                    try self.sdk.computePrepareDeviceBackupMPCOperation(mpcData as String, passcode: passcode as String)
+                    promise(Result.success(()))
+                } catch {
+                    promise(Result.failure(WaasError.mpcSdkUnspecifiedError(error)))
+                }
+            })
         }
     }
 
     /**
      Computes an MPC operation of type AddDevice, given mpcData from the response of ListMPCOperations API on
-     MPCKeyService, passcode of the Device and device backup created with PrepareDeviceBackup operation. Resolves with the string "success" on success; rejects with an error otherwise.
+     MPCKeyService, passcode of the Device and device backup created with PrepareDeviceBackup operation. Resolves on success; rejects with an error otherwise.
      */
-    @objc(computeAddDeviceMPCOperation:withPasscode:withDeviceBackup:withResolver:withRejecter:)
-    func computeAddDeviceMPCOperation(_ mpcData: NSString, passcode: NSString, deviceBackup: NSString, resolve: RCTPromiseResolveBlock, reject: RCTPromiseRejectBlock) {
-        if self.sdk == nil {
-            reject(self.mpcSdkErr, self.uninitializedErr, nil)
-            return
+    func computeAddDeviceMPCOperation(_ mpcData: NSString, passcode: NSString, deviceBackup: NSString) -> Future<Void, WaasError> {
+        return Future() { promise in
+            DispatchQueue.main.async(execute: {
+                do {
+                    try self.sdk.computeAddDeviceMPCOperation(
+                        mpcData as String,
+                        passcode: passcode as String,
+                        deviceBackup: deviceBackup as String)
+                    promise(Result.success(()))
+                } catch {
+                    promise(Result.failure(WaasError.mpcSdkUnspecifiedError(error)))
+                }
+            })
         }
-
-        do {
-            try self.sdk?.computeAddDeviceMPCOperation(
-                mpcData as String,
-                passcode: passcode as String,
-                deviceBackup: deviceBackup as String)
-            resolve("success" as NSString)
-        } catch {
-            reject(self.mpcSdkErr, error.localizedDescription, nil)
-        }
+        
     }
 
     /**
@@ -208,24 +160,21 @@ class MPCSdk: NSObject {
      exporting private keys that back EVM addresses. Resolves with ExportPrivateKeysResponse object on success;
      rejects with an error otherwise.
      */
-    @objc(exportPrivateKeys:withPasscode:withResolver:withRejecter:)
-    func exportPrivateKeys(_ mpcKeyExportMetadata: NSString, passcode: NSString, resolve: RCTPromiseResolveBlock,
-                           reject: RCTPromiseRejectBlock) {
-        if self.sdk == nil {
-            reject(self.mpcSdkErr, self.uninitializedErr, nil)
-            return
-        }
-
-        do {
-            let response = try self.sdk?.exportPrivateKeys(
-                mpcKeyExportMetadata as String,
-                passcode: passcode as String)
-            // swiftlint:disable force_cast
-            let res = try JSONSerialization.jsonObject(with: response!) as! NSArray
-            // swiftlint:enable force_cast
-            resolve(res)
-        } catch {
-            reject(self.mpcSdkErr, error.localizedDescription, nil)
+    func exportPrivateKeys(_ mpcKeyExportMetadata: NSString, passcode: NSString) -> Future<NSArray, WaasError> {
+        return Future() { promise in
+            DispatchQueue.main.async(execute: {
+                do {
+                    let response = try self.sdk.exportPrivateKeys(
+                        mpcKeyExportMetadata as String,
+                        passcode: passcode as String)
+                    // swiftlint:disable force_cast
+                    let res = try JSONSerialization.jsonObject(with: response) as! NSArray
+                    // swiftlint:enable force_cast
+                    promise(Result.success(res))
+                } catch {
+                    promise(Result.failure(WaasError.mpcSdkUnspecifiedError(error)))
+                }
+            })
         }
     }
 
@@ -233,20 +182,11 @@ class MPCSdk: NSObject {
      Exports device backup for the Device. The device backup is only available after the Device has computed PrepareDeviceBackup operation successfully.
      Resolves with backup data as a hex-encoded string on success; rejects with an error otherwise.
      */
-    @objc(exportDeviceBackup:withRejecter:)
-    func exportDeviceBackup(_ resolve: @escaping RCTPromiseResolveBlock, reject: @escaping RCTPromiseRejectBlock) {
-        if self.sdk == nil {
-            reject(self.mpcSdkErr, self.uninitializedErr, nil)
+    func exportDeviceBackup() -> Future<String, WaasError> {
+        return Future() { promise in
+            DispatchQueue.main.async(execute: {
+                self.sdk.exportDeviceBackup(goReturnsString(promise: promise, wrapAsError: self.wrapError))
+            })
         }
-
-        let callback: (String?, Error?) -> Void = { data, error in
-            if let error = error {
-                reject(self.mpcSdkErr, error.localizedDescription, nil)
-            } else {
-                resolve(data ?? "")
-            }
-        }
-
-        self.sdk?.exportDeviceBackup(wrapGo(callback))
     }
 }

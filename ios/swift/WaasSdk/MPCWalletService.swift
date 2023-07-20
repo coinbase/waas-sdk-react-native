@@ -1,7 +1,8 @@
 import Foundation
 import WaasSdkGo
+import Combine
 
-@objc(MPCWalletService)
+@objc
 class MPCWalletService: NSObject {
     // The URL of the MPCWalletService.
     let mpcWalletServiceUrl = "https://api.developer.coinbase.com/waas/mpc_wallets"
@@ -13,53 +14,42 @@ class MPCWalletService: NSObject {
     let uninitializedErr = "MPCWalletService must be initialized"
 
     // The handle to the Go MPCWalletService client.
-    var walletsClient: V1MPCWalletServiceProtocol?
+    var walletsClient: V1MPCWalletServiceProtocol
 
     /**
      Initializes the MPCWalletService with the given Cloud API Key parameters. Resolves with the string "success"
      on success; rejects with an error otherwise.
      */
-    @objc(initialize:withPrivateKey:withResolver:withRejecter:)
-    func initialize(_ apiKeyName: NSString, privateKey: NSString,
-                    resolve: RCTPromiseResolveBlock, reject: RCTPromiseRejectBlock) {
+    init(_ apiKeyName: NSString, privateKey: NSString) throws {
         var error: NSError?
 
-        walletsClient = V1NewMPCWalletService(
+        var _walletsClient = V1NewMPCWalletService(
             mpcWalletServiceUrl as String,
             apiKeyName as String,
             privateKey as String,
             &error)
 
-        if error != nil {
-            reject(walletsErr, error!.localizedDescription, nil)
-        } else {
-            resolve("success" as NSString)
+        if error != nil || _walletsClient == nil {
+            throw WaasError.walletServiceFailedToInitialize(error as NSError?)
         }
+        
+        walletsClient = _walletsClient!
     }
 
     /**
      Creates an MPCWallet with the given parameters.  Resolves with the response on success; rejects with an error
      otherwise.
      */
-    @objc(createMPCWallet:withDevice:withResolver:withRejecter:)
-    func createMPCWallet(_ parent: NSString, device: NSString,
-                         resolve: RCTPromiseResolveBlock, reject: RCTPromiseRejectBlock) {
-        if self.walletsClient == nil {
-            reject(self.walletsErr, self.uninitializedErr, nil)
-            return
-        }
-
-        var response: V1CreateMPCWalletResponse?
-
-        do {
-            response = try self.walletsClient?.createMPCWallet(parent as String, device: device as String)
-            let res: NSDictionary = [
-                "DeviceGroup": response?.deviceGroup as Any,
-                "Operation": response?.operation as Any
-            ]
-            resolve(res)
-        } catch {
-            reject(self.walletsErr, error.localizedDescription, nil)
+    func createMPCWallet(_ parent: NSString, device: NSString) -> Future<V1CreateMPCWalletResponse, WaasError> {
+        return Future() { promise in
+            DispatchQueue.main.async(execute: {
+                do {
+                    let response = try self.walletsClient.createMPCWallet(parent as String, device: device as String)
+                    promise(Result.success(response))
+                } catch {
+                    promise(Result.failure(WaasError.walletServiceUnspecifiedError(error as NSError)))
+                }
+            })
         }
     }
 
@@ -67,25 +57,16 @@ class MPCWalletService: NSObject {
      Waits for a pending MPCWallet with the given operation name. Resolves with the MPCWallet object on success;
      rejects with an error otherwise.
      */
-    @objc(waitPendingMPCWallet:withResolver:withRejecter:)
-    func waitPendingMPCWallet(_ operation: NSString,
-                              resolve: RCTPromiseResolveBlock, reject: RCTPromiseRejectBlock) {
-        if self.walletsClient == nil {
-            reject(self.walletsErr, self.uninitializedErr, nil)
-            return
-        }
-
-        var mpcWallet: V1MPCWallet?
-
-        do {
-            mpcWallet = try self.walletsClient?.waitPendingMPCWallet(operation as String)
-            let res: NSDictionary = [
-                "Name": mpcWallet?.name as Any,
-                "DeviceGroup": mpcWallet?.deviceGroup as Any
-            ]
-            resolve(res)
-        } catch {
-            reject(self.walletsErr, error.localizedDescription, nil)
+    func waitPendingMPCWallet(_ operation: NSString) -> Future<V1MPCWallet, WaasError> {
+        return Future() { promise in
+            DispatchQueue.main.async(execute: {
+                do {
+                    let mpcWallet = try self.walletsClient.waitPendingMPCWallet(operation as String)
+                    promise(Result.success(mpcWallet))
+                } catch {
+                    promise(Result.failure(WaasError.walletServiceUnspecifiedError(error as NSError)))
+                }
+            })
         }
     }
 
@@ -93,39 +74,34 @@ class MPCWalletService: NSObject {
      Generates an Address within an MPCWallet. Resolves with the Address object on success;
      rejects with an error otherwise.
      */
-    @objc(generateAddress:withNetwork:withResolver:withRejecter:)
-    func generateAddress(_ mpcWallet: NSString, network: NSString,
-                         resolve: RCTPromiseResolveBlock, reject: RCTPromiseRejectBlock) {
-        if self.walletsClient == nil {
-            reject(self.walletsErr, self.uninitializedErr, nil)
-            return
-        }
-
-        do {
-            let addressData = try self.walletsClient?.generateAddress(mpcWallet as String, network: network as String)
-            let res = try JSONSerialization.jsonObject(with: addressData!) as? NSDictionary
-            resolve(res)
-        } catch {
-            reject(self.walletsErr, error.localizedDescription, nil)
+    func generateAddress(_ mpcWallet: NSString, network: NSString) -> Future<NSDictionary, WaasError> {
+        return Future() { promise in
+            DispatchQueue.main.async(execute: {
+                do {
+                    let addressData = try self.walletsClient.generateAddress(mpcWallet as String, network: network as String)
+                    let res = try JSONSerialization.jsonObject(with: addressData) as? NSDictionary
+                    promise(Result.success(res!))
+                } catch {
+                    promise(Result.failure(WaasError.walletServiceUnspecifiedError(error as NSError)))
+                }
+            })
         }
     }
 
     /**
      Gets an Address with the given name. Resolves with the Address object on success; rejects with an error otherwise.
      */
-    @objc(getAddress:withResolver:withRejecter:)
-    func getAddress(_ name: NSString, resolve: RCTPromiseResolveBlock, reject: RCTPromiseRejectBlock) {
-        if self.walletsClient == nil {
-            reject(self.walletsErr, self.uninitializedErr, nil)
-            return
-        }
-
-        do {
-            let addressData = try self.walletsClient?.getAddress(name as String)
-            let res = try JSONSerialization.jsonObject(with: addressData!) as? NSDictionary
-            resolve(res)
-        } catch {
-            reject(self.walletsErr, error.localizedDescription, nil)
+    func getAddress(_ name: NSString) -> Future<NSDictionary, WaasError> {
+        return Future() { promise in
+            DispatchQueue.main.async(execute: {
+                do {
+                    let addressData = try self.walletsClient.getAddress(name as String)
+                    let res = try JSONSerialization.jsonObject(with: addressData) as? NSDictionary
+                    promise(Result.success(res!))
+                } catch {
+                    promise(Result.failure(WaasError.walletServiceUnspecifiedError(error as NSError)))
+                }
+            })
         }
     }
 }
