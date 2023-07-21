@@ -1,16 +1,13 @@
 import Foundation
-import WaasSdkGo
+import WaasSdk
 
-@objc(PoolService)
+@objc
 class PoolService: NSObject {
-    // The URL of the PoolService.
-    let poolServiceUrl = "https://api.developer.coinbase.com/waas/pools"
-
     // The error code for PoolService-related errors.
     let poolsErr = "E_POOL_SERVICE"
 
     // The handle to the Go PoolService client.
-    var poolsClient: V1PoolServiceProtocol?
+    var poolsClient: WaasSdk.PoolService?
 
     /**
      Initializes the PoolService with the given Cloud API Key parameters. Resolves with the string "success" on success;
@@ -20,13 +17,11 @@ class PoolService: NSObject {
     func initialize(_ apiKeyName: NSString, privateKey: NSString,
                     resolve: RCTPromiseResolveBlock, reject: RCTPromiseRejectBlock) {
         var error: NSError?
-
-        poolsClient = V1NewPoolService(poolServiceUrl as String, apiKeyName as String, privateKey as String, &error)
-
-        if error != nil {
+        try {
+            poolsClient = WaasSdk.PoolServiec(apiKeyName as String, privateKey as String)
+            resolve(nil)
+        } catch {
             reject(poolsErr, error!.localizedDescription, nil)
-        } else {
-            resolve("success" as NSString)
         }
     }
 
@@ -41,18 +36,12 @@ class PoolService: NSObject {
             reject(self.poolsErr, "pool service must be initialized", nil)
             return
         }
-
-        var pool: V1Pool?
-
-        do {
-            try pool = self.poolsClient?.createPool(displayName as String, poolID: poolID as String)
-            let res: NSDictionary = [
+        
+        Operation(self.poolsClient?.createPool(displayName as String, poolID: poolID as String)).bridge(resolve: resolve, reject: reject) { pool in
+            return [
                 "name": pool?.name as Any,
                 "displayName": pool?.displayName as Any
             ]
-            resolve(res)
-        } catch {
-            reject(self.poolsErr, error.localizedDescription, nil)
         }
     }
 }

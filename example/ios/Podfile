@@ -24,6 +24,7 @@ end
 target 'WaasSdkReactNativeExample' do
   config = use_native_modules!
 
+  pod 'waas-sdk', :path => "../../waas-sdk.podspec"
 
   # Flags change depending on the env values.
   flags = get_default_flags()
@@ -50,6 +51,14 @@ target 'WaasSdkReactNativeExample' do
   end
 
   post_install do |installer|
+    installer.pods_project.targets.each do |target|
+      if target.name == 'OpenSSL-Universal'
+        target.build_configurations.each do |config|
+          config.build_settings['LDFLAGS'] ||= ['$(inherited)', '-L/opt/homebrew/opt/openssl@1.1/lib']
+          config.build_settings['CPPFLAGS'] ||= ['$(inherited)', '-I/opt/homebrew/opt/openssl@1.1/include']
+        end
+      end
+    end
     react_native_post_install(
       installer,
       # Set `mac_catalyst_enabled` to `true` in order to apply patches
@@ -60,7 +69,7 @@ target 'WaasSdkReactNativeExample' do
     # This issue happens after upgrading to Xcode 14.3.
     installer.pods_project.targets.each do |target|
       target.build_configurations.each do |config|
-        config.build_settings['IPHONEOS_DEPLOYMENT_TARGET'] = '12.4'
+        config.build_settings['IPHONEOS_DEPLOYMENT_TARGET'] = '13.0'
       end
     end
     __apply_Xcode_12_5_M1_post_install_workaround(installer)

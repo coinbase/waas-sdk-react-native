@@ -7,7 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		BDCFAD9F3B808DBC06E8FE21 /* Pods_WaasSdk.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A17305174FC287A8D1BC6558 /* Pods_WaasSdk.framework */; };
+		61AF07C1AFAB656399EF1CA1 /* Pods_WaasSdkReactNative.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 0512DA0688FDEC5DF49371A8 /* Pods_WaasSdkReactNative.framework */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -23,8 +23,10 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		0512DA0688FDEC5DF49371A8 /* Pods_WaasSdkReactNative.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_WaasSdkReactNative.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		0B82B3AEC858A900ABA82213 /* Pods-WaasSdkReactNative.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-WaasSdkReactNative.release.xcconfig"; path = "Target Support Files/Pods-WaasSdkReactNative/Pods-WaasSdkReactNative.release.xcconfig"; sourceTree = "<group>"; };
 		134814201AA4EA6300B7C361 /* libWaasSdkReactNative.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = libWaasSdkReactNative.a; sourceTree = BUILT_PRODUCTS_DIR; };
-		A17305174FC287A8D1BC6558 /* Pods_WaasSdk.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_WaasSdk.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		3EA72372DE2AA939A76D409E /* Pods-WaasSdkReactNative.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-WaasSdkReactNative.debug.xcconfig"; path = "Target Support Files/Pods-WaasSdkReactNative/Pods-WaasSdkReactNative.debug.xcconfig"; sourceTree = "<group>"; };
 		AA926DB4CCF8A3997536049B /* Pods-WaasSdk.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-WaasSdk.debug.xcconfig"; path = "Target Support Files/Pods-WaasSdk/Pods-WaasSdk.debug.xcconfig"; sourceTree = "<group>"; };
 		CEB2276DAC8398445DF8DE44 /* Pods-WaasSdk.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-WaasSdk.release.xcconfig"; path = "Target Support Files/Pods-WaasSdk/Pods-WaasSdk.release.xcconfig"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -34,7 +36,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				BDCFAD9F3B808DBC06E8FE21 /* Pods_WaasSdk.framework in Frameworks */,
+				61AF07C1AFAB656399EF1CA1 /* Pods_WaasSdkReactNative.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -46,6 +48,8 @@
 			children = (
 				AA926DB4CCF8A3997536049B /* Pods-WaasSdk.debug.xcconfig */,
 				CEB2276DAC8398445DF8DE44 /* Pods-WaasSdk.release.xcconfig */,
+				3EA72372DE2AA939A76D409E /* Pods-WaasSdkReactNative.debug.xcconfig */,
+				0B82B3AEC858A900ABA82213 /* Pods-WaasSdkReactNative.release.xcconfig */,
 			);
 			path = Pods;
 			sourceTree = "<group>";
@@ -61,7 +65,7 @@
 		3439C229FAD510872D89C48E /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
-				A17305174FC287A8D1BC6558 /* Pods_WaasSdk.framework */,
+				0512DA0688FDEC5DF49371A8 /* Pods_WaasSdkReactNative.framework */,
 			);
 			name = Frameworks;
 			sourceTree = "<group>";
@@ -144,7 +148,7 @@
 			outputFileListPaths = (
 			);
 			outputPaths = (
-				"$(DERIVED_FILE_DIR)/Pods-WaasSdk-checkManifestLockResult.txt",
+				"$(DERIVED_FILE_DIR)/Pods-WaasSdkReactNative-checkManifestLockResult.txt",
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
@@ -261,7 +265,7 @@
 		};
 		58B511F01A9E6C8500147676 /* Debug */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = AA926DB4CCF8A3997536049B /* Pods-WaasSdk.debug.xcconfig */;
+			baseConfigurationReference = 3EA72372DE2AA939A76D409E /* Pods-WaasSdkReactNative.debug.xcconfig */;
 			buildSettings = {
 				HEADER_SEARCH_PATHS = (
 					"$(inherited)",
@@ -281,7 +285,7 @@
 		};
 		58B511F11A9E6C8500147676 /* Release */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = CEB2276DAC8398445DF8DE44 /* Pods-WaasSdk.release.xcconfig */;
+			baseConfigurationReference = 0B82B3AEC858A900ABA82213 /* Pods-WaasSdkReactNative.release.xcconfig */;
 			buildSettings = {
 				HEADER_SEARCH_PATHS = (
 					"$(inherited)",

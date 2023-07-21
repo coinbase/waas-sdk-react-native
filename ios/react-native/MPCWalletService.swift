@@ -1,7 +1,7 @@
 import Foundation
-import WaasSdkGo
+import WaasSdk
 
-@objc(MPCWalletService)
+@objc
 class MPCWalletService: NSObject {
     // The URL of the MPCWalletService.
     let mpcWalletServiceUrl = "https://api.developer.coinbase.com/waas/mpc_wallets"
@@ -23,17 +23,15 @@ class MPCWalletService: NSObject {
     func initialize(_ apiKeyName: NSString, privateKey: NSString,
                     resolve: RCTPromiseResolveBlock, reject: RCTPromiseRejectBlock) {
         var error: NSError?
-
-        walletsClient = V1NewMPCWalletService(
-            mpcWalletServiceUrl as String,
-            apiKeyName as String,
-            privateKey as String,
-            &error)
-
-        if error != nil {
+        try {
+            walletsClient = V1NewMPCWalletService(
+                mpcWalletServiceUrl as String,
+                apiKeyName as String,
+                privateKey as String,
+                &error)
+            resolve(nil)
+        } catch {
             reject(walletsErr, error!.localizedDescription, nil)
-        } else {
-            resolve("success" as NSString)
         }
     }
 
@@ -48,18 +46,12 @@ class MPCWalletService: NSObject {
             reject(self.walletsErr, self.uninitializedErr, nil)
             return
         }
-
-        var response: V1CreateMPCWalletResponse?
-
-        do {
-            response = try self.walletsClient?.createMPCWallet(parent as String, device: device as String)
-            let res: NSDictionary = [
-                "DeviceGroup": response?.deviceGroup as Any,
-                "Operation": response?.operation as Any
-            ]
-            resolve(res)
-        } catch {
-            reject(self.walletsErr, error.localizedDescription, nil)
+        
+        Operation(self.walletsClient?.createMPCWallet(parent as String, device: device as String)).bridge(resolve: resolve, reject: reject) { response in
+            return [
+               "DeviceGroup": response?.deviceGroup as Any,
+               "Operation": response?.operation as Any
+           ]
         }
     }
 
@@ -74,18 +66,12 @@ class MPCWalletService: NSObject {
             reject(self.walletsErr, self.uninitializedErr, nil)
             return
         }
-
-        var mpcWallet: V1MPCWallet?
-
-        do {
-            mpcWallet = try self.walletsClient?.waitPendingMPCWallet(operation as String)
-            let res: NSDictionary = [
+        
+        Operation(self.walletsClient?.waitPendingMPCWallet(operation as String)).bridge(resolve: resolve, reject: reject) { wallet in
+            return  [
                 "Name": mpcWallet?.name as Any,
                 "DeviceGroup": mpcWallet?.deviceGroup as Any
             ]
-            resolve(res)
-        } catch {
-            reject(self.walletsErr, error.localizedDescription, nil)
         }
     }
 
@@ -100,14 +86,8 @@ class MPCWalletService: NSObject {
             reject(self.walletsErr, self.uninitializedErr, nil)
             return
         }
-
-        do {
-            let addressData = try self.walletsClient?.generateAddress(mpcWallet as String, network: network as String)
-            let res = try JSONSerialization.jsonObject(with: addressData!) as? NSDictionary
-            resolve(res)
-        } catch {
-            reject(self.walletsErr, error.localizedDescription, nil)
-        }
+        
+        Operation(self.walletsClient?.generateAddress(mpcWallet as String, network: network as String)).bridge(resolve: resolve, reject: reject)
     }
 
     /**
@@ -119,13 +99,7 @@ class MPCWalletService: NSObject {
             reject(self.walletsErr, self.uninitializedErr, nil)
             return
         }
-
-        do {
-            let addressData = try self.walletsClient?.getAddress(name as String)
-            let res = try JSONSerialization.jsonObject(with: addressData!) as? NSDictionary
-            resolve(res)
-        } catch {
-            reject(self.walletsErr, error.localizedDescription, nil)
-        }
+        
+        Operation(self.walletsClient?.getAddress(name as String)).bridge(resolve: resolve, reject: reject)
     }
 }

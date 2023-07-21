@@ -1,24 +1,7 @@
 import Foundation
-import WaasSdkGo
+import WaasSdk
 
-class ApiResponseReceiverWrapper: NSObject, V1ApiResponseReceiverProtocol {
-    private let callback: (String?, Error?) -> Void
-
-    init(callback: @escaping (String?, Error?) -> Void) {
-        self.callback = callback
-        super.init()
-    }
-
-    func returnValue(_ data: String?, err: Error?) {
-        callback(data, err)
-    }
-}
-
-func wrapGo(_ callback: @escaping (String?, Error?) -> Void) -> ApiResponseReceiverWrapper {
-    return ApiResponseReceiverWrapper(callback: callback)
-}
-
-@objc(MPCSdk)
+@objc
 class MPCSdk: NSObject {
 
     // The config to be used for MPCSdk initialization.
@@ -32,6 +15,14 @@ class MPCSdk: NSObject {
 
     // The handle to the Go MPCSdk class.
     var sdk: V1MPCSdkProtocol?
+    
+    func failIfUninitialized(_ reject: RCTPromiseRejectBlock) -> Bool {
+        if self.sdk == nil {
+            reject(self.mpcSdkErr, self.uninitializedErr, nil)
+            return true
+        }
+        return false
+    }
 
     /**
      Initializes the MPCSdk  with the given parameters.
@@ -39,17 +30,11 @@ class MPCSdk: NSObject {
      */
     @objc(initialize:withResolver:withRejecter:)
     func initialize(_ isSimulator: NSNumber, resolve: RCTPromiseResolveBlock, reject: RCTPromiseRejectBlock) {
-        var error: NSError?
-        sdk = V1NewMPCSdk(
-            mpcSdkConfig as String,
-            isSimulator.intValue != 0,
-            nil,
-            &error)
-
-        if error != nil {
+        do {
+            sdk = try WaasSdk.MPCSdk(isSimulator.intValue != 0)
+            resolve(nil)
+        } catch {
             reject(mpcSdkErr, error!.localizedDescription, nil)
-        } else {
-            resolve("success" as NSString)
         }
     }
 
@@ -63,20 +48,11 @@ class MPCSdk: NSObject {
      */
     @objc(bootstrapDevice:withResolver:withRejecter:)
     func bootstrapDevice(_ passcode: NSString, resolve: @escaping RCTPromiseResolveBlock, reject: @escaping RCTPromiseRejectBlock) {
-        if self.sdk == nil {
-            reject(self.mpcSdkErr, self.uninitializedErr, nil)
-            return
+        if failIfUninitialized(reject) {
+            return;
         }
-
-        let callback: (String?, Error?) -> Void = { data, error in
-            if let error = error {
-                reject(self.mpcSdkErr, error.localizedDescription, nil)
-            } else {
-                resolve(data ?? "")
-            }
-        }
-
-        self.sdk?.bootstrapDevice(passcode as String, receiver: wrapGo(callback))
+        
+        Operation(self.sdk?.bootstrapDevice(passcode as String)).bridge(resolve: resolve, reject: reject)
     }
 
     /**
@@ -88,17 +64,11 @@ class MPCSdk: NSObject {
      */
     @objc(resetPasscode:withResolver:withRejecter:)
     func resetPasscode(_ newPasscode: NSString, resolve: RCTPromiseResolveBlock, reject: RCTPromiseRejectBlock) {
-        if self.sdk == nil {
-            reject(self.mpcSdkErr, self.uninitializedErr, nil)
-            return
+        if failIfUninitialized(reject) {
+            return;
         }
-
-        do {
-            try self.sdk?.resetPasscode(newPasscode as String)
-            resolve("passcode reset" as NSString)
-        } catch {
-            reject(self.mpcSdkErr, error.localizedDescription, nil)
-        }
+        
+        Operation(self.sdk!.resetPasscode(newPasscode as String)).bridge(resolve: resolve, reject: reject)
     }
 
     /**
@@ -107,20 +77,11 @@ class MPCSdk: NSObject {
      */
     @objc(getRegistrationData:withRejecter:)
     func getRegistrationData(_ resolve: @escaping RCTPromiseResolveBlock, reject: @escaping RCTPromiseRejectBlock) {
-        if self.sdk == nil {
-            reject(self.mpcSdkErr, self.uninitializedErr, nil)
-            return
+        if failIfUninitialized(reject) {
+            return;
         }
-
-        let callback: (String?, Error?) -> Void = { data, error in
-            if let error = error {
-                reject(self.mpcSdkErr, error.localizedDescription, nil)
-            } else {
-                resolve(data ?? "")
-            }
-        }
-
-        self.sdk?.getRegistrationData(wrapGo(callback))
+        
+        Operation(self.sdk!.getRegistrationData()).bridge(resolve: resolve, reject: reject)
     }
 
     /**
@@ -130,17 +91,11 @@ class MPCSdk: NSObject {
      */
     @objc(computeMPCOperation:withResolver:withRejecter:)
     func computeMPCOperation(_ mpcData: NSString, resolve: RCTPromiseResolveBlock, reject: RCTPromiseRejectBlock) {
-        if self.sdk == nil {
-            reject(self.mpcSdkErr, self.uninitializedErr, nil)
-            return
+        if failIfUninitialized(reject) {
+            return;
         }
-
-        do {
-            try self.sdk?.computeMPCOperation(mpcData as String)
-            resolve("success" as NSString)
-        } catch {
-            reject(self.mpcSdkErr, error.localizedDescription, nil)
-        }
+        
+        Operation(self.sdk?.computeMPCOperation(mpcData as String)).bridge(resolve: resolve, reject: reject)
     }
 
     /**
@@ -149,17 +104,11 @@ class MPCSdk: NSObject {
      */
     @objc(computePrepareDeviceArchiveMPCOperation:withPasscode:withResolver:withRejecter:)
     func computePrepareDeviceArchiveMPCOperation(_ mpcData: NSString, passcode: NSString, resolve: RCTPromiseResolveBlock, reject: RCTPromiseRejectBlock) {
-        if self.sdk == nil {
-            reject(self.mpcSdkErr, self.uninitializedErr, nil)
-            return
+        if failIfUninitialized(reject) {
+            return;
         }
-
-        do {
-            try self.sdk?.computePrepareDeviceArchiveMPCOperation(mpcData as String, passcode: passcode as String)
-            resolve("success" as NSString)
-        } catch {
-            reject(self.mpcSdkErr, error.localizedDescription, nil)
-        }
+        
+        Operation(self.sdk!.computePrepareDeviceArchiveMPCOperation(mpcData as String, passcode: passcode as String)).bridge(resolve: resolve, reject: reject)
     }
 
     /**
@@ -168,17 +117,11 @@ class MPCSdk: NSObject {
      */
     @objc(computePrepareDeviceBackupMPCOperation:withPasscode:withResolver:withRejecter:)
     func computePrepareDeviceBackupMPCOperation(_ mpcData: NSString, passcode: NSString, resolve: RCTPromiseResolveBlock, reject: RCTPromiseRejectBlock) {
-        if self.sdk == nil {
-            reject(self.mpcSdkErr, self.uninitializedErr, nil)
-            return
+        if failIfUninitialized(reject) {
+            return;
         }
-
-        do {
-            try self.sdk?.computePrepareDeviceBackupMPCOperation(mpcData as String, passcode: passcode as String)
-            resolve("success" as NSString)
-        } catch {
-            reject(self.mpcSdkErr, error.localizedDescription, nil)
-        }
+        
+        Operation(self.sdk!.computePrepareDeviceBackupMPCOperation(mpcData as String, passcode: passcode as String)).bridge(resolve: resolve, reject: reject)
     }
 
     /**
@@ -187,20 +130,14 @@ class MPCSdk: NSObject {
      */
     @objc(computeAddDeviceMPCOperation:withPasscode:withDeviceBackup:withResolver:withRejecter:)
     func computeAddDeviceMPCOperation(_ mpcData: NSString, passcode: NSString, deviceBackup: NSString, resolve: RCTPromiseResolveBlock, reject: RCTPromiseRejectBlock) {
-        if self.sdk == nil {
-            reject(self.mpcSdkErr, self.uninitializedErr, nil)
-            return
+        if failIfUninitialized(reject) {
+            return;
         }
-
-        do {
-            try self.sdk?.computeAddDeviceMPCOperation(
-                mpcData as String,
-                passcode: passcode as String,
-                deviceBackup: deviceBackup as String)
-            resolve("success" as NSString)
-        } catch {
-            reject(self.mpcSdkErr, error.localizedDescription, nil)
-        }
+        
+        Operation(self.sdk!.computeAddDeviceMPCOperation(
+            mpcData as String,
+            passcode: passcode as String,
+            deviceBackup: deviceBackup as String)).bridge(resolve: resolve, reject: reject)
     }
 
     /**
@@ -211,22 +148,13 @@ class MPCSdk: NSObject {
     @objc(exportPrivateKeys:withPasscode:withResolver:withRejecter:)
     func exportPrivateKeys(_ mpcKeyExportMetadata: NSString, passcode: NSString, resolve: RCTPromiseResolveBlock,
                            reject: RCTPromiseRejectBlock) {
-        if self.sdk == nil {
-            reject(self.mpcSdkErr, self.uninitializedErr, nil)
-            return
+        if failIfUninitialized(reject) {
+            return;
         }
-
-        do {
-            let response = try self.sdk?.exportPrivateKeys(
-                mpcKeyExportMetadata as String,
-                passcode: passcode as String)
-            // swiftlint:disable force_cast
-            let res = try JSONSerialization.jsonObject(with: response!) as! NSArray
-            // swiftlint:enable force_cast
-            resolve(res)
-        } catch {
-            reject(self.mpcSdkErr, error.localizedDescription, nil)
-        }
+        
+        Operation(self.sdk?.exportPrivateKeys(
+            mpcKeyExportMetadata as String,
+            passcode: passcode as String)).bridge(resolve: resolve, reject: reject)
     }
 
     /**
@@ -235,18 +163,10 @@ class MPCSdk: NSObject {
      */
     @objc(exportDeviceBackup:withRejecter:)
     func exportDeviceBackup(_ resolve: @escaping RCTPromiseResolveBlock, reject: @escaping RCTPromiseRejectBlock) {
-        if self.sdk == nil {
-            reject(self.mpcSdkErr, self.uninitializedErr, nil)
+        if failIfUninitialized(reject) {
+            return;
         }
 
-        let callback: (String?, Error?) -> Void = { data, error in
-            if let error = error {
-                reject(self.mpcSdkErr, error.localizedDescription, nil)
-            } else {
-                resolve(data ?? "")
-            }
-        }
-
-        self.sdk?.exportDeviceBackup(wrapGo(callback))
+        Operation(self.sdk!.exportDeviceBackup()).bridge(resolve: resolve, reject: reject)
     }
 }

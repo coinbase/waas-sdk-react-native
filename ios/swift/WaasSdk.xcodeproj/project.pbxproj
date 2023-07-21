@@ -16,6 +16,9 @@
 		4C54C40C2A69C7C000545269 /* Gomobile.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C54C40B2A69C7C000545269 /* Gomobile.swift */; };
 		4C54C40F2A69C8BF00545269 /* WaasSdkGo.xcframework in Frameworks */ = {isa = PBXBuildFile; fileRef = 4C54C40E2A69C8BF00545269 /* WaasSdkGo.xcframework */; };
 		4C54C4132A69CAED00545269 /* WaasError.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C54C4122A69CAED00545269 /* WaasError.swift */; };
+		4C8445AC2A69E2DB00980DA7 /* libc++.tbd in Frameworks */ = {isa = PBXBuildFile; fileRef = 4C8445AB2A69E2DB00980DA7 /* libc++.tbd */; };
+		4C8445AE2A69E2EB00980DA7 /* libresolv.tbd in Frameworks */ = {isa = PBXBuildFile; fileRef = 4C8445AD2A69E2EB00980DA7 /* libresolv.tbd */; };
+		4C8445B02A69E35800980DA7 /* LocalAuthentication.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 4C8445AF2A69E35800980DA7 /* LocalAuthentication.framework */; };
 		B1DDD97303751744CC91297C /* Pods_WaasSdk.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 86115EF5DA134F71FC389ECF /* Pods_WaasSdk.framework */; };
 /* End PBXBuildFile section */
 
@@ -32,6 +35,9 @@
 		4C54C40B2A69C7C000545269 /* Gomobile.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Gomobile.swift; sourceTree = "<group>"; };
 		4C54C40E2A69C8BF00545269 /* WaasSdkGo.xcframework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcframework; path = WaasSdkGo.xcframework; sourceTree = "<group>"; };
 		4C54C4122A69CAED00545269 /* WaasError.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WaasError.swift; sourceTree = "<group>"; };
+		4C8445AB2A69E2DB00980DA7 /* libc++.tbd */ = {isa = PBXFileReference; lastKnownFileType = "sourcecode.text-based-dylib-definition"; name = "libc++.tbd"; path = "usr/lib/libc++.tbd"; sourceTree = SDKROOT; };
+		4C8445AD2A69E2EB00980DA7 /* libresolv.tbd */ = {isa = PBXFileReference; lastKnownFileType = "sourcecode.text-based-dylib-definition"; name = libresolv.tbd; path = usr/lib/libresolv.tbd; sourceTree = SDKROOT; };
+		4C8445AF2A69E35800980DA7 /* LocalAuthentication.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = LocalAuthentication.framework; path = System/Library/Frameworks/LocalAuthentication.framework; sourceTree = SDKROOT; };
 		86115EF5DA134F71FC389ECF /* Pods_WaasSdk.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_WaasSdk.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
@@ -40,6 +46,9 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				4C8445B02A69E35800980DA7 /* LocalAuthentication.framework in Frameworks */,
+				4C8445AE2A69E2EB00980DA7 /* libresolv.tbd in Frameworks */,
+				4C8445AC2A69E2DB00980DA7 /* libc++.tbd in Frameworks */,
 				4C54C40F2A69C8BF00545269 /* WaasSdkGo.xcframework in Frameworks */,
 				B1DDD97303751744CC91297C /* Pods_WaasSdk.framework in Frameworks */,
 			);
@@ -84,6 +93,9 @@
 		4C54C40D2A69C8BF00545269 /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				4C8445AF2A69E35800980DA7 /* LocalAuthentication.framework */,
+				4C8445AD2A69E2EB00980DA7 /* libresolv.tbd */,
+				4C8445AB2A69E2DB00980DA7 /* libc++.tbd */,
 				4C54C40E2A69C8BF00545269 /* WaasSdkGo.xcframework */,
 				86115EF5DA134F71FC389ECF /* Pods_WaasSdk.framework */,
 			);
@@ -343,7 +355,7 @@
 			baseConfigurationReference = 386707A6D40185B633E9750A /* Pods-WaasSdk.debug.xcconfig */;
 			buildSettings = {
 				CLANG_ENABLE_MODULES = YES;
-				CODE_SIGN_STYLE = Automatic;
+				CODE_SIGN_STYLE = Manual;
 				CURRENT_PROJECT_VERSION = 1;
 				DEFINES_MODULE = YES;
 				DYLIB_COMPATIBILITY_VERSION = 1;
@@ -352,6 +364,7 @@
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_KEY_NSHumanReadableCopyright = "";
 				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
+				IPHONEOS_DEPLOYMENT_TARGET = 13.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -376,7 +389,7 @@
 			baseConfigurationReference = 13B4F7ECE157014B11CEA0FA /* Pods-WaasSdk.release.xcconfig */;
 			buildSettings = {
 				CLANG_ENABLE_MODULES = YES;
-				CODE_SIGN_STYLE = Automatic;
+				CODE_SIGN_STYLE = Manual;
 				CURRENT_PROJECT_VERSION = 1;
 				DEFINES_MODULE = YES;
 				DYLIB_COMPATIBILITY_VERSION = 1;
@@ -385,6 +398,7 @@
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_KEY_NSHumanReadableCopyright = "";
 				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
+				IPHONEOS_DEPLOYMENT_TARGET = 13.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",

@@ -21,5 +21,5 @@ Pod::Spec.new do |s|
   s.vendored_frameworks = 'ios/swift/WaasSdkGo.xcframework', 'ios/swift/openssl_libcrypto.xcframework'
 
   s.framework = "LocalAuthentication"
-  s.libraries = 'resolv'
+  s.libraries = 'resolv', 'c++'
 end

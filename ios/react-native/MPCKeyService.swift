@@ -1,19 +1,24 @@
 import Foundation
-import WaasSdkGo
 
-@objc(MPCKeyService)
+@objc
 class MPCKeyService: NSObject {
-    // The URL of the MPCKeyService.
-    let mpcKeyServiceUrl = "https://api.developer.coinbase.com/waas/mpc_keys"
 
     // The error code for MPCKeyService-related errors.
     let mpcKeyServiceErr = "E_MPC_KEY_SERVICE"
 
-    // The error message for calls made without initializing SDK.
-    let uninitializedErr = "MPCKeyService must be initialized"
-
     // The handle to the Go MPCKeyService client.
-    var keyClient: V1MPCKeyServiceProtocol?
+    var keyClient: WaasSdk.MPCKeyService?
+    
+    
+    // bails if keyClient isn't initialized.
+    func failIfUnitialized(reject: RCTPromiseRejectBlock) -> bool {
+        if (keyClient == nil) {
+            reject(self.mpcKeyServiceErr, self.uninitializedErr, nil)
+            return true;
+        }
+        
+        return false;
+    }
 
     /**
      Initializes the MPCKeyService  with the given parameters.
@@ -23,16 +28,14 @@ class MPCKeyService: NSObject {
     func initialize(_ apiKeyName: NSString, privateKey: NSString,
                     resolve: RCTPromiseResolveBlock, reject: RCTPromiseRejectBlock) {
         var error: NSError?
-        keyClient = V1NewMPCKeyService(
-            mpcKeyServiceUrl as String,
-            apiKeyName as String,
-            privateKey as String,
-            &error)
+        keyClient = WaasSdk.MPCKeyService(
+            apiKeyName,
+            privateKey)
 
         if error != nil {
             reject(mpcKeyServiceErr, error!.localizedDescription, nil)
         } else {
-            resolve("success" as NSString)
+            resolve(nil)
         }
     }
 
@@ -41,19 +44,14 @@ class MPCKeyService: NSObject {
      */
     @objc(registerDevice:withRejecter:)
     func registerDevice(_ resolve: RCTPromiseResolveBlock, reject: RCTPromiseRejectBlock) {
-        if self.keyClient == nil {
-            reject(self.mpcKeyServiceErr, self.uninitializedErr, nil)
+        if failIfUnitialized(reject) {
             return
         }
-
-        do {
-            let device = try self.keyClient?.registerDevice()
-            let res: NSDictionary = [
+        
+        Operation(self.keyClient!.registerDevice()).bridge(resolve: resolve, reject: reject) { device in
+            return [
                 "Name": device?.name as Any
             ]
-            resolve(res)
-        } catch {
-            reject(self.mpcKeyServiceErr, error.localizedDescription, nil)
         }
     }
 
@@ -66,25 +64,16 @@ class MPCKeyService: NSObject {
     @objc(pollForPendingDeviceGroup:withPollInterval:withResolver:withRejecter:)
     func pollForPendingDeviceGroup(_ deviceGroup: NSString, pollInterval: NSNumber,
                                    resolve: @escaping RCTPromiseResolveBlock, reject: @escaping RCTPromiseRejectBlock) {
-        // Polling occurs asynchronously, so dispatch it.
-        let dispatchWorkItem = DispatchWorkItem.init(qos: DispatchQoS.userInitiated, block: {
-            if self.keyClient == nil {
-                reject(self.mpcKeyServiceErr, self.uninitializedErr, nil)
-                return
-            }
-
-            do {
-                let pendingDeviceGroupData = try self.keyClient?.pollPendingDeviceGroup(
-                    deviceGroup as String,
-                    pollInterval: pollInterval.int64Value)
+        if failIfUnitialized(reject) {
+            return
+        }
+        
+        Operation(self.keyClient!.pollPendingDeviceGroup(
+            deviceGroup as String,
+            pollInterval: pollInterval.int64Value)).bridge(resolve: resolve, reject: reject) { pendingDeviceGroupData in
                 let res = try JSONSerialization.jsonObject(with: pendingDeviceGroupData!) as? NSArray
-                resolve(res)
-            } catch {
-                reject(self.mpcKeyServiceErr, error.localizedDescription, nil)
+                return res;
             }
-        })
-
-        DispatchQueue.global().async(execute: dispatchWorkItem)
     }
 
     /**
@@ -95,20 +84,11 @@ class MPCKeyService: NSObject {
      */
     @objc(stopPollingForPendingDeviceGroup:withRejecter:)
     func stopPollingForPendingDeviceGroup(resolve: @escaping RCTPromiseResolveBlock, reject: @escaping RCTPromiseRejectBlock) {
-        if self.keyClient == nil {
-            reject(self.mpcKeyServiceErr, self.uninitializedErr, nil)
+        if failIfUnitialized(reject) {
             return
         }
 
-        let callback: (String?, Error?) -> Void = { data, error in
-            if let error = error {
-                reject(self.mpcKeyServiceErr, error.localizedDescription, nil)
-            } else {
-                resolve(data ?? "")
-            }
-        }
-
-        self.keyClient?.stopPollingPendingDeviceBackups(wrapGo(callback))
+        Operation(self.keyClient!.stopPollingPendingDeviceBackups()).bridge(resolve: resolve, reject: reject)
     }
 
     /**
@@ -118,22 +98,13 @@ class MPCKeyService: NSObject {
     @objc(createSignatureFromTx:withTransaction:withResolver:withRejecter:)
     func createSignatureFromTx(_ parent: NSString, transaction: NSDictionary,
                                resolve: @escaping RCTPromiseResolveBlock, reject: @escaping RCTPromiseRejectBlock) {
-        if self.keyClient == nil {
-            reject(self.mpcKeyServiceErr, self.uninitializedErr, nil)
+        if failIfUnitialized(reject) {
             return
-        }
-
-        let callback: (String?, Error?) -> Void = { data, error in
-            if let error = error {
-                reject(self.mpcKeyServiceErr, error.localizedDescription, nil)
-            } else {
-                resolve(data ?? "")
-            }
         }
 
         do {
             let serializedTx = try JSONSerialization.data(withJSONObject: transaction)
-            self.keyClient?.createTxSignature(parent as String, tx: serializedTx, receiver: wrapGo(callback))
+            Operation(self.keyClient?.createTxSignature(parent as String, tx: serializedTx)).bridge(resolve: resolve, reject: reject)
         } catch {
             reject(self.mpcKeyServiceErr, error.localizedDescription, nil)
         }
@@ -148,25 +119,13 @@ class MPCKeyService: NSObject {
     @objc(pollForPendingSignatures:withPollInterval:withResolver:withRejecter:)
     func pollForPendingSignatures(_ deviceGroup: NSString, pollInterval: NSNumber,
                                   resolve: @escaping RCTPromiseResolveBlock, reject: @escaping RCTPromiseRejectBlock) {
-        // Polling occurs asynchronously, so dispatch it.
-        let dispatchWorkItem = DispatchWorkItem.init(qos: DispatchQoS.userInitiated, block: {
-            if self.keyClient == nil {
-                reject(self.mpcKeyServiceErr, self.uninitializedErr, nil)
-                return
-            }
-
-            do {
-                let pendingSignaturesData = try self.keyClient?.pollPendingSignatures(
-                    deviceGroup as String,
-                    pollInterval: pollInterval.int64Value)
-                let res = try JSONSerialization.jsonObject(with: pendingSignaturesData!) as? NSArray
-                resolve(res)
-            } catch {
-                reject(self.mpcKeyServiceErr, error.localizedDescription, nil)
-            }
-        })
-
-        DispatchQueue.global().async(execute: dispatchWorkItem)
+        if failIfUnitialized(reject) {
+            return
+        }
+        
+        Operation(self.keyClient!.pollPendingSignatures(
+            deviceGroup as String,
+            pollInterval: pollInterval.int64Value)).bridge(resolve: resolve, reject: reject)
     }
 
     /**
@@ -177,20 +136,11 @@ class MPCKeyService: NSObject {
      */
     @objc(stopPollingForPendingSignatures:withRejecter:)
     func stopPollingForPendingSignatures(resolve: @escaping RCTPromiseResolveBlock, reject: @escaping RCTPromiseRejectBlock) {
-        if self.keyClient == nil {
-            reject(self.mpcKeyServiceErr, self.uninitializedErr, nil)
+        if failIfUnitialized(reject) {
             return
         }
 
-        let callback: (String?, Error?) -> Void = { data, error in
-            if let error = error {
-                reject(self.mpcKeyServiceErr, error.localizedDescription, nil)
-            } else {
-                resolve(data ?? "")
-            }
-        }
-
-        self.keyClient?.stopPollingPendingSignatures(wrapGo(callback))
+        Operation(self.keyClient?.stopPollingPendingSignatures()).bridge(resolve: resolve, reject: reject)
     }
 
     /**
@@ -200,23 +150,16 @@ class MPCKeyService: NSObject {
     @objc(waitPendingSignature:withResolver:withRejecter:)
     func waitPendingSignature(_ operation: NSString,
                               resolve: RCTPromiseResolveBlock, reject: RCTPromiseRejectBlock) {
-        if self.keyClient == nil {
-            reject(self.mpcKeyServiceErr, self.uninitializedErr, nil)
+        if failIfUnitialized(reject) {
             return
         }
-
-        var signature: V1Signature?
-
-        do {
-            signature = try self.keyClient?.waitPendingSignature(operation as String)
-            let res: NSDictionary = [
+        
+        Operation(self.keyClient?.waitPendingSignature(operation as String)).bridge(resolve: resolve, reject: reject) { signature in
+            return [
                 "Name": signature?.name as Any,
                 "Payload": signature?.payload as Any,
                 "SignedPayload": signature?.signedPayload as Any
             ]
-            resolve(res)
-        } catch {
-            reject(self.mpcKeyServiceErr, error.localizedDescription, nil)
         }
     }
     /**
@@ -226,32 +169,17 @@ class MPCKeyService: NSObject {
     @objc(getSignedTransaction:withSignature:withResolver:withRejecter:)
     func getSignedTransaction(_ transaction: NSDictionary, signature: NSDictionary,
                               resolve: RCTPromiseResolveBlock, reject: RCTPromiseRejectBlock) {
-        if self.keyClient == nil {
-            reject(self.mpcKeyServiceErr, self.uninitializedErr, nil)
+        if failIfUnitialized(reject) {
             return
         }
-
-        do {
-            let serializedTx = try JSONSerialization.data(withJSONObject: transaction)
-
-            let goSignature = V1Signature()
-            // swiftlint:disable force_cast
-            goSignature.name = signature["Name"] as! String
-            goSignature.payload = signature["Payload"] as! String
-            goSignature.signedPayload = signature["SignedPayload"] as! String
-            // swiftlint:enable force_cast
-
-            let signedTransaction = try self.keyClient?.getSignedTransaction(serializedTx, signature: goSignature)
-
-            let res: NSDictionary = [
+        
+        Operation(self.keyClient!.getSignedTransaction(transaction, signature: signature)).bridge(resolve: resolve, reject: reject) { signedTransaction in
+            return [
                 "Transaction": transaction,
                 "Signature": signature,
                 "RawTransaction": signedTransaction?.rawTransaction as Any,
                 "TransactionHash": signedTransaction?.transactionHash as Any
             ]
-            resolve(res)
-        } catch {
-            reject(self.mpcKeyServiceErr, error.localizedDescription, nil)
         }
     }
 
@@ -260,24 +188,17 @@ class MPCKeyService: NSObject {
      */
     @objc(getDeviceGroup:withResolver:withRejecter:)
     func getDeviceGroup(_ name: NSString, resolve: RCTPromiseResolveBlock, reject: RCTPromiseRejectBlock) {
-        if self.keyClient == nil {
-            reject(self.mpcKeyServiceErr, self.uninitializedErr, nil)
+        if failIfUnitialized(reject) {
             return
         }
-
-        do {
-            let deviceGroupRes = try self.keyClient?.getDeviceGroup(name as String)
-
+        
+        Operation(self.keyClient?.getDeviceGroup(name as String)).bridge(resolve: resolve, reject: reject) { deviceGroupRes in
             let devices = try JSONSerialization.jsonObject(with: deviceGroupRes!.devices! as Data)
-
-            let res: NSDictionary = [
+            return [
                 "Name": deviceGroupRes?.name as Any,
                 "MPCKeyExportMetadata": deviceGroupRes?.mpcKeyExportMetadata as Any,
                 "Devices": devices as Any
             ]
-            resolve(res)
-        } catch {
-            reject(self.mpcKeyServiceErr, error.localizedDescription, nil)
         }
     }
 
@@ -288,21 +209,12 @@ class MPCKeyService: NSObject {
     @objc(prepareDeviceArchive:withDevice:withResolver:withRejecter:)
     func prepareDeviceArchive(_ deviceGroup: NSString, device: NSString,
                               resolve: @escaping RCTPromiseResolveBlock, reject: @escaping RCTPromiseRejectBlock) {
-        if self.keyClient == nil {
-            reject(self.mpcKeyServiceErr, self.uninitializedErr, nil)
+        if failIfUnitialized(reject) {
             return
         }
-
-        let callback: (String?, Error?) -> Void = { data, error in
-            if let error = error {
-                reject(self.mpcKeyServiceErr, error.localizedDescription, nil)
-            } else {
-                resolve(data ?? "")
-            }
-        }
-
-        self.keyClient?.prepareDeviceArchive(
-            deviceGroup as String, device: device as String, receiver: wrapGo(callback))
+        
+        Operation(self.keyClient!.prepareDeviceArchive(
+            deviceGroup as String, device: device as String)).bridge(resolve: resolve, reject: reject)
     }
 
     /**
@@ -314,27 +226,11 @@ class MPCKeyService: NSObject {
     @objc(pollForPendingDeviceArchives:withPollInterval:withResolver:withRejecter:)
     func pollForPendingDeviceArchives(_ deviceGroup: NSString, pollInterval: NSNumber,
                                       resolve: @escaping RCTPromiseResolveBlock, reject: @escaping RCTPromiseRejectBlock) {
-        // Polling occurs asynchronously, so dispatch it.
-        let dispatchWorkItem = DispatchWorkItem.init(qos: DispatchQoS.userInitiated, block: {
-            if self.keyClient == nil {
-                reject(self.mpcKeyServiceErr, self.uninitializedErr, nil)
-                return
-            }
-
-            do {
-                let pendingDeviceArchiveData = try self.keyClient?.pollPendingDeviceArchives(
-                    deviceGroup as String,
-                    pollInterval: pollInterval.int64Value)
-                // swiftlint:disable force_cast
-                let res = try JSONSerialization.jsonObject(with: pendingDeviceArchiveData!) as! NSArray
-                // swiftlint:enable force_cast
-                resolve(res)
-            } catch {
-                reject(self.mpcKeyServiceErr, error.localizedDescription, nil)
-            }
-        })
-
-        DispatchQueue.global().async(execute: dispatchWorkItem)
+        if failIfUnitialized(reject) {
+            return
+        }
+        
+        Operation(self.keyClient!.pollPendingDeviceArchives).bridge(resolve: resolve, reject: reject)
     }
 
     /**
@@ -344,20 +240,11 @@ class MPCKeyService: NSObject {
      */
     @objc(stopPollingForPendingDeviceArchives:withRejecter:)
     func stopPollingForPendingDeviceArchives(resolve: @escaping RCTPromiseResolveBlock, reject: @escaping RCTPromiseRejectBlock) {
-        if self.keyClient == nil {
-            reject(self.mpcKeyServiceErr, self.uninitializedErr, nil)
+        if failIfUnitialized(reject) {
             return
         }
 
-        let callback: (String?, Error?) -> Void = { data, error in
-            if let error = error {
-                reject(self.mpcKeyServiceErr, error.localizedDescription, nil)
-            } else {
-                resolve(data ?? "")
-            }
-        }
-
-        self.keyClient?.stopPollingPendingDeviceArchives(wrapGo(callback))
+        Operation(self.keyClient!.stopPollingPendingDeviceArchives()).bridge(resolve: resolve, reject: reject)
     }
 
     /**
@@ -367,21 +254,13 @@ class MPCKeyService: NSObject {
     @objc(prepareDeviceBackup:withDevice:withResolver:withRejecter:)
     func prepareDeviceBackup(_ deviceGroup: NSString, device: NSString,
                              resolve: @escaping RCTPromiseResolveBlock, reject: @escaping RCTPromiseRejectBlock) {
-        if self.keyClient == nil {
-            reject(self.mpcKeyServiceErr, self.uninitializedErr, nil)
+        if failIfUnitialized(reject) {
             return
         }
-
-        let callback: (String?, Error?) -> Void = { data, error in
-            if let error = error {
-                reject(self.mpcKeyServiceErr, error.localizedDescription, nil)
-            } else {
-                resolve(data ?? "")
-            }
-        }
-
+        
+        Operation(
         self.keyClient?.prepareDeviceBackup(
-            deviceGroup as String, device: device as String, receiver: wrapGo(callback))
+            deviceGroup as String, device: device as String)).bridge(resolve: resolve, reject: reject)
     }
 
     /**
@@ -393,27 +272,13 @@ class MPCKeyService: NSObject {
     @objc(pollForPendingDeviceBackups:withPollInterval:withResolver:withRejecter:)
     func pollForPendingDeviceBackups(_ deviceGroup: NSString, pollInterval: NSNumber,
                                      resolve: @escaping RCTPromiseResolveBlock, reject: @escaping RCTPromiseRejectBlock) {
-        // Polling occurs asynchronously, so dispatch it.
-        let dispatchWorkItem = DispatchWorkItem.init(qos: DispatchQoS.userInitiated, block: {
-            if self.keyClient == nil {
-                reject(self.mpcKeyServiceErr, self.uninitializedErr, nil)
-                return
-            }
-
-            do {
-                let pendingDeviceBackupData = try self.keyClient?.pollPendingDeviceBackups(
-                    deviceGroup as String,
-                    pollInterval: pollInterval.int64Value)
-                // swiftlint:disable force_cast
-                let res = try JSONSerialization.jsonObject(with: pendingDeviceBackupData!) as! NSArray
-                // swiftlint:enable force_cast
-                resolve(res)
-            } catch {
-                reject(self.mpcKeyServiceErr, error.localizedDescription, nil)
-            }
-        })
-
-        DispatchQueue.global().async(execute: dispatchWorkItem)
+        if failIfUnitialized(reject) {
+            return
+        }
+        
+        Operation(self.keyClient?.pollPendingDeviceBackups(
+            deviceGroup as String,
+            pollInterval: pollInterval.int64Value)).bridge(resolve: resolve, reject: reject)
     }
 
     /**
@@ -423,20 +288,11 @@ class MPCKeyService: NSObject {
      */
     @objc(stopPollingForPendingDeviceBackups:withRejecter:)
     func stopPollingForPendingDeviceBackups(resolve: @escaping RCTPromiseResolveBlock, reject: @escaping RCTPromiseRejectBlock) {
-        if self.keyClient == nil {
-            reject(self.mpcKeyServiceErr, self.uninitializedErr, nil)
+        if failIfUnitialized(reject) {
             return
         }
-
-        let callback: (String?, Error?) -> Void = { data, error in
-            if let error = error {
-                reject(self.mpcKeyServiceErr, error.localizedDescription, nil)
-            } else {
-                resolve(data ?? "")
-            }
-        }
-
-        self.keyClient?.stopPollingPendingDeviceBackups(wrapGo(callback))
+        
+        Operation(self.keyClient?.stopPollingPendingDeviceBackups()).bridge(resolve: resolve, reject: reject)
     }
 
     /**
@@ -446,21 +302,12 @@ class MPCKeyService: NSObject {
     @objc(addDevice:withDevice:withResolver:withRejecter:)
     func addDevice(_ deviceGroup: NSString, device: NSString,
                    resolve: @escaping RCTPromiseResolveBlock, reject: @escaping RCTPromiseRejectBlock) {
-        if self.keyClient == nil {
-            reject(self.mpcKeyServiceErr, self.uninitializedErr, nil)
+        if failIfUnitialized(reject) {
             return
         }
 
-        let callback: (String?, Error?) -> Void = { data, error in
-            if let error = error {
-                reject(self.mpcKeyServiceErr, error.localizedDescription, nil)
-            } else {
-                resolve(data ?? "")
-            }
-        }
-
-        self.keyClient?.addDevice(
-            deviceGroup as String, device: device as String, receiver: wrapGo(callback))
+        Operation(self.keyClient?.addDevice(
+            deviceGroup as String, device: device as String)).bridge(resolve: resolve, reject: reject)
     }
 
     /**
@@ -472,27 +319,13 @@ class MPCKeyService: NSObject {
     @objc(pollForPendingDevices:withPollInterval:withResolver:withRejecter:)
     func pollForPendingDevices(_ deviceGroup: NSString, pollInterval: NSNumber,
                                resolve: @escaping RCTPromiseResolveBlock, reject: @escaping RCTPromiseRejectBlock) {
-        // Polling occurs asynchronously, so dispatch it.
-        let dispatchWorkItem = DispatchWorkItem.init(qos: DispatchQoS.userInitiated, block: {
-            if self.keyClient == nil {
-                reject(self.mpcKeyServiceErr, self.uninitializedErr, nil)
-                return
-            }
-
-            do {
-                let pendingDeviceData = try self.keyClient?.pollPendingDevices(
-                    deviceGroup as String,
-                    pollInterval: pollInterval.int64Value)
-                // swiftlint:disable force_cast
-                let res = try JSONSerialization.jsonObject(with: pendingDeviceData!) as! NSArray
-                // swiftlint:enable force_cast
-                resolve(res)
-            } catch {
-                reject(self.mpcKeyServiceErr, error.localizedDescription, nil)
-            }
-        })
-
-        DispatchQueue.global().async(execute: dispatchWorkItem)
+        if failIfUnitialized(reject) {
+            return
+        }
+        
+        Operation(self.keyClient?.pollPendingDevices(
+            deviceGroup as String,
+            pollInterval: pollInterval.int64Value)).bridge(resolve: resolve, reject: reject)
     }
 
     /**
@@ -502,19 +335,10 @@ class MPCKeyService: NSObject {
      */
     @objc(stopPollingForPendingDevices:withRejecter:)
     func stopPollingForPendingDevices(resolve: @escaping RCTPromiseResolveBlock, reject: @escaping RCTPromiseRejectBlock) {
-        if self.keyClient == nil {
-            reject(self.mpcKeyServiceErr, self.uninitializedErr, nil)
+        if failIfUnitialized(reject) {
             return
         }
 
-        let callback: (String?, Error?) -> Void = { data, error in
-            if let error = error {
-                reject(self.mpcKeyServiceErr, error.localizedDescription, nil)
-            } else {
-                resolve(data ?? "")
-            }
-        }
-
-        self.keyClient?.stopPollingPendingDevices(wrapGo(callback))
+        Operation(self.keyClient?.stopPollingPendingDevices()).bridge(resolve: resolve, reject: reject)
     }
 }

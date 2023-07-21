@@ -171,7 +171,7 @@ class MPCKeyService: NSObject {
      Gets the signed transaction using the given inputs.
      Resolves with the SignedTransaction on success; rejects with an error otherwise.
      */
-    func getSignedTransaction(_ transaction: NSDictionary, signature: NSDictionary) -> Future<NSDictionary, WaasError> {
+    func getSignedTransaction(_ transaction: NSDictionary, signature: NSDictionary) -> Future<V1Signature, WaasError> {
         return Future() { promise in
             DispatchQueue.main.async(execute: {
                 do {
@@ -184,14 +184,7 @@ class MPCKeyService: NSObject {
                     // swiftlint:enable force_cast
 
                     let signedTransaction = try self.keyClient?.getSignedTransaction(serializedTx, signature: goSignature)
-
-                    let res: NSDictionary = [
-                        "Transaction": transaction,
-                        "Signature": signature,
-                        "RawTransaction": signedTransaction?.rawTransaction as Any,
-                        "TransactionHash": signedTransaction?.transactionHash as Any
-                    ]
-                    promise(Result.success(res))
+                    promise(Result.success(signedTransaction))
                 } catch {
                     promise(Result.failure(WaasError.mpcKeyServiceUnspecifiedError(error as NSError)))
                 }
@@ -202,18 +195,12 @@ class MPCKeyService: NSObject {
     /**
      Gets a DeviceGroup with the given name. Resolves with the DeviceGroup object on success; rejects with an error otherwise.
      */
-    func getDeviceGroup(_ name: NSString) -> Future<NSDictionary, WaasError>{
+    func getDeviceGroup(_ name: NSString) -> Future<V1DeviceGroup, WaasError>{
         return Future() { promise in
             DispatchQueue.main.async(execute: {
                 do {
                     let deviceGroupRes = try self.keyClient?.getDeviceGroup(name as String)
-                    let devices = try JSONSerialization.jsonObject(with: deviceGroupRes!.devices! as Data)
-                    let res: NSDictionary = [
-                        "Name": deviceGroupRes?.name as Any,
-                        "MPCKeyExportMetadata": deviceGroupRes?.mpcKeyExportMetadata as Any,
-                        "Devices": devices as Any
-                    ]
-                    promise(Result.success(res))
+                    promise(Result.success(deviceGroupRes!))
                 } catch {
                     promise(Result.failure(WaasError.mpcKeyServiceUnspecifiedError(error as NSError)))
                 }
