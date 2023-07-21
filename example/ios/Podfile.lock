@@ -425,10 +425,10 @@ PODS:
     - React-Core
     - React-RCTImage
   - SocketRocket (0.6.1)
-  - waas-sdk (0.0.1)
   - waas-sdk-react-native (2.0.2):
     - React-Core
-    - waas-sdk
+    - WaasSdk
+  - WaasSdk (0.0.1)
   - Yoga (1.14.0)
   - YogaKit (1.18.1):
     - Yoga (~> 1.14)
@@ -495,8 +495,8 @@ DEPENDENCIES:
   - ReactCommon/turbomodule/core (from `../node_modules/react-native/ReactCommon`)
   - "RNCClipboard (from `../node_modules/@react-native-clipboard/clipboard`)"
   - RNScreens (from `../node_modules/react-native-screens`)
-  - waas-sdk (from `../../waas-sdk.podspec`)
   - waas-sdk-react-native (from `../..`)
+  - WaasSdk (from `../../WaasSdk.podspec`)
   - Yoga (from `../node_modules/react-native/ReactCommon/yoga`)
 
 SPEC REPOS:
@@ -590,10 +590,10 @@ EXTERNAL SOURCES:
     :path: "../node_modules/@react-native-clipboard/clipboard"
   RNScreens:
     :path: "../node_modules/react-native-screens"
-  waas-sdk:
-    :path: "../../waas-sdk.podspec"
   waas-sdk-react-native:
     :path: "../.."
+  WaasSdk:
+    :path: "../../WaasSdk.podspec"
   Yoga:
     :path: "../node_modules/react-native/ReactCommon/yoga"
 
@@ -648,11 +648,11 @@ SPEC CHECKSUMS:
   RNCClipboard: 2834e1c4af68697089cdd455ee4a4cdd198fa7dd
   RNScreens: 218801c16a2782546d30bd2026bb625c0302d70f
   SocketRocket: f32cd54efbe0f095c4d7594881e52619cfe80b17
-  waas-sdk: e45ab8ecd9d4980dfbf8e4c5bfc017f139699591
-  waas-sdk-react-native: 28815c7f4ffe37d20c8dd798c057789837920db1
+  waas-sdk-react-native: 32c83a409bba56a4c1ee79fa7e5330fbc45b0b0e
+  WaasSdk: d274a50925292ce487de10cb83fc799f60d192ed
   Yoga: 5ed1699acbba8863755998a4245daa200ff3817b
   YogaKit: f782866e155069a2cca2517aafea43200b01fd5a
 
-PODFILE CHECKSUM: a56ed38bdad1ac23c388b247fd736a47d3a67635
+PODFILE CHECKSUM: f46abf234cf8122c1309f3cd74ec7947700c14f0
 
 COCOAPODS: 1.12.0

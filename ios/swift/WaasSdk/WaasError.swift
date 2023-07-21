@@ -1,6 +1,6 @@
 import Foundation
 
-enum WaasError: Error {
+public enum WaasError: Error {
     // Thrown when an invalid password is entered
     case mpcKeyServiceFailedToInitialize
     

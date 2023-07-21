@@ -3,7 +3,7 @@ import WaasSdkGo
 import Combine
 
 @objc
-class MPCWalletService: NSObject {
+public class MPCWalletService: NSObject {
     // The URL of the MPCWalletService.
     let mpcWalletServiceUrl = "https://api.developer.coinbase.com/waas/mpc_wallets"
 
@@ -20,7 +20,7 @@ class MPCWalletService: NSObject {
      Initializes the MPCWalletService with the given Cloud API Key parameters. Resolves with the string "success"
      on success; rejects with an error otherwise.
      */
-    init(_ apiKeyName: NSString, privateKey: NSString) throws {
+    public init(_ apiKeyName: NSString, privateKey: NSString) throws {
         var error: NSError?
 
         var _walletsClient = V1NewMPCWalletService(
@@ -40,7 +40,7 @@ class MPCWalletService: NSObject {
      Creates an MPCWallet with the given parameters.  Resolves with the response on success; rejects with an error
      otherwise.
      */
-    func createMPCWallet(_ parent: NSString, device: NSString) -> Future<V1CreateMPCWalletResponse, WaasError> {
+    public func createMPCWallet(_ parent: NSString, device: NSString) -> Future<V1CreateMPCWalletResponse, WaasError> {
         return Future() { promise in
             DispatchQueue.main.async(execute: {
                 do {
@@ -57,7 +57,7 @@ class MPCWalletService: NSObject {
      Waits for a pending MPCWallet with the given operation name. Resolves with the MPCWallet object on success;
      rejects with an error otherwise.
      */
-    func waitPendingMPCWallet(_ operation: NSString) -> Future<V1MPCWallet, WaasError> {
+    public func waitPendingMPCWallet(_ operation: NSString) -> Future<V1MPCWallet, WaasError> {
         return Future() { promise in
             DispatchQueue.main.async(execute: {
                 do {
@@ -74,7 +74,7 @@ class MPCWalletService: NSObject {
      Generates an Address within an MPCWallet. Resolves with the Address object on success;
      rejects with an error otherwise.
      */
-    func generateAddress(_ mpcWallet: NSString, network: NSString) -> Future<NSDictionary, WaasError> {
+    public func generateAddress(_ mpcWallet: NSString, network: NSString) -> Future<NSDictionary, WaasError> {
         return Future() { promise in
             DispatchQueue.main.async(execute: {
                 do {
@@ -91,7 +91,7 @@ class MPCWalletService: NSObject {
     /**
      Gets an Address with the given name. Resolves with the Address object on success; rejects with an error otherwise.
      */
-    func getAddress(_ name: NSString) -> Future<NSDictionary, WaasError> {
+    public func getAddress(_ name: NSString) -> Future<NSDictionary, WaasError> {
         return Future() { promise in
             DispatchQueue.main.async(execute: {
                 do {

@@ -3,7 +3,7 @@ import WaasSdkGo
 import Combine
 
 @objc
-class MPCSdk: NSObject {
+public class MPCSdk: NSObject {
 
     // The config to be used for MPCSdk initialization.
     let mpcSdkConfig = "default"
@@ -15,7 +15,7 @@ class MPCSdk: NSObject {
      Initializes the MPCSdk  with the given parameters.
      Resolves with the string "success" on success; rejects with an error otherwise.
      */
-    init(_ isSimulator: NSNumber) throws {
+    public init(_ isSimulator: NSNumber) throws {
         var error: NSError?
         let _sdk = V1NewMPCSdk(
             mpcSdkConfig as String,
@@ -42,7 +42,7 @@ class MPCSdk: NSObject {
      has been called for the Device. It resolves with the string "bootstrap complete" on successful initialization;
      or a rejection otherwise.
      */
-    func bootstrapDevice(_ passcode: NSString) -> Future<String, WaasError> {
+    public func bootstrapDevice(_ passcode: NSString) -> Future<String, WaasError> {
         return Future() { promise in
             DispatchQueue.main.async(execute: {
                 self.sdk.bootstrapDevice(passcode as String, receiver: goReturnsString(promise: promise, wrapAsError: self.wrapError))
@@ -57,7 +57,7 @@ class MPCSdk: NSObject {
      This function can be used when/if the end user forgets their old passcode.
      It resolves on success; a rejection otherwise.
      */
-    func resetPasscode(_ newPasscode: NSString) -> Future<Void, WaasError> {
+    public func resetPasscode(_ newPasscode: NSString) -> Future<Void, WaasError> {
         return Future() { promise in
             DispatchQueue.main.async(execute: {
                 do {
@@ -74,7 +74,7 @@ class MPCSdk: NSObject {
      Returns the data required to call RegisterDeviceAPI on MPCKeyService.
      Resolves with the RegistrationData on success; rejects with an error otherwise.
      */
-    func getRegistrationData() -> Future<String, WaasError> {
+    public func getRegistrationData() -> Future<String, WaasError> {
         return Future() { promise in
             DispatchQueue.main.async(execute: {
                 self.sdk.getRegistrationData(goReturnsString(promise: promise, wrapAsError: self.wrapError))
@@ -87,7 +87,7 @@ class MPCSdk: NSObject {
      MPCKeyService. This function can be used to compute MPCOperations of types: CreateDeviceGroup and CreateSignature.
      Resolves on success; rejects with an error otherwise.
      */
-    func computeMPCOperation(_ mpcData: NSString) -> Future<Void, WaasError> {
+    public func computeMPCOperation(_ mpcData: NSString) -> Future<Void, WaasError> {
         return Future() { promise in
             DispatchQueue.main.async(execute: {
                 do {
@@ -104,7 +104,7 @@ class MPCSdk: NSObject {
      Computes an MPC operation of type PrepareDeviceArchive, given mpcData from the response of ListMPCOperations API on
      MPCKeyService and passcode of the Device. Resolves on success; rejects with an error otherwise.
      */
-    func computePrepareDeviceArchiveMPCOperation(_ mpcData: NSString, passcode: NSString) -> Future<Void, WaasError> {
+    public func computePrepareDeviceArchiveMPCOperation(_ mpcData: NSString, passcode: NSString) -> Future<Void, WaasError> {
         return Future() { promise in
             DispatchQueue.main.async(execute: {
                 do {
@@ -121,7 +121,7 @@ class MPCSdk: NSObject {
      Computes an MPC operation of type PrepareDeviceBackup, given mpcData from the response of ListMPCOperations API on
      MPCKeyService and passcode of the Device. Resolves on success; rejects with an error otherwise.
      */
-    func computePrepareDeviceBackupMPCOperation(_ mpcData: NSString, passcode: NSString) -> Future<Void, WaasError> {
+    public func computePrepareDeviceBackupMPCOperation(_ mpcData: NSString, passcode: NSString) -> Future<Void, WaasError> {
         return Future() { promise in
             DispatchQueue.main.async(execute: {
                 do {
@@ -138,7 +138,7 @@ class MPCSdk: NSObject {
      Computes an MPC operation of type AddDevice, given mpcData from the response of ListMPCOperations API on
      MPCKeyService, passcode of the Device and device backup created with PrepareDeviceBackup operation. Resolves on success; rejects with an error otherwise.
      */
-    func computeAddDeviceMPCOperation(_ mpcData: NSString, passcode: NSString, deviceBackup: NSString) -> Future<Void, WaasError> {
+    public func computeAddDeviceMPCOperation(_ mpcData: NSString, passcode: NSString, deviceBackup: NSString) -> Future<Void, WaasError> {
         return Future() { promise in
             DispatchQueue.main.async(execute: {
                 do {
@@ -160,7 +160,7 @@ class MPCSdk: NSObject {
      exporting private keys that back EVM addresses. Resolves with ExportPrivateKeysResponse object on success;
      rejects with an error otherwise.
      */
-    func exportPrivateKeys(_ mpcKeyExportMetadata: NSString, passcode: NSString) -> Future<NSArray, WaasError> {
+    public func exportPrivateKeys(_ mpcKeyExportMetadata: NSString, passcode: NSString) -> Future<NSArray, WaasError> {
         return Future() { promise in
             DispatchQueue.main.async(execute: {
                 do {
@@ -182,7 +182,7 @@ class MPCSdk: NSObject {
      Exports device backup for the Device. The device backup is only available after the Device has computed PrepareDeviceBackup operation successfully.
      Resolves with backup data as a hex-encoded string on success; rejects with an error otherwise.
      */
-    func exportDeviceBackup() -> Future<String, WaasError> {
+    public func exportDeviceBackup() -> Future<String, WaasError> {
         return Future() { promise in
             DispatchQueue.main.async(execute: {
                 self.sdk.exportDeviceBackup(goReturnsString(promise: promise, wrapAsError: self.wrapError))

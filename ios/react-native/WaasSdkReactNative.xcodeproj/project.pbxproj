@@ -7,6 +7,14 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		4C3DFA5F2A6A132F00D51E7D /* MPCWalletService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C3DFA512A6A132F00D51E7D /* MPCWalletService.swift */; };
+		4C3DFA602A6A132F00D51E7D /* MPCSdk.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C3DFA572A6A132F00D51E7D /* MPCSdk.swift */; };
+		4C3DFA612A6A132F00D51E7D /* MPCSdkBridge.m in Sources */ = {isa = PBXBuildFile; fileRef = 4C3DFA582A6A132F00D51E7D /* MPCSdkBridge.m */; };
+		4C3DFA622A6A132F00D51E7D /* PoolServiceBridge.m in Sources */ = {isa = PBXBuildFile; fileRef = 4C3DFA592A6A132F00D51E7D /* PoolServiceBridge.m */; };
+		4C3DFA632A6A132F00D51E7D /* MPCWalletServiceBridge.m in Sources */ = {isa = PBXBuildFile; fileRef = 4C3DFA5A2A6A132F00D51E7D /* MPCWalletServiceBridge.m */; };
+		4C3DFA642A6A132F00D51E7D /* MPCKeyServiceBridge.m in Sources */ = {isa = PBXBuildFile; fileRef = 4C3DFA5B2A6A132F00D51E7D /* MPCKeyServiceBridge.m */; };
+		4C3DFA652A6A132F00D51E7D /* MPCKeyService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C3DFA5C2A6A132F00D51E7D /* MPCKeyService.swift */; };
+		4C3DFA662A6A132F00D51E7D /* PoolService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C3DFA5D2A6A132F00D51E7D /* PoolService.swift */; };
 		61AF07C1AFAB656399EF1CA1 /* Pods_WaasSdkReactNative.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 0512DA0688FDEC5DF49371A8 /* Pods_WaasSdkReactNative.framework */; };
 /* End PBXBuildFile section */
 
@@ -27,6 +35,21 @@
 		0B82B3AEC858A900ABA82213 /* Pods-WaasSdkReactNative.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-WaasSdkReactNative.release.xcconfig"; path = "Target Support Files/Pods-WaasSdkReactNative/Pods-WaasSdkReactNative.release.xcconfig"; sourceTree = "<group>"; };
 		134814201AA4EA6300B7C361 /* libWaasSdkReactNative.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = libWaasSdkReactNative.a; sourceTree = BUILT_PRODUCTS_DIR; };
 		3EA72372DE2AA939A76D409E /* Pods-WaasSdkReactNative.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-WaasSdkReactNative.debug.xcconfig"; path = "Target Support Files/Pods-WaasSdkReactNative/Pods-WaasSdkReactNative.debug.xcconfig"; sourceTree = "<group>"; };
+		4C3DFA512A6A132F00D51E7D /* MPCWalletService.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MPCWalletService.swift; sourceTree = "<group>"; };
+		4C3DFA522A6A132F00D51E7D /* Pods */ = {isa = PBXFileReference; lastKnownFileType = folder; path = Pods; sourceTree = "<group>"; };
+		4C3DFA532A6A132F00D51E7D /* WaasSdk.xcworkspace */ = {isa = PBXFileReference; lastKnownFileType = wrapper.workspace; path = WaasSdk.xcworkspace; sourceTree = "<group>"; };
+		4C3DFA542A6A132F00D51E7D /* Podfile.lock */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = Podfile.lock; sourceTree = "<group>"; };
+		4C3DFA552A6A132F00D51E7D /* WaasSdkGo.textClipping */ = {isa = PBXFileReference; lastKnownFileType = file.bplist; path = WaasSdkGo.textClipping; sourceTree = "<group>"; };
+		4C3DFA562A6A132F00D51E7D /* WaasSdkReactNative-Bridging-Header.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "WaasSdkReactNative-Bridging-Header.h"; sourceTree = "<group>"; };
+		4C3DFA572A6A132F00D51E7D /* MPCSdk.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MPCSdk.swift; sourceTree = "<group>"; };
+		4C3DFA582A6A132F00D51E7D /* MPCSdkBridge.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MPCSdkBridge.m; sourceTree = "<group>"; };
+		4C3DFA592A6A132F00D51E7D /* PoolServiceBridge.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = PoolServiceBridge.m; sourceTree = "<group>"; };
+		4C3DFA5A2A6A132F00D51E7D /* MPCWalletServiceBridge.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MPCWalletServiceBridge.m; sourceTree = "<group>"; };
+		4C3DFA5B2A6A132F00D51E7D /* MPCKeyServiceBridge.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MPCKeyServiceBridge.m; sourceTree = "<group>"; };
+		4C3DFA5C2A6A132F00D51E7D /* MPCKeyService.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MPCKeyService.swift; sourceTree = "<group>"; };
+		4C3DFA5D2A6A132F00D51E7D /* PoolService.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PoolService.swift; sourceTree = "<group>"; };
+		4C3DFA5E2A6A132F00D51E7D /* Podfile */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = Podfile; sourceTree = "<group>"; };
+		4C3DFA672A6A1D9400D51E7D /* Operation.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Operation.swift; sourceTree = "<group>"; };
 		AA926DB4CCF8A3997536049B /* Pods-WaasSdk.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-WaasSdk.debug.xcconfig"; path = "Target Support Files/Pods-WaasSdk/Pods-WaasSdk.debug.xcconfig"; sourceTree = "<group>"; };
 		CEB2276DAC8398445DF8DE44 /* Pods-WaasSdk.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-WaasSdk.release.xcconfig"; path = "Target Support Files/Pods-WaasSdk/Pods-WaasSdk.release.xcconfig"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -73,6 +96,21 @@
 		58B511D21A9E6C8500147676 = {
 			isa = PBXGroup;
 			children = (
+				4C3DFA672A6A1D9400D51E7D /* Operation.swift */,
+				4C3DFA5C2A6A132F00D51E7D /* MPCKeyService.swift */,
+				4C3DFA5B2A6A132F00D51E7D /* MPCKeyServiceBridge.m */,
+				4C3DFA572A6A132F00D51E7D /* MPCSdk.swift */,
+				4C3DFA582A6A132F00D51E7D /* MPCSdkBridge.m */,
+				4C3DFA512A6A132F00D51E7D /* MPCWalletService.swift */,
+				4C3DFA5A2A6A132F00D51E7D /* MPCWalletServiceBridge.m */,
+				4C3DFA5E2A6A132F00D51E7D /* Podfile */,
+				4C3DFA542A6A132F00D51E7D /* Podfile.lock */,
+				4C3DFA522A6A132F00D51E7D /* Pods */,
+				4C3DFA5D2A6A132F00D51E7D /* PoolService.swift */,
+				4C3DFA592A6A132F00D51E7D /* PoolServiceBridge.m */,
+				4C3DFA532A6A132F00D51E7D /* WaasSdk.xcworkspace */,
+				4C3DFA552A6A132F00D51E7D /* WaasSdkGo.textClipping */,
+				4C3DFA562A6A132F00D51E7D /* WaasSdkReactNative-Bridging-Header.h */,
 				134814211AA4EA7D00B7C361 /* Products */,
 				0B6525FA86D79266DA90FD21 /* Pods */,
 				3439C229FAD510872D89C48E /* Frameworks */,
@@ -162,6 +200,14 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				4C3DFA612A6A132F00D51E7D /* MPCSdkBridge.m in Sources */,
+				4C3DFA5F2A6A132F00D51E7D /* MPCWalletService.swift in Sources */,
+				4C3DFA652A6A132F00D51E7D /* MPCKeyService.swift in Sources */,
+				4C3DFA622A6A132F00D51E7D /* PoolServiceBridge.m in Sources */,
+				4C3DFA642A6A132F00D51E7D /* MPCKeyServiceBridge.m in Sources */,
+				4C3DFA602A6A132F00D51E7D /* MPCSdk.swift in Sources */,
+				4C3DFA632A6A132F00D51E7D /* MPCWalletServiceBridge.m in Sources */,
+				4C3DFA662A6A132F00D51E7D /* PoolService.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -277,7 +323,7 @@
 				OTHER_LDFLAGS = "-ObjC";
 				PRODUCT_NAME = WaasSdkReactNative;
 				SKIP_INSTALL = YES;
-				SWIFT_OBJC_BRIDGING_HEADER = "WaasSdk-Bridging-Header.h";
+				SWIFT_OBJC_BRIDGING_HEADER = "WaasSdkReactNative-Bridging-Header.h";
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 				SWIFT_VERSION = 5.0;
 			};
@@ -297,7 +343,7 @@
 				OTHER_LDFLAGS = "-ObjC";
 				PRODUCT_NAME = WaasSdkReactNative;
 				SKIP_INSTALL = YES;
-				SWIFT_OBJC_BRIDGING_HEADER = "WaasSdk-Bridging-Header.h";
+				SWIFT_OBJC_BRIDGING_HEADER = "WaasSdkReactNative-Bridging-Header.h";
 				SWIFT_VERSION = 5.0;
 			};
 			name = Release;

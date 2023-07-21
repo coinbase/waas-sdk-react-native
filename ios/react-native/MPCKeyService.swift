@@ -1,17 +1,20 @@
 import Foundation
+import WaasSdk
 
 @objc
 class MPCKeyService: NSObject {
 
     // The error code for MPCKeyService-related errors.
     let mpcKeyServiceErr = "E_MPC_KEY_SERVICE"
+    
+    let uninitializedErr = "uninitialized"
 
     // The handle to the Go MPCKeyService client.
     var keyClient: WaasSdk.MPCKeyService?
     
     
     // bails if keyClient isn't initialized.
-    func failIfUnitialized(reject: RCTPromiseRejectBlock) -> bool {
+    func failIfUnitialized(_ reject: RCTPromiseRejectBlock) -> Bool {
         if (keyClient == nil) {
             reject(self.mpcKeyServiceErr, self.uninitializedErr, nil)
             return true;
@@ -27,15 +30,13 @@ class MPCKeyService: NSObject {
     @objc(initialize:withPrivateKey:withResolver:withRejecter:)
     func initialize(_ apiKeyName: NSString, privateKey: NSString,
                     resolve: RCTPromiseResolveBlock, reject: RCTPromiseRejectBlock) {
-        var error: NSError?
-        keyClient = WaasSdk.MPCKeyService(
-            apiKeyName,
-            privateKey)
-
-        if error != nil {
-            reject(mpcKeyServiceErr, error!.localizedDescription, nil)
-        } else {
+        do {
+            keyClient = try WaasSdk.MPCKeyService(
+                apiKeyName,
+                privateKey: privateKey)
             resolve(nil)
+        } catch {
+            reject(mpcKeyServiceErr, error.localizedDescription, nil)
         }
     }
 

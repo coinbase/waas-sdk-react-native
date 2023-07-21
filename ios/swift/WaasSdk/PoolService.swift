@@ -3,7 +3,7 @@ import WaasSdkGo
 import Combine
 
 @objc
-class PoolService: NSObject {
+public class PoolService: NSObject {
     // The URL of the PoolService.
     let poolServiceUrl = "https://api.developer.coinbase.com/waas/pools"
 
@@ -14,7 +14,7 @@ class PoolService: NSObject {
      Initializes the PoolService with the given Cloud API Key parameters. Resolves with the string "success" on success;
      rejects with an error otherwise.
      */
-    init(_ apiKeyName: NSString, privateKey: NSString) throws {
+    public init(_ apiKeyName: NSString, privateKey: NSString) throws {
         var error: NSError?
         var _poolsClient = V1NewPoolService(poolServiceUrl as String, apiKeyName as String, privateKey as String, &error)
         if (_poolsClient == nil) {
@@ -28,7 +28,7 @@ class PoolService: NSObject {
      Creates a Pool with the given parameters.  Resolves with the created Pool object on success; rejects with an error
      otherwise.
      */
-    func createPool(_ displayName: NSString, poolID: NSString) -> Future<V1Pool, WaasError> {
+    public func createPool(_ displayName: NSString, poolID: NSString) -> Future<V1Pool, WaasError> {
         return Future() { promise in
             DispatchQueue.main.async(execute: {
                 do {

@@ -3,7 +3,7 @@ import WaasSdkGo
 import Combine
 
 @objc
-class MPCKeyService: NSObject {
+public class MPCKeyService: NSObject {
     // The URL of the MPCKeyService.
     let mpcKeyServiceUrl = "https://api.developer.coinbase.com/waas/mpc_keys"
 
@@ -20,7 +20,7 @@ class MPCKeyService: NSObject {
      Initializes the MPCKeyService  with the given parameters.
      Resolves with the string "success" on success; rejects with an error otherwise.
      */
-    init(_ apiKeyName: NSString, privateKey: NSString) throws {
+    public init(_ apiKeyName: NSString, privateKey: NSString) throws {
         var error: NSError?
         keyClient = V1NewMPCKeyService(
             mpcKeyServiceUrl as String,
@@ -40,7 +40,7 @@ class MPCKeyService: NSObject {
     /**
      Registers the current Device. Resolves with the Device object on success; rejects with an error otherwise.
      */
-    func registerDevice() -> Future<NSDictionary, WaasError> {
+    public func registerDevice() -> Future<NSDictionary, WaasError> {
         return Future() { promise in
             DispatchQueue.main.async(execute: {
                 do {
@@ -62,7 +62,7 @@ class MPCKeyService: NSObject {
      stopPollingForPendingDeviceGroup or computeMPCOperation) before another call is made to this function.
      Resolves with a list of the pending CreateDeviceGroupOperations on success; rejects with an error otherwise.
      */
-    func pollForPendingDeviceGroup(_ deviceGroup: NSString, pollInterval: NSNumber) -> Future<NSArray, WaasError> {
+    public func pollForPendingDeviceGroup(_ deviceGroup: NSString, pollInterval: NSNumber) -> Future<NSArray, WaasError> {
         return Future() { promise in
             DispatchQueue.main.async(execute: {
                 do {
@@ -84,7 +84,7 @@ class MPCKeyService: NSObject {
      Resolves with string "stopped polling for pending DeviceGroup" if polling is stopped successfully;
      resolves with the empty string otherwise.
      */
-    func stopPollingForPendingDeviceGroup() -> Future<String, WaasError> {
+    public func stopPollingForPendingDeviceGroup() -> Future<String, WaasError> {
         return Future() { promise in
             DispatchQueue.main.async(execute: {
                 self.keyClient?.stopPollingPendingDeviceBackups(goReturnsString(promise: promise, wrapAsError: self.wrapError))
@@ -96,7 +96,7 @@ class MPCKeyService: NSObject {
      Initiates an operation to create a Signature resource from the given transaction.
      Resolves with the resource name of the WaaS operation creating the Signature on successful initiation; rejects with an error otherwise.
      */
-    func createSignatureFromTx(_ parent: NSString, transaction: NSDictionary) -> Future<String, WaasError> {
+    public func createSignatureFromTx(_ parent: NSString, transaction: NSDictionary) -> Future<String, WaasError> {
         return Future() { promise in
             DispatchQueue.main.async(execute: {
                 do {
@@ -115,7 +115,7 @@ class MPCKeyService: NSObject {
      stopPollingForPendingSignatures or computeMPCOperaton before another call is made to this
      function. Resolves with a list of the pending Signatures on success; rejects with an error otherwise.
      */
-    func pollForPendingSignatures(_ deviceGroup: NSString, pollInterval: NSNumber) -> Future<NSArray, WaasError> {
+    public func pollForPendingSignatures(_ deviceGroup: NSString, pollInterval: NSNumber) -> Future<NSArray, WaasError> {
         return Future() { promise in
             DispatchQueue.main.async(execute: {
                 do {
@@ -137,7 +137,7 @@ class MPCKeyService: NSObject {
      Resolves with string "stopped polling for pending Signatures" if polling is stopped successfully;
      resolves with the empty string otherwise.
      */
-    func stopPollingForPendingSignatures() -> Future<String, WaasError> {
+    public func stopPollingForPendingSignatures() -> Future<String, WaasError> {
         return Future() { promise in
             DispatchQueue.main.async(execute: {
                 self.keyClient?.stopPollingPendingSignatures(goReturnsString(promise: promise, wrapAsError: self.wrapError))
@@ -149,7 +149,7 @@ class MPCKeyService: NSObject {
      Waits for a pending Signature with the given operation name. Resolves with the Signature object on success;
      rejects with an error otherwise.
      */
-    func waitPendingSignature(_ operation: NSString) -> Future<NSDictionary, WaasError> {
+    public func waitPendingSignature(_ operation: NSString) -> Future<NSDictionary, WaasError> {
         return Future() { promise in
             DispatchQueue.main.async(execute: {
                 var signature: V1Signature?
@@ -171,7 +171,7 @@ class MPCKeyService: NSObject {
      Gets the signed transaction using the given inputs.
      Resolves with the SignedTransaction on success; rejects with an error otherwise.
      */
-    func getSignedTransaction(_ transaction: NSDictionary, signature: NSDictionary) -> Future<V1Signature, WaasError> {
+    public func getSignedTransaction(_ transaction: NSDictionary, signature: NSDictionary) -> Future<V1SignedTransaction, WaasError> {
         return Future() { promise in
             DispatchQueue.main.async(execute: {
                 do {
@@ -184,7 +184,7 @@ class MPCKeyService: NSObject {
                     // swiftlint:enable force_cast
 
                     let signedTransaction = try self.keyClient?.getSignedTransaction(serializedTx, signature: goSignature)
-                    promise(Result.success(signedTransaction))
+                    promise(Result.success(signedTransaction!))
                 } catch {
                     promise(Result.failure(WaasError.mpcKeyServiceUnspecifiedError(error as NSError)))
                 }
@@ -195,7 +195,7 @@ class MPCKeyService: NSObject {
     /**
      Gets a DeviceGroup with the given name. Resolves with the DeviceGroup object on success; rejects with an error otherwise.
      */
-    func getDeviceGroup(_ name: NSString) -> Future<V1DeviceGroup, WaasError>{
+    public func getDeviceGroup(_ name: NSString) -> Future<V1DeviceGroup, WaasError>{
         return Future() { promise in
             DispatchQueue.main.async(execute: {
                 do {
@@ -212,7 +212,7 @@ class MPCKeyService: NSObject {
      Initiates an operation to prepare device archive for MPCKey export. Resolves with the resource name of the WaaS operation creating the Device Archive on successful initiation; rejects with
      an error otherwise.
      */
-    func prepareDeviceArchive(_ deviceGroup: NSString, device: NSString) -> Future<String, WaasError> {
+    public func prepareDeviceArchive(_ deviceGroup: NSString, device: NSString) -> Future<String, WaasError> {
         return Future() { promise in
             DispatchQueue.main.async(execute: {
                 self.keyClient?.prepareDeviceArchive(
@@ -227,7 +227,7 @@ class MPCKeyService: NSObject {
      stopPollingForDeviceArchives or computePrepareDeviceArchiveMPCOperation) before another call is made to this function.
      Resolves with a list of the pending DeviceArchives on success; rejects with an error otherwise.
      */
-    func pollForPendingDeviceArchives(_ deviceGroup: NSString, pollInterval: NSNumber) -> Future<NSArray, WaasError> {
+    public func pollForPendingDeviceArchives(_ deviceGroup: NSString, pollInterval: NSNumber) -> Future<NSArray, WaasError> {
         return Future() { promise in
             DispatchQueue.main.async(execute: {
                 do {
@@ -248,7 +248,7 @@ class MPCKeyService: NSObject {
      screen changes, etc. This function is a no-op if the SDK is not currently polling for a pending DeviceArchiveOperation.
      Resolves with string "stopped polling for pending Device Archives" if polling is stopped successfully; resolves with the empty string otherwise.
      */
-    func stopPollingForPendingDeviceArchives() -> Future<String, WaasError> {
+    public func stopPollingForPendingDeviceArchives() -> Future<String, WaasError> {
         return Future() { promise in
             DispatchQueue.main.async(execute: {
                 self.keyClient?.stopPollingPendingDeviceArchives(goReturnsString(promise: promise, wrapAsError: self.wrapError))
@@ -260,7 +260,7 @@ class MPCKeyService: NSObject {
      Initiates an operation to prepare device backup to add a new Device to the DeviceGroup. Resolves with the resource name of the WaaS operation creating the Device Backup on
      successful initiation; rejects with an error otherwise.
      */
-    func prepareDeviceBackup(_ deviceGroup: NSString, device: NSString) -> Future<String, WaasError> {
+    public func prepareDeviceBackup(_ deviceGroup: NSString, device: NSString) -> Future<String, WaasError> {
         return Future() { promise in
             DispatchQueue.main.async(execute: {
                 self.keyClient?.prepareDeviceBackup(
@@ -275,7 +275,7 @@ class MPCKeyService: NSObject {
      stopPollingForDeviceBackups or computePrepareDeviceBackupMPCOperation) before another call is made to this function.
      Resolves with a list of the pending DeviceBackups on success; rejects with an error otherwise.
      */
-    func pollForPendingDeviceBackups(_ deviceGroup: NSString, pollInterval: NSNumber) -> Future<NSArray, WaasError> {
+    public func pollForPendingDeviceBackups(_ deviceGroup: NSString, pollInterval: NSNumber) -> Future<NSArray, WaasError> {
         return Future() { promise in
             DispatchQueue.main.async(execute: {
                 do {
@@ -298,7 +298,7 @@ class MPCKeyService: NSObject {
      screen changes, etc. This function is a no-op if the SDK is not currently polling for a pending DeviceBackupOperation.
      Resolves with string "stopped polling for pending Device Backups" if polling is stopped successfully; resolves with the empty string otherwise.
      */
-    func stopPollingForPendingDeviceBackups() -> Future<String, WaasError> {
+    public func stopPollingForPendingDeviceBackups() -> Future<String, WaasError> {
         return Future() { promise in
             DispatchQueue.main.async(execute: {
                 self.keyClient?.stopPollingPendingDeviceBackups(goReturnsString(promise: promise, wrapAsError: self.wrapError))
@@ -310,7 +310,7 @@ class MPCKeyService: NSObject {
      Initiates an operation to add a Device to the DeviceGroup. Resolves with the operation name on successful initiation; rejects with
      an error otherwise.
      */
-    func addDevice(_ deviceGroup: NSString, device: NSString) -> Future<String, WaasError> {
+    public func addDevice(_ deviceGroup: NSString, device: NSString) -> Future<String, WaasError> {
         return Future() { promise in
             DispatchQueue.main.async(execute: {
                 self.keyClient?.addDevice(
@@ -325,7 +325,7 @@ class MPCKeyService: NSObject {
      stopPollingForPendingDevices or computeAddDeviceMPCOperation) before another call is made to this function.
      Resolves with a list of the pending Devices on success; rejects with an error otherwise.
      */
-    func pollForPendingDevices(_ deviceGroup: NSString, pollInterval: NSNumber) -> Future<NSArray, WaasError> {
+    public func pollForPendingDevices(_ deviceGroup: NSString, pollInterval: NSNumber) -> Future<NSArray, WaasError> {
         return Future() { promise in
             DispatchQueue.main.async(execute: {
                 do {
@@ -348,7 +348,7 @@ class MPCKeyService: NSObject {
      screen changes, etc. This function is a no-op if the SDK is not currently polling for a pending AddDeviceOperation.
      Resolves with string "stopped polling for pending Devices" if polling is stopped successfully; resolves with the empty string otherwise.
      */
-    func stopPollingForPendingDevices() -> Future<String, WaasError> {
+    public func stopPollingForPendingDevices() -> Future<String, WaasError> {
         return Future() { promise in
             DispatchQueue.main.async(execute: {
                 self.keyClient?.stopPollingPendingDevices(goReturnsString(promise: promise, wrapAsError: self.wrapError))
