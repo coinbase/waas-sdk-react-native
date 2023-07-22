@@ -13,7 +13,7 @@ prepare_react_native_project!
 #   dependencies: {
 #     ...(process.env.NO_FLIPPER ? { 'react-native-flipper': { platforms: { ios: null } } } : {}),
 # ```
-flipper_config = ENV['NO_FLIPPER'] == "1" ? FlipperConfiguration.disabled : FlipperConfiguration.enabled
+flipper_config = FlipperConfiguration.disabled
 
 linkage = ENV['USE_FRAMEWORKS']
 if linkage != nil
@@ -51,14 +51,6 @@ target 'WaasSdkReactNativeExample' do
   end
 
   post_install do |installer|
-    installer.pods_project.targets.each do |target|
-      if target.name == 'OpenSSL-Universal'
-        target.build_configurations.each do |config|
-          config.build_settings['LDFLAGS'] ||= ['$(inherited)', '-L/opt/homebrew/opt/openssl@1.1/lib']
-          config.build_settings['CPPFLAGS'] ||= ['$(inherited)', '-I/opt/homebrew/opt/openssl@1.1/include']
-        end
-      end
-    end
     react_native_post_install(
       installer,
       # Set `mac_catalyst_enabled` to `true` in order to apply patches

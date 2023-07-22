@@ -8,26 +8,66 @@
 import Foundation
 import React
 import Combine
-import waas_sdk
+import WaasSdk
 
 /**
- Bridge a `future` to a
+ Bridge a swift combine- `future` to a react promise.
  */
 class Operation<T> {
     
-    var future: Future<T, WaasOperation>;
+    var future: Future<T, WaasError>;
+    
+    let E_TRANSFORM = "E_TRANSFORM"
     
     init(_ future: Future<T, WaasError>) {
         self.future = future;
     }
     
-    func bridge<T>(resolve: RCTPromiseResolveBlock, reject: RCTPromiseRejectBlock, map: ((T) -> any)? = nil) {
-        Task.init {
-            do {
-                let val = await future
-                resolve(map(val))
-            } catch {
-                reject(error)
+    func bridge(resolve: @escaping RCTPromiseResolveBlock, reject: @escaping RCTPromiseRejectBlock, map: ((T) throws -> Any)? = nil) {
+        do {
+            _ = self.future.sink { completion in
+                switch completion {
+                case .failure(let err):
+                    reject(err.code, err.description, err)
+                case .finished:
+                    // future returned nothing
+                    resolve(nil)
+                }
+            } receiveValue: { val in
+                do {
+                    if map != nil {
+                        let mappedVal = try map!(val)
+                        resolve(mappedVal)
+                    } else {
+                        resolve(val)
+                    }
+                } catch {
+                    reject(self.E_TRANSFORM, error.localizedDescription, error)
+                }
+            }
+        }
+    }
+}
+
+class VoidOperation {
+    var future: Future<Void, WaasError>;
+    
+    init(_ future: Future<Void, WaasError>) {
+        self.future = future;
+    }
+    
+    func bridge(resolve: @escaping RCTPromiseResolveBlock, reject: @escaping RCTPromiseRejectBlock) {
+        do {
+            _ = self.future.sink { completion in
+                switch completion {
+                case .failure(let err):
+                    reject(err.code, err.description, err)
+                case .finished:
+                    // future returned nothing
+                    resolve(nil)
+                }
+            } receiveValue: { val in
+                resolve(nil)
             }
         }
     }

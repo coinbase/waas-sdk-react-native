@@ -14,7 +14,7 @@ class MPCSdk: NSObject {
     let uninitializedErr = "MPCSdk must be initialized"
 
     // The handle to the Go MPCSdk class.
-    var sdk: V1MPCSdkProtocol?
+    var sdk: WaasSdk.MPCSdk?
     
     func failIfUninitialized(_ reject: RCTPromiseRejectBlock) -> Bool {
         if self.sdk == nil {
@@ -34,7 +34,7 @@ class MPCSdk: NSObject {
             sdk = try WaasSdk.MPCSdk(isSimulator.intValue != 0)
             resolve(nil)
         } catch {
-            reject(mpcSdkErr, error!.localizedDescription, nil)
+            reject(mpcSdkErr, error.localizedDescription, nil)
         }
     }
 
@@ -52,7 +52,7 @@ class MPCSdk: NSObject {
             return;
         }
         
-        Operation(self.sdk?.bootstrapDevice(passcode as String)).bridge(resolve: resolve, reject: reject)
+        Operation(self.sdk!.bootstrapDevice(passcode)).bridge(resolve: resolve, reject: reject)
     }
 
     /**
@@ -63,12 +63,12 @@ class MPCSdk: NSObject {
      It resolves with the string "passcode reset" on success; a rejection otherwise.
      */
     @objc(resetPasscode:withResolver:withRejecter:)
-    func resetPasscode(_ newPasscode: NSString, resolve: RCTPromiseResolveBlock, reject: RCTPromiseRejectBlock) {
+    func resetPasscode(_ newPasscode: NSString, resolve: @escaping RCTPromiseResolveBlock, reject: @escaping RCTPromiseRejectBlock) {
         if failIfUninitialized(reject) {
             return;
         }
         
-        Operation(self.sdk!.resetPasscode(newPasscode as String)).bridge(resolve: resolve, reject: reject)
+        Operation(self.sdk!.resetPasscode(newPasscode)).bridge(resolve: resolve, reject: reject)
     }
 
     /**
@@ -90,12 +90,12 @@ class MPCSdk: NSObject {
      Resolves with the string "success" on success; rejects with an error otherwise.
      */
     @objc(computeMPCOperation:withResolver:withRejecter:)
-    func computeMPCOperation(_ mpcData: NSString, resolve: RCTPromiseResolveBlock, reject: RCTPromiseRejectBlock) {
+    func computeMPCOperation(_ mpcData: NSString, resolve: @escaping  RCTPromiseResolveBlock, reject: @escaping  RCTPromiseRejectBlock) {
         if failIfUninitialized(reject) {
             return;
         }
         
-        Operation(self.sdk?.computeMPCOperation(mpcData as String)).bridge(resolve: resolve, reject: reject)
+        Operation(self.sdk!.computeMPCOperation(mpcData)).bridge(resolve: resolve, reject: reject)
     }
 
     /**
@@ -103,12 +103,12 @@ class MPCSdk: NSObject {
      MPCKeyService and passcode of the Device. Resolves with the string "success" on success; rejects with an error otherwise.
      */
     @objc(computePrepareDeviceArchiveMPCOperation:withPasscode:withResolver:withRejecter:)
-    func computePrepareDeviceArchiveMPCOperation(_ mpcData: NSString, passcode: NSString, resolve: RCTPromiseResolveBlock, reject: RCTPromiseRejectBlock) {
+    func computePrepareDeviceArchiveMPCOperation(_ mpcData: NSString, passcode: NSString, resolve: @escaping  RCTPromiseResolveBlock, reject: @escaping RCTPromiseRejectBlock) {
         if failIfUninitialized(reject) {
             return;
         }
         
-        Operation(self.sdk!.computePrepareDeviceArchiveMPCOperation(mpcData as String, passcode: passcode as String)).bridge(resolve: resolve, reject: reject)
+        Operation(self.sdk!.computePrepareDeviceArchiveMPCOperation(mpcData, passcode: passcode)).bridge(resolve: resolve, reject: reject)
     }
 
     /**
@@ -116,12 +116,12 @@ class MPCSdk: NSObject {
      MPCKeyService and passcode of the Device. Resolves with the string "success" on success; rejects with an error otherwise.
      */
     @objc(computePrepareDeviceBackupMPCOperation:withPasscode:withResolver:withRejecter:)
-    func computePrepareDeviceBackupMPCOperation(_ mpcData: NSString, passcode: NSString, resolve: RCTPromiseResolveBlock, reject: RCTPromiseRejectBlock) {
+    func computePrepareDeviceBackupMPCOperation(_ mpcData: NSString, passcode: NSString, resolve: @escaping RCTPromiseResolveBlock, reject: @escaping RCTPromiseRejectBlock) {
         if failIfUninitialized(reject) {
             return;
         }
         
-        Operation(self.sdk!.computePrepareDeviceBackupMPCOperation(mpcData as String, passcode: passcode as String)).bridge(resolve: resolve, reject: reject)
+        Operation(self.sdk!.computePrepareDeviceBackupMPCOperation(mpcData, passcode: passcode)).bridge(resolve: resolve, reject: reject)
     }
 
     /**
@@ -129,15 +129,15 @@ class MPCSdk: NSObject {
      MPCKeyService, passcode of the Device and device backup created with PrepareDeviceBackup operation. Resolves with the string "success" on success; rejects with an error otherwise.
      */
     @objc(computeAddDeviceMPCOperation:withPasscode:withDeviceBackup:withResolver:withRejecter:)
-    func computeAddDeviceMPCOperation(_ mpcData: NSString, passcode: NSString, deviceBackup: NSString, resolve: RCTPromiseResolveBlock, reject: RCTPromiseRejectBlock) {
+    func computeAddDeviceMPCOperation(_ mpcData: NSString, passcode: NSString, deviceBackup: NSString, resolve: @escaping  RCTPromiseResolveBlock, reject: @escaping RCTPromiseRejectBlock) {
         if failIfUninitialized(reject) {
             return;
         }
         
         Operation(self.sdk!.computeAddDeviceMPCOperation(
-            mpcData as String,
-            passcode: passcode as String,
-            deviceBackup: deviceBackup as String)).bridge(resolve: resolve, reject: reject)
+            mpcData,
+            passcode: passcode,
+            deviceBackup: deviceBackup)).bridge(resolve: resolve, reject: reject)
     }
 
     /**
@@ -146,15 +146,15 @@ class MPCSdk: NSObject {
      rejects with an error otherwise.
      */
     @objc(exportPrivateKeys:withPasscode:withResolver:withRejecter:)
-    func exportPrivateKeys(_ mpcKeyExportMetadata: NSString, passcode: NSString, resolve: RCTPromiseResolveBlock,
-                           reject: RCTPromiseRejectBlock) {
+    func exportPrivateKeys(_ mpcKeyExportMetadata: NSString, passcode: NSString, resolve: @escaping RCTPromiseResolveBlock,
+                           reject: @escaping RCTPromiseRejectBlock) {
         if failIfUninitialized(reject) {
             return;
         }
         
-        Operation(self.sdk?.exportPrivateKeys(
-            mpcKeyExportMetadata as String,
-            passcode: passcode as String)).bridge(resolve: resolve, reject: reject)
+        Operation(self.sdk!.exportPrivateKeys(
+            mpcKeyExportMetadata,
+            passcode: passcode)).bridge(resolve: resolve, reject: reject)
     }
 
     /**

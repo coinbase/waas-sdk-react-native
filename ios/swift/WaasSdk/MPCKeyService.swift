@@ -40,15 +40,12 @@ public class MPCKeyService: NSObject {
     /**
      Registers the current Device. Resolves with the Device object on success; rejects with an error otherwise.
      */
-    public func registerDevice() -> Future<NSDictionary, WaasError> {
+    public func registerDevice() -> Future<V1Device, WaasError> {
         return Future() { promise in
             DispatchQueue.main.async(execute: {
                 do {
                     let device = try self.keyClient?.registerDevice()
-                    let res: NSDictionary = [
-                        "Name": device?.name as Any
-                    ]
-                    promise(Result.success(res))
+                    promise(Result.success(device!))
                 } catch {
                     promise(Result.failure(WaasError.mpcKeyServiceUnspecifiedError(error as NSError)))
                 }
@@ -149,18 +146,13 @@ public class MPCKeyService: NSObject {
      Waits for a pending Signature with the given operation name. Resolves with the Signature object on success;
      rejects with an error otherwise.
      */
-    public func waitPendingSignature(_ operation: NSString) -> Future<NSDictionary, WaasError> {
+    public func waitPendingSignature(_ operation: NSString) -> Future<V1Signature, WaasError> {
         return Future() { promise in
             DispatchQueue.main.async(execute: {
                 var signature: V1Signature?
                 do {
                     signature = try self.keyClient?.waitPendingSignature(operation as String)
-                    let res: NSDictionary = [
-                        "Name": signature?.name as Any,
-                        "Payload": signature?.payload as Any,
-                        "SignedPayload": signature?.signedPayload as Any
-                    ]
-                    promise(Result.success(res))
+                    promise(Result.success(signature!))
                 } catch {
                     promise(Result.failure(WaasError.mpcKeyServiceUnspecifiedError(error as NSError)))
                 }

@@ -32,11 +32,8 @@
 
 /* Begin PBXFileReference section */
 		0512DA0688FDEC5DF49371A8 /* Pods_WaasSdkReactNative.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_WaasSdkReactNative.framework; sourceTree = BUILT_PRODUCTS_DIR; };
-		0B82B3AEC858A900ABA82213 /* Pods-WaasSdkReactNative.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-WaasSdkReactNative.release.xcconfig"; path = "Target Support Files/Pods-WaasSdkReactNative/Pods-WaasSdkReactNative.release.xcconfig"; sourceTree = "<group>"; };
 		134814201AA4EA6300B7C361 /* libWaasSdkReactNative.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = libWaasSdkReactNative.a; sourceTree = BUILT_PRODUCTS_DIR; };
-		3EA72372DE2AA939A76D409E /* Pods-WaasSdkReactNative.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-WaasSdkReactNative.debug.xcconfig"; path = "Target Support Files/Pods-WaasSdkReactNative/Pods-WaasSdkReactNative.debug.xcconfig"; sourceTree = "<group>"; };
 		4C3DFA512A6A132F00D51E7D /* MPCWalletService.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MPCWalletService.swift; sourceTree = "<group>"; };
-		4C3DFA522A6A132F00D51E7D /* Pods */ = {isa = PBXFileReference; lastKnownFileType = folder; path = Pods; sourceTree = "<group>"; };
 		4C3DFA532A6A132F00D51E7D /* WaasSdk.xcworkspace */ = {isa = PBXFileReference; lastKnownFileType = wrapper.workspace; path = WaasSdk.xcworkspace; sourceTree = "<group>"; };
 		4C3DFA542A6A132F00D51E7D /* Podfile.lock */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = Podfile.lock; sourceTree = "<group>"; };
 		4C3DFA552A6A132F00D51E7D /* WaasSdkGo.textClipping */ = {isa = PBXFileReference; lastKnownFileType = file.bplist; path = WaasSdkGo.textClipping; sourceTree = "<group>"; };
@@ -50,8 +47,8 @@
 		4C3DFA5D2A6A132F00D51E7D /* PoolService.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PoolService.swift; sourceTree = "<group>"; };
 		4C3DFA5E2A6A132F00D51E7D /* Podfile */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = Podfile; sourceTree = "<group>"; };
 		4C3DFA672A6A1D9400D51E7D /* Operation.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Operation.swift; sourceTree = "<group>"; };
-		AA926DB4CCF8A3997536049B /* Pods-WaasSdk.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-WaasSdk.debug.xcconfig"; path = "Target Support Files/Pods-WaasSdk/Pods-WaasSdk.debug.xcconfig"; sourceTree = "<group>"; };
-		CEB2276DAC8398445DF8DE44 /* Pods-WaasSdk.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-WaasSdk.release.xcconfig"; path = "Target Support Files/Pods-WaasSdk/Pods-WaasSdk.release.xcconfig"; sourceTree = "<group>"; };
+		7792E8EBBD099BEC4F23CD92 /* Pods-WaasSdkReactNative.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-WaasSdkReactNative.debug.xcconfig"; path = "Target Support Files/Pods-WaasSdkReactNative/Pods-WaasSdkReactNative.debug.xcconfig"; sourceTree = "<group>"; };
+		B89182CB951AD1873380A00B /* Pods-WaasSdkReactNative.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-WaasSdkReactNative.release.xcconfig"; path = "Target Support Files/Pods-WaasSdkReactNative/Pods-WaasSdkReactNative.release.xcconfig"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -66,17 +63,6 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
-		0B6525FA86D79266DA90FD21 /* Pods */ = {
-			isa = PBXGroup;
-			children = (
-				AA926DB4CCF8A3997536049B /* Pods-WaasSdk.debug.xcconfig */,
-				CEB2276DAC8398445DF8DE44 /* Pods-WaasSdk.release.xcconfig */,
-				3EA72372DE2AA939A76D409E /* Pods-WaasSdkReactNative.debug.xcconfig */,
-				0B82B3AEC858A900ABA82213 /* Pods-WaasSdkReactNative.release.xcconfig */,
-			);
-			path = Pods;
-			sourceTree = "<group>";
-		};
 		134814211AA4EA7D00B7C361 /* Products */ = {
 			isa = PBXGroup;
 			children = (
@@ -105,16 +91,25 @@
 				4C3DFA5A2A6A132F00D51E7D /* MPCWalletServiceBridge.m */,
 				4C3DFA5E2A6A132F00D51E7D /* Podfile */,
 				4C3DFA542A6A132F00D51E7D /* Podfile.lock */,
-				4C3DFA522A6A132F00D51E7D /* Pods */,
 				4C3DFA5D2A6A132F00D51E7D /* PoolService.swift */,
 				4C3DFA592A6A132F00D51E7D /* PoolServiceBridge.m */,
 				4C3DFA532A6A132F00D51E7D /* WaasSdk.xcworkspace */,
 				4C3DFA552A6A132F00D51E7D /* WaasSdkGo.textClipping */,
 				4C3DFA562A6A132F00D51E7D /* WaasSdkReactNative-Bridging-Header.h */,
 				134814211AA4EA7D00B7C361 /* Products */,
-				0B6525FA86D79266DA90FD21 /* Pods */,
 				3439C229FAD510872D89C48E /* Frameworks */,
+				B60DE99602A71E9F5EE977B5 /* Pods */,
 			);
+			sourceTree = "<group>";
+		};
+		B60DE99602A71E9F5EE977B5 /* Pods */ = {
+			isa = PBXGroup;
+			children = (
+				7792E8EBBD099BEC4F23CD92 /* Pods-WaasSdkReactNative.debug.xcconfig */,
+				B89182CB951AD1873380A00B /* Pods-WaasSdkReactNative.release.xcconfig */,
+			);
+			name = Pods;
+			path = Pods;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -311,7 +306,7 @@
 		};
 		58B511F01A9E6C8500147676 /* Debug */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = 3EA72372DE2AA939A76D409E /* Pods-WaasSdkReactNative.debug.xcconfig */;
+			baseConfigurationReference = 7792E8EBBD099BEC4F23CD92 /* Pods-WaasSdkReactNative.debug.xcconfig */;
 			buildSettings = {
 				HEADER_SEARCH_PATHS = (
 					"$(inherited)",
@@ -331,7 +326,7 @@
 		};
 		58B511F11A9E6C8500147676 /* Release */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = 0B82B3AEC858A900ABA82213 /* Pods-WaasSdkReactNative.release.xcconfig */;
+			baseConfigurationReference = B89182CB951AD1873380A00B /* Pods-WaasSdkReactNative.release.xcconfig */;
 			buildSettings = {
 				HEADER_SEARCH_PATHS = (
 					"$(inherited)",

@@ -1,16 +1,23 @@
 PODS:
-  - waas-sdk (0.0.1)
+  - React-Core (0.1.0)
+  - WaasSdk (0.0.1)
 
 DEPENDENCIES:
-  - waas-sdk (from `../../waas-sdk.podspec`)
+  - React-Core
+  - WaasSdk (from `../../WaasSdk.podspec`)
+
+SPEC REPOS:
+  trunk:
+    - React-Core
 
 EXTERNAL SOURCES:
-  waas-sdk:
-    :path: "../../waas-sdk.podspec"
+  WaasSdk:
+    :path: "../../WaasSdk.podspec"
 
 SPEC CHECKSUMS:
-  waas-sdk: e45ab8ecd9d4980dfbf8e4c5bfc017f139699591
+  React-Core: c89e140a0ac23ed77a6094fe25d005e9c72e03b0
+  WaasSdk: d274a50925292ce487de10cb83fc799f60d192ed
 
-PODFILE CHECKSUM: 39166cf291b346907050d4e003a063f91f8e3076
+PODFILE CHECKSUM: 560af9920caa8bd826bedca213fc68123f5d4b40
 
 COCOAPODS: 1.12.0

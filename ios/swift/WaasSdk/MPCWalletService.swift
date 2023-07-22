@@ -23,14 +23,14 @@ public class MPCWalletService: NSObject {
     public init(_ apiKeyName: NSString, privateKey: NSString) throws {
         var error: NSError?
 
-        var _walletsClient = V1NewMPCWalletService(
+        let _walletsClient = V1NewMPCWalletService(
             mpcWalletServiceUrl as String,
             apiKeyName as String,
             privateKey as String,
             &error)
 
-        if error != nil || _walletsClient == nil {
-            throw WaasError.walletServiceFailedToInitialize(error as NSError?)
+        if error != nil {
+            throw WaasError.walletServiceFailedToInitialize(error!)
         }
         
         walletsClient = _walletsClient!
@@ -40,7 +40,7 @@ public class MPCWalletService: NSObject {
      Creates an MPCWallet with the given parameters.  Resolves with the response on success; rejects with an error
      otherwise.
      */
-    public func createMPCWallet(_ parent: NSString, device: NSString) -> Future<V1CreateMPCWalletResponse, WaasError> {
+    public func createMPCWallet(parent: NSString, device: NSString) -> Future<V1CreateMPCWalletResponse, WaasError> {
         return Future() { promise in
             DispatchQueue.main.async(execute: {
                 do {
@@ -57,7 +57,7 @@ public class MPCWalletService: NSObject {
      Waits for a pending MPCWallet with the given operation name. Resolves with the MPCWallet object on success;
      rejects with an error otherwise.
      */
-    public func waitPendingMPCWallet(_ operation: NSString) -> Future<V1MPCWallet, WaasError> {
+    public func waitPendingMPCWallet(operation: NSString) -> Future<V1MPCWallet, WaasError> {
         return Future() { promise in
             DispatchQueue.main.async(execute: {
                 do {
@@ -91,7 +91,7 @@ public class MPCWalletService: NSObject {
     /**
      Gets an Address with the given name. Resolves with the Address object on success; rejects with an error otherwise.
      */
-    public func getAddress(_ name: NSString) -> Future<NSDictionary, WaasError> {
+    public func getAddress(name: NSString) -> Future<NSDictionary, WaasError> {
         return Future() { promise in
             DispatchQueue.main.async(execute: {
                 do {

@@ -1,5 +1,6 @@
 import Foundation
 import WaasSdk
+import WaasSdkGo
 
 @objc
 class MPCWalletService: NSObject {
@@ -12,8 +13,8 @@ class MPCWalletService: NSObject {
     // The error message for calls made without initializing SDK.
     let uninitializedErr = "MPCWalletService must be initialized"
 
-    // The handle to the Go MPCWalletService client.
-    var walletsClient: V1MPCWalletServiceProtocol?
+    // The handle to the native-swift MPCWalletService client.
+    var walletsClient: WaasSdk.MPCWalletService?
 
     /**
      Initializes the MPCWalletService with the given Cloud API Key parameters. Resolves with the string "success"
@@ -22,16 +23,13 @@ class MPCWalletService: NSObject {
     @objc(initialize:withPrivateKey:withResolver:withRejecter:)
     func initialize(_ apiKeyName: NSString, privateKey: NSString,
                     resolve: RCTPromiseResolveBlock, reject: RCTPromiseRejectBlock) {
-        var error: NSError?
-        try {
-            walletsClient = V1NewMPCWalletService(
-                mpcWalletServiceUrl as String,
-                apiKeyName as String,
-                privateKey as String,
-                &error)
+        do {
+            walletsClient = try WaasSdk.MPCWalletService(
+                apiKeyName,
+                privateKey: privateKey)
             resolve(nil)
         } catch {
-            reject(walletsErr, error!.localizedDescription, nil)
+            reject(walletsErr, error.localizedDescription, nil)
         }
     }
 
@@ -41,13 +39,13 @@ class MPCWalletService: NSObject {
      */
     @objc(createMPCWallet:withDevice:withResolver:withRejecter:)
     func createMPCWallet(_ parent: NSString, device: NSString,
-                         resolve: RCTPromiseResolveBlock, reject: RCTPromiseRejectBlock) {
+                         resolve: @escaping RCTPromiseResolveBlock, reject: @escaping RCTPromiseRejectBlock) {
         if self.walletsClient == nil {
             reject(self.walletsErr, self.uninitializedErr, nil)
             return
         }
         
-        Operation(self.walletsClient?.createMPCWallet(parent as String, device: device as String)).bridge(resolve: resolve, reject: reject) { response in
+        Operation(self.walletsClient!.createMPCWallet(parent: parent, device: device)).bridge(resolve: resolve, reject: reject) { response in
             return [
                "DeviceGroup": response?.deviceGroup as Any,
                "Operation": response?.operation as Any
@@ -61,16 +59,17 @@ class MPCWalletService: NSObject {
      */
     @objc(waitPendingMPCWallet:withResolver:withRejecter:)
     func waitPendingMPCWallet(_ operation: NSString,
-                              resolve: RCTPromiseResolveBlock, reject: RCTPromiseRejectBlock) {
+                              resolve: @escaping RCTPromiseResolveBlock, reject: @escaping RCTPromiseRejectBlock) {
         if self.walletsClient == nil {
             reject(self.walletsErr, self.uninitializedErr, nil)
             return
         }
         
-        Operation(self.walletsClient?.waitPendingMPCWallet(operation as String)).bridge(resolve: resolve, reject: reject) { wallet in
+        let res = self.walletsClient!.waitPendingMPCWallet(operation: operation)
+        Operation(res).bridge(resolve: resolve, reject: reject) { wallet in
             return  [
-                "Name": mpcWallet?.name as Any,
-                "DeviceGroup": mpcWallet?.deviceGroup as Any
+                "Name": wallet.name as Any,
+                "DeviceGroup": wallet.deviceGroup as Any
             ]
         }
     }
@@ -81,25 +80,25 @@ class MPCWalletService: NSObject {
      */
     @objc(generateAddress:withNetwork:withResolver:withRejecter:)
     func generateAddress(_ mpcWallet: NSString, network: NSString,
-                         resolve: RCTPromiseResolveBlock, reject: RCTPromiseRejectBlock) {
+                         resolve: @escaping RCTPromiseResolveBlock, reject: @escaping RCTPromiseRejectBlock) {
         if self.walletsClient == nil {
             reject(self.walletsErr, self.uninitializedErr, nil)
             return
         }
         
-        Operation(self.walletsClient?.generateAddress(mpcWallet as String, network: network as String)).bridge(resolve: resolve, reject: reject)
+        Operation(self.walletsClient!.generateAddress(mpcWallet, network: network)).bridge(resolve: resolve, reject: reject)
     }
 
     /**
      Gets an Address with the given name. Resolves with the Address object on success; rejects with an error otherwise.
      */
     @objc(getAddress:withResolver:withRejecter:)
-    func getAddress(_ name: NSString, resolve: RCTPromiseResolveBlock, reject: RCTPromiseRejectBlock) {
+    func getAddress(_ name: NSString, resolve: @escaping RCTPromiseResolveBlock, reject: @escaping RCTPromiseRejectBlock) {
         if self.walletsClient == nil {
             reject(self.walletsErr, self.uninitializedErr, nil)
             return
         }
         
-        Operation(self.walletsClient?.getAddress(name as String)).bridge(resolve: resolve, reject: reject)
+        Operation(self.walletsClient!.getAddress(name: name)).bridge(resolve: resolve, reject: reject)
     }
 }

@@ -1,5 +1,6 @@
 import Foundation
 import WaasSdk
+import WaasSdkGo
 
 @objc
 class PoolService: NSObject {
@@ -16,12 +17,11 @@ class PoolService: NSObject {
     @objc(initialize:withPrivateKey:withResolver:withRejecter:)
     func initialize(_ apiKeyName: NSString, privateKey: NSString,
                     resolve: RCTPromiseResolveBlock, reject: RCTPromiseRejectBlock) {
-        var error: NSError?
-        try {
-            poolsClient = WaasSdk.PoolServiec(apiKeyName as String, privateKey as String)
+        do {
+            poolsClient = try WaasSdk.PoolService(apiKeyName, privateKey: privateKey)
             resolve(nil)
         } catch {
-            reject(poolsErr, error!.localizedDescription, nil)
+            reject(poolsErr, error.localizedDescription, nil)
         }
     }
 
@@ -31,13 +31,13 @@ class PoolService: NSObject {
      */
     @objc(createPool:withPoolID:withResolver:withRejecter:)
     func createPool(_ displayName: NSString, poolID: NSString,
-                    resolve: RCTPromiseResolveBlock, reject: RCTPromiseRejectBlock) {
+                    resolve: @escaping RCTPromiseResolveBlock, reject: @escaping RCTPromiseRejectBlock) {
         if self.poolsClient == nil {
             reject(self.poolsErr, "pool service must be initialized", nil)
             return
         }
         
-        Operation(self.poolsClient?.createPool(displayName as String, poolID: poolID as String)).bridge(resolve: resolve, reject: reject) { pool in
+        Operation(self.poolsClient!.createPool(displayName as String, poolID: poolID as String)).bridge(resolve: resolve, reject: reject) { pool in
             return [
                 "name": pool?.name as Any,
                 "displayName": pool?.displayName as Any

@@ -6,5 +6,5 @@ target 'WaasSdkReactNative' do
   use_frameworks!
 
   pod 'WaasSdk', :path => '../../WaasSdk.podspec'
-  pod 'React'
+  pod 'React-Core'
 end

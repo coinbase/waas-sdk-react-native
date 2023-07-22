@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		4C3DFA6B2A6A214400D51E7D /* openssl_libcrypto.xcframework in Frameworks */ = {isa = PBXBuildFile; fileRef = 4C3DFA6A2A6A214400D51E7D /* openssl_libcrypto.xcframework */; };
 		4C54C3F12A69C54100545269 /* WaasSdk.h in Headers */ = {isa = PBXBuildFile; fileRef = 4C54C3F02A69C54100545269 /* WaasSdk.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		4C54C4012A69C58C00545269 /* PoolService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C54C3F72A69C58C00545269 /* PoolService.swift */; };
 		4C54C4032A69C58C00545269 /* MPCKeyService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C54C3F92A69C58C00545269 /* MPCKeyService.swift */; };
@@ -25,6 +26,7 @@
 /* Begin PBXFileReference section */
 		13B4F7ECE157014B11CEA0FA /* Pods-WaasSdk.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-WaasSdk.release.xcconfig"; path = "Target Support Files/Pods-WaasSdk/Pods-WaasSdk.release.xcconfig"; sourceTree = "<group>"; };
 		386707A6D40185B633E9750A /* Pods-WaasSdk.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-WaasSdk.debug.xcconfig"; path = "Target Support Files/Pods-WaasSdk/Pods-WaasSdk.debug.xcconfig"; sourceTree = "<group>"; };
+		4C3DFA6A2A6A214400D51E7D /* openssl_libcrypto.xcframework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcframework; path = openssl_libcrypto.xcframework; sourceTree = "<group>"; };
 		4C54C3ED2A69C54100545269 /* WaasSdk.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = WaasSdk.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		4C54C3F02A69C54100545269 /* WaasSdk.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = WaasSdk.h; sourceTree = "<group>"; };
 		4C54C3F72A69C58C00545269 /* PoolService.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PoolService.swift; sourceTree = "<group>"; };
@@ -46,6 +48,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				4C3DFA6B2A6A214400D51E7D /* openssl_libcrypto.xcframework in Frameworks */,
 				4C8445B02A69E35800980DA7 /* LocalAuthentication.framework in Frameworks */,
 				4C8445AE2A69E2EB00980DA7 /* libresolv.tbd in Frameworks */,
 				4C8445AC2A69E2DB00980DA7 /* libc++.tbd in Frameworks */,
@@ -93,6 +96,7 @@
 		4C54C40D2A69C8BF00545269 /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				4C3DFA6A2A6A214400D51E7D /* openssl_libcrypto.xcframework */,
 				4C8445AF2A69E35800980DA7 /* LocalAuthentication.framework */,
 				4C8445AD2A69E2EB00980DA7 /* libresolv.tbd */,
 				4C8445AB2A69E2DB00980DA7 /* libc++.tbd */,

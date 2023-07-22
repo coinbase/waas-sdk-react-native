@@ -15,16 +15,16 @@ public class MPCSdk: NSObject {
      Initializes the MPCSdk  with the given parameters.
      Resolves with the string "success" on success; rejects with an error otherwise.
      */
-    public init(_ isSimulator: NSNumber) throws {
+    public init(_ isSimulator: Bool) throws {
         var error: NSError?
         let _sdk = V1NewMPCSdk(
             mpcSdkConfig as String,
-            isSimulator.intValue != 0,
+            isSimulator,
             nil,
             &error)
 
         if error != nil {
-            throw WaasError.mpcSdkFailedToInitialize(error)
+            throw WaasError.mpcSdkFailedToInitialize(error!)
         }
         
         sdk = _sdk!

@@ -3,8 +3,5 @@
 
 target 'WaasSdk' do
   # Comment the next line if you don't want to use dynamic frameworks
-  use_frameworks!
-
-  # Pods for WaasSdk
-  pod 'OpenSSL-Universal'
+  # use_frameworks!
 end
