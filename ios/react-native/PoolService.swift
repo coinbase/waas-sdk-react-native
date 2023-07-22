@@ -2,7 +2,7 @@ import Foundation
 import WaasSdk
 import WaasSdkGo
 
-@objc
+@objc(PoolService)
 class PoolService: NSObject {
     // The error code for PoolService-related errors.
     let poolsErr = "E_POOL_SERVICE"
@@ -37,10 +37,10 @@ class PoolService: NSObject {
             return
         }
         
-        Operation(self.poolsClient!.createPool(displayName as String, poolID: poolID as String)).bridge(resolve: resolve, reject: reject) { pool in
+        Operation(self.poolsClient!.createPool(displayName: displayName, poolID: poolID)).bridge(resolve: resolve, reject: reject) { pool in
             return [
-                "name": pool?.name as Any,
-                "displayName": pool?.displayName as Any
+                "name": pool.name as Any,
+                "displayName": pool.displayName as Any
             ]
         }
     }

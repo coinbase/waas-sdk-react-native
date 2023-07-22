@@ -1,7 +1,7 @@
 import Foundation
 import WaasSdk
 
-@objc
+@objc(MPCSdk)
 class MPCSdk: NSObject {
 
     // The config to be used for MPCSdk initialization.

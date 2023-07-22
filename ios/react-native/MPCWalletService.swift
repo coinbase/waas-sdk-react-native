@@ -2,7 +2,7 @@ import Foundation
 import WaasSdk
 import WaasSdkGo
 
-@objc
+@objc(MPCWalletService)
 class MPCWalletService: NSObject {
     // The URL of the MPCWalletService.
     let mpcWalletServiceUrl = "https://api.developer.coinbase.com/waas/mpc_wallets"
@@ -47,8 +47,8 @@ class MPCWalletService: NSObject {
         
         Operation(self.walletsClient!.createMPCWallet(parent: parent, device: device)).bridge(resolve: resolve, reject: reject) { response in
             return [
-               "DeviceGroup": response?.deviceGroup as Any,
-               "Operation": response?.operation as Any
+               "DeviceGroup": response.deviceGroup as Any,
+               "Operation": response.operation as Any
            ]
         }
     }

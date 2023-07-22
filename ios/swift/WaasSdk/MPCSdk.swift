@@ -2,7 +2,6 @@ import Foundation
 import WaasSdkGo
 import Combine
 
-@objc
 public class MPCSdk: NSObject {
 
     // The config to be used for MPCSdk initialization.

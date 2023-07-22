@@ -2,7 +2,6 @@ import Foundation
 import WaasSdkGo
 import Combine
 
-@objc
 public class MPCWalletService: NSObject {
     // The URL of the MPCWalletService.
     let mpcWalletServiceUrl = "https://api.developer.coinbase.com/waas/mpc_wallets"

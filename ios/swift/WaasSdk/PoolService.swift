@@ -2,7 +2,6 @@ import Foundation
 import WaasSdkGo
 import Combine
 
-@objc
 public class PoolService: NSObject {
     // The URL of the PoolService.
     let poolServiceUrl = "https://api.developer.coinbase.com/waas/pools"

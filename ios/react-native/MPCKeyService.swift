@@ -2,7 +2,7 @@ import Foundation
 import WaasSdk
 import WaasSdkGo
 
-@objc
+@objc(MPCKeyService)
 class MPCKeyService: NSObject {
 
     // The error code for MPCKeyService-related errors.
@@ -12,7 +12,6 @@ class MPCKeyService: NSObject {
 
     // The handle to the Go MPCKeyService client.
     var keyClient: WaasSdk.MPCKeyService?
-    
     
     // bails if keyClient isn't initialized.
     func failIfUnitialized(_ reject: RCTPromiseRejectBlock) -> Bool {
@@ -70,12 +69,9 @@ class MPCKeyService: NSObject {
             return
         }
         
-        Operation(self.keyClient!.pollPendingDeviceGroup(
-            deviceGroup as String,
-            pollInterval: pollInterval.int64Value)).bridge(resolve: resolve, reject: reject) { pendingDeviceGroupData in
-                let res = try JSONSerialization.jsonObject(with: pendingDeviceGroupData!) as? NSArray
-                return res;
-            }
+        Operation(self.keyClient!.pollForPendingDeviceGroup(
+            deviceGroup,
+            pollInterval: pollInterval)).bridge(resolve: resolve, reject: reject)
     }
 
     /**
@@ -90,7 +86,7 @@ class MPCKeyService: NSObject {
             return
         }
 
-        VoidOperation(self.keyClient!.stopPollingPendingDeviceBackups()).bridge(resolve: resolve, reject: reject)
+        Operation(self.keyClient!.stopPollingForPendingDeviceGroup()).bridge(resolve: resolve, reject: reject)
     }
 
     /**
@@ -103,13 +99,8 @@ class MPCKeyService: NSObject {
         if failIfUnitialized(reject) {
             return
         }
-
-        do {
-            let serializedTx = try JSONSerialization.data(withJSONObject: transaction)
-            Operation(self.keyClient!.createTxSignature(parent, tx: serializedTx)).bridge(resolve: resolve, reject: reject)
-        } catch {
-            reject(self.mpcKeyServiceErr, error.localizedDescription, nil)
-        }
+        
+        Operation(self.keyClient!.createSignatureFromTx(parent, transaction: transaction)).bridge(resolve: resolve, reject: reject)
     }
 
     /**
@@ -125,9 +116,9 @@ class MPCKeyService: NSObject {
             return
         }
         
-        Operation(self.keyClient!.pollPendingSignatures(
-            deviceGroup as String,
-            pollInterval: pollInterval.int64Value)).bridge(resolve: resolve, reject: reject)
+        Operation(self.keyClient!.pollForPendingSignatures(
+            deviceGroup,
+            pollInterval: pollInterval)).bridge(resolve: resolve, reject: reject)
     }
 
     /**
@@ -142,7 +133,7 @@ class MPCKeyService: NSObject {
             return
         }
 
-        Operation(self.keyClient!.stopPollingPendingSignatures()).bridge(resolve: resolve, reject: reject)
+        Operation(self.keyClient!.stopPollingForPendingSignatures()).bridge(resolve: resolve, reject: reject)
     }
 
     /**
@@ -158,9 +149,9 @@ class MPCKeyService: NSObject {
         
         Operation(self.keyClient!.waitPendingSignature(operation)).bridge(resolve: resolve, reject: reject) { signature in
             return [
-                "Name": signature?.name,
-                "Payload": signature?.payload,
-                "SignedPayload": signature?.signedPayload
+                "Name": signature.name,
+                "Payload": signature.payload,
+                "SignedPayload": signature.signedPayload
             ]
         }
     }
@@ -179,8 +170,8 @@ class MPCKeyService: NSObject {
             return [
                 "Transaction": transaction,
                 "Signature": signature,
-                "RawTransaction": signedTransaction?.rawTransaction as Any,
-                "TransactionHash": signedTransaction?.transactionHash as Any
+                "RawTransaction": signedTransaction.rawTransaction as Any,
+                "TransactionHash": signedTransaction.transactionHash as Any
             ]
         }
     }
@@ -194,11 +185,11 @@ class MPCKeyService: NSObject {
             return
         }
         
-        Operation(self.keyClient!.getDeviceGroup(name as String)).bridge(resolve: resolve, reject: reject) { deviceGroupRes in
-            let devices = try JSONSerialization.jsonObject(with: deviceGroupRes!.devices! as Data)
+        Operation(self.keyClient!.getDeviceGroup(name)).bridge(resolve: resolve, reject: reject) { deviceGroupRes in
+            let devices = try JSONSerialization.jsonObject(with: deviceGroupRes.devices! as Data)
             return [
-                "Name": deviceGroupRes?.name as Any,
-                "MPCKeyExportMetadata": deviceGroupRes?.mpcKeyExportMetadata as Any,
+                "Name": deviceGroupRes.name as Any,
+                "MPCKeyExportMetadata": deviceGroupRes.mpcKeyExportMetadata as Any,
                 "Devices": devices as Any
             ]
         }
@@ -216,7 +207,7 @@ class MPCKeyService: NSObject {
         }
         
         Operation(self.keyClient!.prepareDeviceArchive(
-            deviceGroup as String, device: device)).bridge(resolve: resolve, reject: reject)
+            deviceGroup, device: device)).bridge(resolve: resolve, reject: reject)
     }
 
     /**
@@ -232,7 +223,7 @@ class MPCKeyService: NSObject {
             return
         }
         
-        Operation(self.keyClient!.pollPendingDeviceArchives).bridge(resolve: resolve, reject: reject)
+        Operation(self.keyClient!.pollForPendingDeviceArchives(deviceGroup, pollInterval: pollInterval)).bridge(resolve: resolve, reject: reject)
     }
 
     /**
@@ -246,7 +237,7 @@ class MPCKeyService: NSObject {
             return
         }
 
-        Operation(self.keyClient!.stopPollingPendingDeviceArchives()).bridge(resolve: resolve, reject: reject)
+        Operation(self.keyClient!.stopPollingForPendingDeviceArchives()).bridge(resolve: resolve, reject: reject)
     }
 
     /**
@@ -262,7 +253,7 @@ class MPCKeyService: NSObject {
         
         Operation(
         self.keyClient!.prepareDeviceBackup(
-            deviceGroup as String, device: device)).bridge(resolve: resolve, reject: reject)
+            deviceGroup, device: device)).bridge(resolve: resolve, reject: reject)
     }
 
     /**
@@ -278,9 +269,9 @@ class MPCKeyService: NSObject {
             return
         }
         
-        Operation(self.keyClient!.pollPendingDeviceBackups(
-            deviceGroup as String,
-            pollInterval: pollInterval.int64Value)).bridge(resolve: resolve, reject: reject)
+        Operation(self.keyClient!.pollForPendingDeviceBackups(
+            deviceGroup,
+            pollInterval: pollInterval)).bridge(resolve: resolve, reject: reject)
     }
 
     /**
@@ -294,7 +285,7 @@ class MPCKeyService: NSObject {
             return
         }
         
-        Operation(self.keyClient!.stopPollingPendingDeviceBackups()).bridge(resolve: resolve, reject: reject)
+        Operation(self.keyClient!.stopPollingForPendingDeviceBackups()).bridge(resolve: resolve, reject: reject)
     }
 
     /**
@@ -325,9 +316,9 @@ class MPCKeyService: NSObject {
             return
         }
         
-        Operation(self.keyClient!.pollPendingDevices(
-            deviceGroup as String,
-            pollInterval: pollInterval.int64Value)).bridge(resolve: resolve, reject: reject)
+        Operation(self.keyClient!.pollForPendingDevices(
+            deviceGroup,
+            pollInterval: pollInterval)).bridge(resolve: resolve, reject: reject)
     }
 
     /**
@@ -341,6 +332,6 @@ class MPCKeyService: NSObject {
             return
         }
 
-        VoidOperation(self.keyClient!.stopPollingPendingDevices()).bridge(resolve: resolve, reject: reject)
+        Operation(self.keyClient!.stopPollingForPendingDevices()).bridge(resolve: resolve, reject: reject)
     }
 }
