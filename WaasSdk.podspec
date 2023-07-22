@@ -1,21 +1,17 @@
 require "json"
 
-package = JSON.parse(File.read(File.join(__dir__, "package.json")))
-folly_compiler_flags = '-DFOLLY_NO_CONFIG -DFOLLY_MOBILE=1 -DFOLLY_USE_LIBCPP=1 -Wno-comma -Wno-shorten-64-to-32'
-
-# the version of the native iOS sdk.
-version = "0.0.1"
+VERSION = "0.0.1"
 
 Pod::Spec.new do |s|
   s.name         = "WaasSdk"
-  s.version      = "#{version}"
-  s.summary      = package["description"]
-  s.homepage     = package["homepage"]
-  s.license      = package["license"]
-  s.authors      = package["author"]
+  s.version      = "#{VERSION}"
+  s.summary      = "A native swift SDK for Coinbase's Wallet-as-a-service."
+  s.homepage     = "https://github.com/coinbase/waas-sdk-react-native"
+  s.license      = "Apache-2.0"
+  s.authors      = "Coinbase, Inc."
 
-  s.platforms    = { :ios => "11.0" }
-  s.source       = { :git => "https://github.com/coinbase/waas-sdk-react-native.git", :tag => "swift/#{version}" }
+  s.platforms    = { :ios => "13.0" }
+  s.source       = { :git => "https://github.com/coinbase/waas-sdk-react-native.git", :tag => "swift/#{VERSION}" }
 
   s.source_files = "ios/swift/WaasSdk/*.{h,m,mm,swift}"
   s.vendored_frameworks = 'ios/swift/WaasSdkGo.xcframework', 'ios/swift/openssl_libcrypto.xcframework'

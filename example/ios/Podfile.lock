@@ -534,8 +534,8 @@ SPEC CHECKSUMS:
   ReactCommon: 6f65ea5b7d84deb9e386f670dd11ce499ded7b40
   RNCClipboard: 2834e1c4af68697089cdd455ee4a4cdd198fa7dd
   RNScreens: 218801c16a2782546d30bd2026bb625c0302d70f
-  waas-sdk-react-native: d4d7edec727d0cf5e2af9073df2f6cab7d3376ce
-  WaasSdk: 1f93140a4e460266d333d6350ef2c680ea29fa3a
+  waas-sdk-react-native: ea64aee8cb37e98eb49ec56bca4260d721a01d13
+  WaasSdk: d0960d5480ffb6aaf83224a4f02d22da3d76c217
   Yoga: 5ed1699acbba8863755998a4245daa200ff3817b
 
 PODFILE CHECKSUM: b6da8e0a0a101dd81a8849985292246e71e0e844
