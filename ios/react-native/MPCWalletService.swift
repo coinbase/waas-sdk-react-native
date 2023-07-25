@@ -32,6 +32,10 @@ class MPCWalletService: NSObject {
             reject(walletsErr, error.localizedDescription, nil)
         }
     }
+    
+    @objc static func requiresMainQueueSetup() -> Bool {
+        return true
+    }
 
     /**
      Creates an MPCWallet with the given parameters.  Resolves with the response on success; rejects with an error

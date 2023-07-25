@@ -24,6 +24,10 @@ class MPCSdk: NSObject {
         return false
     }
 
+    @objc static func requiresMainQueueSetup() -> Bool {
+        return true
+    }
+    
     /**
      Initializes the MPCSdk  with the given parameters.
      Resolves with the string "success" on success; rejects with an error otherwise.

@@ -41,7 +41,7 @@ public class MPCKeyService: NSObject {
      */
     public func registerDevice() -> Future<V1Device, WaasError> {
         return Future() { promise in
-            DispatchQueue.main.async(execute: {
+            Job.background().async(execute: {
                 do {
                     let device = try self.keyClient?.registerDevice()
                     promise(Result.success(device!))
@@ -60,7 +60,7 @@ public class MPCKeyService: NSObject {
      */
     public func pollForPendingDeviceGroup(_ deviceGroup: NSString, pollInterval: NSNumber) -> Future<NSArray, WaasError> {
         return Future() { promise in
-            DispatchQueue.main.async(execute: {
+            Job.background().async(execute: {
                 do {
                     let pendingDeviceGroupData = try self.keyClient?.pollPendingDeviceGroup(
                         deviceGroup as String,
@@ -82,7 +82,7 @@ public class MPCKeyService: NSObject {
      */
     public func stopPollingForPendingDeviceGroup() -> Future<String, WaasError> {
         return Future() { promise in
-            DispatchQueue.main.async(execute: {
+            Job.background().async(execute: {
                 self.keyClient?.stopPollingPendingDeviceBackups(goReturnsString(promise: promise, wrapAsError: self.wrapError))
             })
          }
@@ -94,7 +94,7 @@ public class MPCKeyService: NSObject {
      */
     public func createSignatureFromTx(_ parent: NSString, transaction: NSDictionary) -> Future<String, WaasError> {
         return Future() { promise in
-            DispatchQueue.main.async(execute: {
+            Job.background().async(execute: {
                 do {
                     let serializedTx = try JSONSerialization.data(withJSONObject: transaction)
                     self.keyClient?.createTxSignature(parent as String, tx: serializedTx, receiver: goReturnsString(promise: promise, wrapAsError: self.wrapError))
@@ -113,7 +113,7 @@ public class MPCKeyService: NSObject {
      */
     public func pollForPendingSignatures(_ deviceGroup: NSString, pollInterval: NSNumber) -> Future<NSArray, WaasError> {
         return Future() { promise in
-            DispatchQueue.main.async(execute: {
+            Job.background().async(execute: {
                 do {
                     let pendingSignaturesData = try self.keyClient?.pollPendingSignatures(
                         deviceGroup as String,
@@ -135,7 +135,7 @@ public class MPCKeyService: NSObject {
      */
     public func stopPollingForPendingSignatures() -> Future<String, WaasError> {
         return Future() { promise in
-            DispatchQueue.main.async(execute: {
+            Job.background().async(execute: {
                 self.keyClient?.stopPollingPendingSignatures(goReturnsString(promise: promise, wrapAsError: self.wrapError))
             })
         }
@@ -147,7 +147,7 @@ public class MPCKeyService: NSObject {
      */
     public func waitPendingSignature(_ operation: NSString) -> Future<V1Signature, WaasError> {
         return Future() { promise in
-            DispatchQueue.main.async(execute: {
+            Job.background().async(execute: {
                 var signature: V1Signature?
                 do {
                     signature = try self.keyClient?.waitPendingSignature(operation as String)
@@ -164,7 +164,7 @@ public class MPCKeyService: NSObject {
      */
     public func getSignedTransaction(_ transaction: NSDictionary, signature: NSDictionary) -> Future<V1SignedTransaction, WaasError> {
         return Future() { promise in
-            DispatchQueue.main.async(execute: {
+            Job.background().async(execute: {
                 do {
                     let serializedTx = try JSONSerialization.data(withJSONObject: transaction)
                     let goSignature = V1Signature()
@@ -188,7 +188,7 @@ public class MPCKeyService: NSObject {
      */
     public func getDeviceGroup(_ name: NSString) -> Future<V1DeviceGroup, WaasError>{
         return Future() { promise in
-            DispatchQueue.main.async(execute: {
+            Job.background().async(execute: {
                 do {
                     let deviceGroupRes = try self.keyClient?.getDeviceGroup(name as String)
                     promise(Result.success(deviceGroupRes!))
@@ -205,7 +205,7 @@ public class MPCKeyService: NSObject {
      */
     public func prepareDeviceArchive(_ deviceGroup: NSString, device: NSString) -> Future<String, WaasError> {
         return Future() { promise in
-            DispatchQueue.main.async(execute: {
+            Job.background().async(execute: {
                 self.keyClient?.prepareDeviceArchive(
                     deviceGroup as String, device: device as String, receiver: goReturnsString(promise: promise, wrapAsError: self.wrapError))
             })
@@ -220,7 +220,7 @@ public class MPCKeyService: NSObject {
      */
     public func pollForPendingDeviceArchives(_ deviceGroup: NSString, pollInterval: NSNumber) -> Future<NSArray, WaasError> {
         return Future() { promise in
-            DispatchQueue.main.async(execute: {
+            Job.background().async(execute: {
                 do {
                     let pendingDeviceArchiveData = try self.keyClient?.pollPendingDeviceArchives(
                         deviceGroup as String,
@@ -241,7 +241,7 @@ public class MPCKeyService: NSObject {
      */
     public func stopPollingForPendingDeviceArchives() -> Future<String, WaasError> {
         return Future() { promise in
-            DispatchQueue.main.async(execute: {
+            Job.background().async(execute: {
                 self.keyClient?.stopPollingPendingDeviceArchives(goReturnsString(promise: promise, wrapAsError: self.wrapError))
             })
         }
@@ -253,7 +253,7 @@ public class MPCKeyService: NSObject {
      */
     public func prepareDeviceBackup(_ deviceGroup: NSString, device: NSString) -> Future<String, WaasError> {
         return Future() { promise in
-            DispatchQueue.main.async(execute: {
+            Job.background().async(execute: {
                 self.keyClient?.prepareDeviceBackup(
                     deviceGroup as String, device: device as String, receiver: goReturnsString(promise: promise, wrapAsError: self.wrapError))
             })
@@ -268,7 +268,7 @@ public class MPCKeyService: NSObject {
      */
     public func pollForPendingDeviceBackups(_ deviceGroup: NSString, pollInterval: NSNumber) -> Future<NSArray, WaasError> {
         return Future() { promise in
-            DispatchQueue.main.async(execute: {
+            Job.background().async(execute: {
                 do {
                     let pendingDeviceBackupData = try self.keyClient?.pollPendingDeviceBackups(
                         deviceGroup as String,
@@ -291,7 +291,7 @@ public class MPCKeyService: NSObject {
      */
     public func stopPollingForPendingDeviceBackups() -> Future<String, WaasError> {
         return Future() { promise in
-            DispatchQueue.main.async(execute: {
+            Job.background().async(execute: {
                 self.keyClient?.stopPollingPendingDeviceBackups(goReturnsString(promise: promise, wrapAsError: self.wrapError))
             })
         }
@@ -303,7 +303,7 @@ public class MPCKeyService: NSObject {
      */
     public func addDevice(_ deviceGroup: NSString, device: NSString) -> Future<String, WaasError> {
         return Future() { promise in
-            DispatchQueue.main.async(execute: {
+            Job.background().async(execute: {
                 self.keyClient?.addDevice(
                     deviceGroup as String, device: device as String, receiver: goReturnsString(promise: promise, wrapAsError: self.wrapError))
             })
@@ -318,7 +318,7 @@ public class MPCKeyService: NSObject {
      */
     public func pollForPendingDevices(_ deviceGroup: NSString, pollInterval: NSNumber) -> Future<NSArray, WaasError> {
         return Future() { promise in
-            DispatchQueue.main.async(execute: {
+            Job.background().async(execute: {
                 do {
                     let pendingDeviceData = try self.keyClient?.pollPendingDevices(
                         deviceGroup as String,
@@ -341,7 +341,7 @@ public class MPCKeyService: NSObject {
      */
     public func stopPollingForPendingDevices() -> Future<String, WaasError> {
         return Future() { promise in
-            DispatchQueue.main.async(execute: {
+            Job.background().async(execute: {
                 self.keyClient?.stopPollingPendingDevices(goReturnsString(promise: promise, wrapAsError: self.wrapError))
             })
         }

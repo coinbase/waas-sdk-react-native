@@ -43,7 +43,7 @@ public class MPCSdk: NSObject {
      */
     public func bootstrapDevice(_ passcode: NSString) -> Future<String, WaasError> {
         return Future() { promise in
-            DispatchQueue.main.async(execute: {
+            Job.main().async(execute: {
                 self.sdk.bootstrapDevice(passcode as String, receiver: goReturnsString(promise: promise, wrapAsError: self.wrapError))
             })
         }
@@ -58,7 +58,7 @@ public class MPCSdk: NSObject {
      */
     public func resetPasscode(_ newPasscode: NSString) -> Future<Void, WaasError> {
         return Future() { promise in
-            DispatchQueue.main.async(execute: {
+            Job.main().async(execute: {
                 do {
                     try self.sdk.resetPasscode(newPasscode as String)
                     promise(Result.success(()))
@@ -75,7 +75,7 @@ public class MPCSdk: NSObject {
      */
     public func getRegistrationData() -> Future<String, WaasError> {
         return Future() { promise in
-            DispatchQueue.main.async(execute: {
+            Job.main().async(execute: {
                 self.sdk.getRegistrationData(goReturnsString(promise: promise, wrapAsError: self.wrapError))
             })
         }
@@ -88,7 +88,7 @@ public class MPCSdk: NSObject {
      */
     public func computeMPCOperation(_ mpcData: NSString) -> Future<Void, WaasError> {
         return Future() { promise in
-            DispatchQueue.main.async(execute: {
+            Job.backgroundHighPri().async(execute: {
                 do {
                     try self.sdk.computeMPCOperation(mpcData as String)
                     promise(Result.success(()))
@@ -105,7 +105,7 @@ public class MPCSdk: NSObject {
      */
     public func computePrepareDeviceArchiveMPCOperation(_ mpcData: NSString, passcode: NSString) -> Future<Void, WaasError> {
         return Future() { promise in
-            DispatchQueue.main.async(execute: {
+            Job.backgroundHighPri().async(execute: {
                 do {
                     try self.sdk.computePrepareDeviceArchiveMPCOperation(mpcData as String, passcode: passcode as String)
                     promise(Result.success(()))
@@ -122,7 +122,7 @@ public class MPCSdk: NSObject {
      */
     public func computePrepareDeviceBackupMPCOperation(_ mpcData: NSString, passcode: NSString) -> Future<Void, WaasError> {
         return Future() { promise in
-            DispatchQueue.main.async(execute: {
+            Job.backgroundHighPri().async(execute: {
                 do {
                     try self.sdk.computePrepareDeviceBackupMPCOperation(mpcData as String, passcode: passcode as String)
                     promise(Result.success(()))
@@ -139,7 +139,7 @@ public class MPCSdk: NSObject {
      */
     public func computeAddDeviceMPCOperation(_ mpcData: NSString, passcode: NSString, deviceBackup: NSString) -> Future<Void, WaasError> {
         return Future() { promise in
-            DispatchQueue.main.async(execute: {
+            Job.backgroundHighPri().async(execute: {
                 do {
                     try self.sdk.computeAddDeviceMPCOperation(
                         mpcData as String,
@@ -161,7 +161,7 @@ public class MPCSdk: NSObject {
      */
     public func exportPrivateKeys(_ mpcKeyExportMetadata: NSString, passcode: NSString) -> Future<NSArray, WaasError> {
         return Future() { promise in
-            DispatchQueue.main.async(execute: {
+            Job.backgroundHighPri().async(execute: {
                 do {
                     let response = try self.sdk.exportPrivateKeys(
                         mpcKeyExportMetadata as String,
@@ -183,7 +183,7 @@ public class MPCSdk: NSObject {
      */
     public func exportDeviceBackup() -> Future<String, WaasError> {
         return Future() { promise in
-            DispatchQueue.main.async(execute: {
+            Job.backgroundHighPri().async(execute: {
                 self.sdk.exportDeviceBackup(goReturnsString(promise: promise, wrapAsError: self.wrapError))
             })
         }

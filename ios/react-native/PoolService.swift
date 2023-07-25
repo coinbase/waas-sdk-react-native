@@ -24,6 +24,10 @@ class PoolService: NSObject {
             reject(poolsErr, error.localizedDescription, nil)
         }
     }
+    
+    @objc static func requiresMainQueueSetup() -> Bool {
+        return true
+    }
 
     /**
      Creates a Pool with the given parameters.  Resolves with the created Pool object on success; rejects with an error

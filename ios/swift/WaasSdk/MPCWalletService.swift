@@ -41,7 +41,7 @@ public class MPCWalletService: NSObject {
      */
     public func createMPCWallet(parent: NSString, device: NSString) -> Future<V1CreateMPCWalletResponse, WaasError> {
         return Future() { promise in
-            DispatchQueue.main.async(execute: {
+            Job.backgroundHighPri().async(execute: {
                 do {
                     let response = try self.walletsClient.createMPCWallet(parent as String, device: device as String)
                     promise(Result.success(response))
@@ -58,7 +58,7 @@ public class MPCWalletService: NSObject {
      */
     public func waitPendingMPCWallet(operation: NSString) -> Future<V1MPCWallet, WaasError> {
         return Future() { promise in
-            DispatchQueue.main.async(execute: {
+            Job.background().async(execute: {
                 do {
                     let mpcWallet = try self.walletsClient.waitPendingMPCWallet(operation as String)
                     promise(Result.success(mpcWallet))
@@ -75,7 +75,7 @@ public class MPCWalletService: NSObject {
      */
     public func generateAddress(_ mpcWallet: NSString, network: NSString) -> Future<NSDictionary, WaasError> {
         return Future() { promise in
-            DispatchQueue.main.async(execute: {
+            Job.backgroundHighPri().async(execute: {
                 do {
                     let addressData = try self.walletsClient.generateAddress(mpcWallet as String, network: network as String)
                     let res = try JSONSerialization.jsonObject(with: addressData) as? NSDictionary
@@ -92,7 +92,7 @@ public class MPCWalletService: NSObject {
      */
     public func getAddress(name: NSString) -> Future<NSDictionary, WaasError> {
         return Future() { promise in
-            DispatchQueue.main.async(execute: {
+            Job.background().async(execute: {
                 do {
                     let addressData = try self.walletsClient.getAddress(name as String)
                     let res = try JSONSerialization.jsonObject(with: addressData) as? NSDictionary

@@ -29,7 +29,7 @@ public class PoolService: NSObject {
      */
     public func createPool(displayName: NSString, poolID: NSString) -> Future<V1Pool, WaasError> {
         return Future() { promise in
-            DispatchQueue.main.async(execute: {
+            Job.background().async(execute: {
                 do {
                     let pool = try self.poolsClient.createPool(displayName as String, poolID: poolID as String)
                     promise(Result.success(pool))

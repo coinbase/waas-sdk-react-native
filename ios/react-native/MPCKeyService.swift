@@ -22,6 +22,10 @@ class MPCKeyService: NSObject {
         
         return false;
     }
+    
+    @objc static func requiresMainQueueSetup() -> Bool {
+        return true
+    }
 
     /**
      Initializes the MPCKeyService  with the given parameters.
