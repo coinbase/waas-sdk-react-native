@@ -132,19 +132,21 @@ The methods from the WaaS SDK which are _required_ to be used for participation 
 3. `getRegistrationData`
 4. `computeMPCOperation`
 
-# Native Waas SDK
+# Native Waas SDK (Beta)
+
+## Android
 
 We expose a Java 8+, `java.util.concurrent.Future`-based SDK for use with Java/Kotlin. An example
 app is included in `android-native-example/` for more information.
 
-## Requirements
+### Requirements
 
 - Java 8+
 - Gradle 7.*
   - If using central gradle repositories, you may need to update your `settings.gradle` to not fail on project repos.
     - i.e (`repositoriesMode.set(RepositoriesMode.PREFER_SETTINGS)`)
 
-## Installation
+### Installation
 To begin, place the `android-native` directory relative to your project.
 
 In your `settings.gradle`, include the following:
@@ -166,11 +168,43 @@ implementation project(':android-native:mpc-sdk')
 implementation project(':android-native:go-internal-sdk')
 ```
 
-## Demo App
+### Demo App
 A demo app of the native SDK is included in `android-native/`. Opening this directory with Android Studio should be 
 sufficient to build and run the app.
 
-## Considerations
+### Considerations
 
 - The SDK should import cleanly into Kotlin as-is -- the sample app includes a demonstration of utilizing Waas's Futures
 with Kotlin task-closures. Please reach out with any questions.
+
+## iOS
+
+Waas also supports Native iOS (iOS 13+), using Swift 5.5 futures. The react-native SDK wraps this into convenient
+JS-exposed modules.
+
+### Requirements
+
+- iOS 13+
+- Swift 5.5+ in Xcode (run `swift version` to check your compiler)
+
+### Installation
+
+You can rely upon the `WaasSdk` pod from this repository to use Waas directly in Swift.
+
+In your `Podfile`:
+
+```ruby
+source "https://github.com/coinbase/waas-sdk-react-native"
+
+target "MyApp" do
+  pod "WaasSdk", '~>0.0.1'
+end
+```
+
+Once you've added the `pod` and custom `source`, you can run `pod install` to begin using the SDK.
+
+### Demo App
+
+At the moment, no demo app is included for native iOS. We'll introduce this in a followup PR. For now, the API for Native iOS matches identically to the react-native API, so code should be logically identical.
+
+Please open an issue or contact our cloud forums with any questions.
