@@ -13,8 +13,13 @@ import WaasSdk
 /**
  Bridge a swift combine- `future` to a react promise.
  */
+
+let _queue = DispatchQueue(label: "WaasOperation", qos: .userInitiated)
+
 class Operation<T> {
     
+    
+    var cancellable: Cancellable?
     var future: Future<T, WaasError>;
     
     let E_TRANSFORM = "E_TRANSFORM"
@@ -24,25 +29,27 @@ class Operation<T> {
     }
     
     func bridge(resolve: @escaping RCTPromiseResolveBlock, reject: @escaping RCTPromiseRejectBlock, map: ((T) throws -> Any)? = nil) {
-        do {
-            _ = self.future.sink { completion in
-                switch completion {
-                case .failure(let err):
-                    reject(err.code, err.description, err)
-                case .finished:
-                    // future returned nothing
-                    resolve(nil)
-                }
-            } receiveValue: { val in
-                do {
-                    if map != nil {
-                        let mappedVal = try map!(val)
-                        resolve(mappedVal)
-                    } else {
-                        resolve(val)
+        _queue.async {
+            do {
+                self.cancellable = self.future.sink { completion in
+                    switch completion {
+                    case .failure(let err):
+                        reject(err.code, err.description, err)
+                    case .finished:
+                        // future returned, wait for receiveValue.
+                        break
                     }
-                } catch {
-                    reject(self.E_TRANSFORM, error.localizedDescription, error)
+                } receiveValue: { val in
+                    do {
+                        if map != nil {
+                            let mappedVal = try map!(val)
+                            resolve(mappedVal)
+                        } else {
+                            resolve(val)
+                        }
+                    } catch {
+                        reject(self.E_TRANSFORM, error.localizedDescription, error)
+                    }
                 }
             }
         }
