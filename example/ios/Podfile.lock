@@ -535,7 +535,7 @@ SPEC CHECKSUMS:
   RNCClipboard: 2834e1c4af68697089cdd455ee4a4cdd198fa7dd
   RNScreens: 218801c16a2782546d30bd2026bb625c0302d70f
   waas-sdk-react-native: ea64aee8cb37e98eb49ec56bca4260d721a01d13
-  WaasSdk: d0960d5480ffb6aaf83224a4f02d22da3d76c217
+  WaasSdk: 53bcb83b04d82c49f9a80ae4aa4dc1a52be24f30
   Yoga: 5ed1699acbba8863755998a4245daa200ff3817b
 
 PODFILE CHECKSUM: 1a09ea5037ead0e34eed71ab7eb81bf44f72b83a

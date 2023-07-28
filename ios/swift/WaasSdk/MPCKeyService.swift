@@ -19,12 +19,12 @@ public class MPCKeyService: NSObject {
      Initializes the MPCKeyService  with the given parameters.
      Resolves with the string "success" on success; rejects with an error otherwise.
      */
-    public init(_ apiKeyName: NSString, privateKey: NSString) throws {
+    public init(_ apiKeyName: String, privateKey: String) throws {
         var error: NSError?
         keyClient = V1NewMPCKeyService(
-            mpcKeyServiceUrl as String,
-            apiKeyName as String,
-            privateKey as String,
+            mpcKeyServiceUrl,
+            apiKeyName,
+            privateKey,
             &error)
 
         if error != nil {
@@ -39,12 +39,12 @@ public class MPCKeyService: NSObject {
     /**
      Registers the current Device. Resolves with the Device object on success; rejects with an error otherwise.
      */
-    public func registerDevice() -> Future<V1Device, WaasError> {
+    public func registerDevice() -> Future<Device, WaasError> {
         return Future() { promise in
             Job.background().async(execute: {
                 do {
                     let device = try self.keyClient?.registerDevice()
-                    promise(Result.success(device!))
+                    promise(Result.success(Device(Name: device!.name)))
                 } catch {
                     promise(Result.failure(WaasError.mpcKeyServiceUnspecifiedError(error as NSError)))
                 }
@@ -58,15 +58,15 @@ public class MPCKeyService: NSObject {
      stopPollingForPendingDeviceGroup or computeMPCOperation) before another call is made to this function.
      Resolves with a list of the pending CreateDeviceGroupOperations on success; rejects with an error otherwise.
      */
-    public func pollForPendingDeviceGroup(_ deviceGroup: NSString, pollInterval: NSNumber) -> Future<NSArray, WaasError> {
+    public func pollForPendingDeviceGroup(_ deviceGroup: String, pollInterval: NSNumber) -> Future<[CreateDeviceGroupOperation], WaasError> {
         return Future() { promise in
             Job.background().async(execute: {
                 do {
                     let pendingDeviceGroupData = try self.keyClient?.pollPendingDeviceGroup(
-                        deviceGroup as String,
+                        deviceGroup,
                         pollInterval: pollInterval.int64Value)
-                    let res = try JSONSerialization.jsonObject(with: pendingDeviceGroupData!) as? NSArray
-                    promise(Result.success(res!))
+                    let people = try JSONDecoder().decode([CreateDeviceGroupOperation].self, from: pendingDeviceGroupData!)
+                    promise(Result.success(people))
                 } catch {
                     promise(Result.failure(WaasError.mpcKeyServiceUnspecifiedError(error as NSError)))
                 }
@@ -92,12 +92,12 @@ public class MPCKeyService: NSObject {
      Initiates an operation to create a Signature resource from the given transaction.
      Resolves with the resource name of the WaaS operation creating the Signature on successful initiation; rejects with an error otherwise.
      */
-    public func createSignatureFromTx(_ parent: NSString, transaction: NSDictionary) -> Future<String, WaasError> {
+    public func createSignatureFromTx(_ parent: String, transaction: NSDictionary) -> Future<String, WaasError> {
         return Future() { promise in
             Job.background().async(execute: {
                 do {
                     let serializedTx = try JSONSerialization.data(withJSONObject: transaction)
-                    self.keyClient?.createTxSignature(parent as String, tx: serializedTx, receiver: goReturnsString(promise: promise, wrapAsError: self.wrapError))
+                    self.keyClient?.createTxSignature(parent, tx: serializedTx, receiver: goReturnsString(promise: promise, wrapAsError: self.wrapError))
                 } catch {
                     promise(Result.failure(WaasError.mpcKeyServiceUnspecifiedError(error as NSError)))
                 }
@@ -111,15 +111,15 @@ public class MPCKeyService: NSObject {
      stopPollingForPendingSignatures or computeMPCOperaton before another call is made to this
      function. Resolves with a list of the pending Signatures on success; rejects with an error otherwise.
      */
-    public func pollForPendingSignatures(_ deviceGroup: NSString, pollInterval: NSNumber) -> Future<NSArray, WaasError> {
+    public func pollForPendingSignatures(_ deviceGroup: String, pollInterval: NSNumber) -> Future<[PendingSignature], WaasError> {
         return Future() { promise in
             Job.background().async(execute: {
                 do {
                     let pendingSignaturesData = try self.keyClient?.pollPendingSignatures(
-                        deviceGroup as String,
+                        deviceGroup,
                         pollInterval: pollInterval.int64Value)
-                    let res = try JSONSerialization.jsonObject(with: pendingSignaturesData!) as? NSArray
-                    promise(Result.success(res!))
+                    let res = try JSONDecoder().decode([PendingSignature].self, from: pendingSignaturesData!)
+                    promise(Result.success(res))
                 } catch {
                     promise(Result.failure(WaasError.mpcKeyServiceUnspecifiedError(error as NSError)))
                 }
@@ -145,12 +145,12 @@ public class MPCKeyService: NSObject {
      Waits for a pending Signature with the given operation name. Resolves with the Signature object on success;
      rejects with an error otherwise.
      */
-    public func waitPendingSignature(_ operation: NSString) -> Future<V1Signature, WaasError> {
+    public func waitPendingSignature(_ operation: String) -> Future<V1Signature, WaasError> {
         return Future() { promise in
             Job.background().async(execute: {
                 var signature: V1Signature?
                 do {
-                    signature = try self.keyClient?.waitPendingSignature(operation as String)
+                    signature = try self.keyClient?.waitPendingSignature(operation)
                     promise(Result.success(signature!))
                 } catch {
                     promise(Result.failure(WaasError.mpcKeyServiceUnspecifiedError(error as NSError)))
@@ -186,11 +186,11 @@ public class MPCKeyService: NSObject {
     /**
      Gets a DeviceGroup with the given name. Resolves with the DeviceGroup object on success; rejects with an error otherwise.
      */
-    public func getDeviceGroup(_ name: NSString) -> Future<V1DeviceGroup, WaasError>{
+    public func getDeviceGroup(_ name: String) -> Future<V1DeviceGroup, WaasError>{
         return Future() { promise in
             Job.background().async(execute: {
                 do {
-                    let deviceGroupRes = try self.keyClient?.getDeviceGroup(name as String)
+                    let deviceGroupRes = try self.keyClient?.getDeviceGroup(name)
                     promise(Result.success(deviceGroupRes!))
                 } catch {
                     promise(Result.failure(WaasError.mpcKeyServiceUnspecifiedError(error as NSError)))
@@ -203,11 +203,11 @@ public class MPCKeyService: NSObject {
      Initiates an operation to prepare device archive for MPCKey export. Resolves with the resource name of the WaaS operation creating the Device Archive on successful initiation; rejects with
      an error otherwise.
      */
-    public func prepareDeviceArchive(_ deviceGroup: NSString, device: NSString) -> Future<String, WaasError> {
+    public func prepareDeviceArchive(_ deviceGroup: String, device: String) -> Future<String, WaasError> {
         return Future() { promise in
             Job.background().async(execute: {
                 self.keyClient?.prepareDeviceArchive(
-                    deviceGroup as String, device: device as String, receiver: goReturnsString(promise: promise, wrapAsError: self.wrapError))
+                    deviceGroup, device: device, receiver: goReturnsString(promise: promise, wrapAsError: self.wrapError))
             })
         }
     }
@@ -218,14 +218,14 @@ public class MPCKeyService: NSObject {
      stopPollingForDeviceArchives or computePrepareDeviceArchiveMPCOperation) before another call is made to this function.
      Resolves with a list of the pending DeviceArchives on success; rejects with an error otherwise.
      */
-    public func pollForPendingDeviceArchives(_ deviceGroup: NSString, pollInterval: NSNumber) -> Future<NSArray, WaasError> {
+    public func pollForPendingDeviceArchives(_ deviceGroup: String, pollInterval: NSNumber) -> Future<[PendingDeviceArchive], WaasError> {
         return Future() { promise in
             Job.background().async(execute: {
                 do {
                     let pendingDeviceArchiveData = try self.keyClient?.pollPendingDeviceArchives(
-                        deviceGroup as String,
+                        deviceGroup,
                         pollInterval: pollInterval.int64Value)
-                    let res = try JSONSerialization.jsonObject(with: pendingDeviceArchiveData!) as! NSArray
+                    let res = try JSONDecoder().decode([PendingDeviceArchive].self, from: pendingDeviceArchiveData!)
                     promise(Result.success(res))
                 } catch {
                     promise(Result.failure(WaasError.mpcKeyServiceUnspecifiedError(error as NSError)))
@@ -251,11 +251,11 @@ public class MPCKeyService: NSObject {
      Initiates an operation to prepare device backup to add a new Device to the DeviceGroup. Resolves with the resource name of the WaaS operation creating the Device Backup on
      successful initiation; rejects with an error otherwise.
      */
-    public func prepareDeviceBackup(_ deviceGroup: NSString, device: NSString) -> Future<String, WaasError> {
+    public func prepareDeviceBackup(_ deviceGroup: String, device: String) -> Future<String, WaasError> {
         return Future() { promise in
             Job.background().async(execute: {
                 self.keyClient?.prepareDeviceBackup(
-                    deviceGroup as String, device: device as String, receiver: goReturnsString(promise: promise, wrapAsError: self.wrapError))
+                    deviceGroup, device: device, receiver: goReturnsString(promise: promise, wrapAsError: self.wrapError))
             })
         }
     }
@@ -266,15 +266,15 @@ public class MPCKeyService: NSObject {
      stopPollingForDeviceBackups or computePrepareDeviceBackupMPCOperation) before another call is made to this function.
      Resolves with a list of the pending DeviceBackups on success; rejects with an error otherwise.
      */
-    public func pollForPendingDeviceBackups(_ deviceGroup: NSString, pollInterval: NSNumber) -> Future<NSArray, WaasError> {
+    public func pollForPendingDeviceBackups(_ deviceGroup: String, pollInterval: NSNumber) -> Future<[PendingDeviceBackup], WaasError> {
         return Future() { promise in
             Job.background().async(execute: {
                 do {
                     let pendingDeviceBackupData = try self.keyClient?.pollPendingDeviceBackups(
-                        deviceGroup as String,
+                        deviceGroup,
                         pollInterval: pollInterval.int64Value)
                     // swiftlint:disable force_cast
-                    let res = try JSONSerialization.jsonObject(with: pendingDeviceBackupData!) as! NSArray
+                    let res = try JSONDecoder().decode([PendingDeviceBackup].self, from: pendingDeviceBackupData!)
                     // swiftlint:enable force_cast
                     promise(Result.success(res))
                 } catch {
@@ -301,11 +301,11 @@ public class MPCKeyService: NSObject {
      Initiates an operation to add a Device to the DeviceGroup. Resolves with the operation name on successful initiation; rejects with
      an error otherwise.
      */
-    public func addDevice(_ deviceGroup: NSString, device: NSString) -> Future<String, WaasError> {
+    public func addDevice(_ deviceGroup: String, device: String) -> Future<String, WaasError> {
         return Future() { promise in
             Job.background().async(execute: {
                 self.keyClient?.addDevice(
-                    deviceGroup as String, device: device as String, receiver: goReturnsString(promise: promise, wrapAsError: self.wrapError))
+                    deviceGroup, device: device, receiver: goReturnsString(promise: promise, wrapAsError: self.wrapError))
             })
         }
     }
@@ -315,17 +315,19 @@ public class MPCKeyService: NSObject {
      Only one DeviceGroup can be polled at a time; thus, this function must return (by calling either
      stopPollingForPendingDevices or computeAddDeviceMPCOperation) before another call is made to this function.
      Resolves with a list of the pending Devices on success; rejects with an error otherwise.
+     
+     The "Operation" and "MPCData" keys are relevant on each "pending device".
+        Operation: The mpc operation id for this pending device
+        MPCData: the provided mpc data for adding this device (to use with MPCSdk.computeAddDeviceMPCOperation)
      */
-    public func pollForPendingDevices(_ deviceGroup: NSString, pollInterval: NSNumber) -> Future<NSArray, WaasError> {
+    public func pollForPendingDevices(_ deviceGroup: String, pollInterval: NSNumber) -> Future<[PendingDevice], WaasError> {
         return Future() { promise in
             Job.background().async(execute: {
                 do {
                     let pendingDeviceData = try self.keyClient?.pollPendingDevices(
-                        deviceGroup as String,
+                        deviceGroup,
                         pollInterval: pollInterval.int64Value)
-                    // swiftlint:disable force_cast
-                    let res = try JSONSerialization.jsonObject(with: pendingDeviceData!) as! NSArray
-                    // swiftlint:enable force_cast
+                    let res = try JSONDecoder().decode([PendingDevice].self, from: pendingDeviceData!)
                     promise(Result.success(res))
                 } catch {
                     promise(Result.failure(WaasError.mpcKeyServiceUnspecifiedError(error as NSError)))

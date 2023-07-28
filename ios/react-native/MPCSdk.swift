@@ -56,7 +56,7 @@ class MPCSdk: NSObject {
             return;
         }
         
-        Operation(self.sdk!.bootstrapDevice(passcode)).bridge(resolve: resolve, reject: reject)
+        Operation(self.sdk!.bootstrapDevice(passcode as String)).swift(resolve: resolve, reject: reject)
     }
 
     /**
@@ -72,7 +72,7 @@ class MPCSdk: NSObject {
             return;
         }
         
-        Operation(self.sdk!.resetPasscode(newPasscode)).bridge(resolve: resolve, reject: reject)
+        Operation(self.sdk!.resetPasscode(newPasscode as String)).void(resolve: resolve, reject: reject)
     }
 
     /**
@@ -85,7 +85,7 @@ class MPCSdk: NSObject {
             return;
         }
         
-        Operation(self.sdk!.getRegistrationData()).bridge(resolve: resolve, reject: reject)
+        Operation(self.sdk!.getRegistrationData()).swift(resolve: resolve, reject: reject)
     }
 
     /**
@@ -99,7 +99,7 @@ class MPCSdk: NSObject {
             return;
         }
         
-        Operation(self.sdk!.computeMPCOperation(mpcData)).bridge(resolve: resolve, reject: reject)
+        Operation(self.sdk!.computeMPCOperation(mpcData as String)).void(resolve: resolve, reject: reject)
     }
 
     /**
@@ -112,7 +112,7 @@ class MPCSdk: NSObject {
             return;
         }
         
-        Operation(self.sdk!.computePrepareDeviceArchiveMPCOperation(mpcData, passcode: passcode)).bridge(resolve: resolve, reject: reject)
+        Operation(self.sdk!.computePrepareDeviceArchiveMPCOperation(mpcData as String, passcode: passcode as String)).void(resolve: resolve, reject: reject)
     }
 
     /**
@@ -125,7 +125,7 @@ class MPCSdk: NSObject {
             return;
         }
         
-        Operation(self.sdk!.computePrepareDeviceBackupMPCOperation(mpcData, passcode: passcode)).bridge(resolve: resolve, reject: reject)
+        Operation(self.sdk!.computePrepareDeviceBackupMPCOperation(mpcData as String, passcode: passcode as String)).void(resolve: resolve, reject: reject)
     }
 
     /**
@@ -139,9 +139,9 @@ class MPCSdk: NSObject {
         }
         
         Operation(self.sdk!.computeAddDeviceMPCOperation(
-            mpcData,
-            passcode: passcode,
-            deviceBackup: deviceBackup)).bridge(resolve: resolve, reject: reject)
+            mpcData as String,
+            passcode: passcode as String,
+            deviceBackup: deviceBackup as String)).void(resolve: resolve, reject: reject)
     }
 
     /**
@@ -157,8 +157,10 @@ class MPCSdk: NSObject {
         }
         
         Operation(self.sdk!.exportPrivateKeys(
-            mpcKeyExportMetadata,
-            passcode: passcode)).bridge(resolve: resolve, reject: reject)
+            mpcKeyExportMetadata as String,
+            passcode: passcode as String)).any(resolve: resolve, reject: reject) { keys in
+                keys.map({key in key.asDictionary()}) as NSArray
+            }
     }
 
     /**
@@ -171,6 +173,6 @@ class MPCSdk: NSObject {
             return;
         }
 
-        Operation(self.sdk!.exportDeviceBackup()).bridge(resolve: resolve, reject: reject)
+        Operation(self.sdk!.exportDeviceBackup()).swift(resolve: resolve, reject: reject)
     }
 }

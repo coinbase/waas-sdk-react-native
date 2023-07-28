@@ -18,7 +18,7 @@ class PoolService: NSObject {
     func initialize(_ apiKeyName: NSString, privateKey: NSString,
                     resolve: RCTPromiseResolveBlock, reject: RCTPromiseRejectBlock) {
         do {
-            poolsClient = try WaasSdk.PoolService(apiKeyName, privateKey: privateKey)
+            poolsClient = try WaasSdk.PoolService(apiKeyName as String, privateKey: privateKey as String)
             resolve(nil)
         } catch {
             reject(poolsErr, error.localizedDescription, nil)
@@ -41,11 +41,11 @@ class PoolService: NSObject {
             return
         }
         
-        Operation(self.poolsClient!.createPool(displayName: displayName, poolID: poolID)).bridge(resolve: resolve, reject: reject) { pool in
+        Operation(self.poolsClient!.createPool(displayName: displayName as String, poolID: poolID as String)).any(resolve: resolve, reject: reject) { pool in
             return [
                 "name": pool.name as Any,
                 "displayName": pool.displayName as Any
-            ]
+            ] as NSDictionary
         }
     }
 }

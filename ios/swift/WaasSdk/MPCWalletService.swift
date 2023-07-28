@@ -19,13 +19,13 @@ public class MPCWalletService: NSObject {
      Initializes the MPCWalletService with the given Cloud API Key parameters. Resolves with the string "success"
      on success; rejects with an error otherwise.
      */
-    public init(_ apiKeyName: NSString, privateKey: NSString) throws {
+    public init(_ apiKeyName: String, privateKey: String) throws {
         var error: NSError?
 
         let _walletsClient = V1NewMPCWalletService(
-            mpcWalletServiceUrl as String,
-            apiKeyName as String,
-            privateKey as String,
+            mpcWalletServiceUrl,
+            apiKeyName,
+            privateKey,
             &error)
 
         if error != nil {
@@ -39,11 +39,11 @@ public class MPCWalletService: NSObject {
      Creates an MPCWallet with the given parameters.  Resolves with the response on success; rejects with an error
      otherwise.
      */
-    public func createMPCWallet(parent: NSString, device: NSString) -> Future<V1CreateMPCWalletResponse, WaasError> {
+    public func createMPCWallet(parent: String, device: String) -> Future<V1CreateMPCWalletResponse, WaasError> {
         return Future() { promise in
             Job.backgroundHighPri().async(execute: {
                 do {
-                    let response = try self.walletsClient.createMPCWallet(parent as String, device: device as String)
+                    let response = try self.walletsClient.createMPCWallet(parent, device: device)
                     promise(Result.success(response))
                 } catch {
                     promise(Result.failure(WaasError.walletServiceUnspecifiedError(error as NSError)))
@@ -56,11 +56,11 @@ public class MPCWalletService: NSObject {
      Waits for a pending MPCWallet with the given operation name. Resolves with the MPCWallet object on success;
      rejects with an error otherwise.
      */
-    public func waitPendingMPCWallet(operation: NSString) -> Future<V1MPCWallet, WaasError> {
+    public func waitPendingMPCWallet(operation: String) -> Future<V1MPCWallet, WaasError> {
         return Future() { promise in
             Job.background().async(execute: {
                 do {
-                    let mpcWallet = try self.walletsClient.waitPendingMPCWallet(operation as String)
+                    let mpcWallet = try self.walletsClient.waitPendingMPCWallet(operation)
                     promise(Result.success(mpcWallet))
                 } catch {
                     promise(Result.failure(WaasError.walletServiceUnspecifiedError(error as NSError)))
@@ -73,13 +73,14 @@ public class MPCWalletService: NSObject {
      Generates an Address within an MPCWallet. Resolves with the Address object on success;
      rejects with an error otherwise.
      */
-    public func generateAddress(_ mpcWallet: NSString, network: NSString) -> Future<NSDictionary, WaasError> {
+    public func generateAddress(_ mpcWallet: String, network: String) -> Future<Address, WaasError> {
         return Future() { promise in
             Job.backgroundHighPri().async(execute: {
                 do {
-                    let addressData = try self.walletsClient.generateAddress(mpcWallet as String, network: network as String)
-                    let res = try JSONSerialization.jsonObject(with: addressData) as? NSDictionary
-                    promise(Result.success(res!))
+                    // TODO: golang should return `V1Address` directly.
+                    let addressData = try self.walletsClient.generateAddress(mpcWallet, network: network as String)
+                    let address = try JSONDecoder().decode(Address.self, from: addressData)
+                    promise(Result.success(address))
                 } catch {
                     promise(Result.failure(WaasError.walletServiceUnspecifiedError(error as NSError)))
                 }
@@ -90,13 +91,14 @@ public class MPCWalletService: NSObject {
     /**
      Gets an Address with the given name. Resolves with the Address object on success; rejects with an error otherwise.
      */
-    public func getAddress(name: NSString) -> Future<NSDictionary, WaasError> {
+    public func getAddress(name: String) -> Future<Address, WaasError> {
         return Future() { promise in
             Job.background().async(execute: {
                 do {
-                    let addressData = try self.walletsClient.getAddress(name as String)
-                    let res = try JSONSerialization.jsonObject(with: addressData) as? NSDictionary
-                    promise(Result.success(res!))
+                    // TODO: golang should return `V1Address` directly.
+                    let addressData = try self.walletsClient.getAddress(name)
+                    let address = try JSONDecoder().decode(Address.self, from: addressData)
+                    promise(Result.success(address))
                 } catch {
                     promise(Result.failure(WaasError.walletServiceUnspecifiedError(error as NSError)))
                 }

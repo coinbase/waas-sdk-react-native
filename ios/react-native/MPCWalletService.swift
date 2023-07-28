@@ -25,8 +25,8 @@ class MPCWalletService: NSObject {
                     resolve: RCTPromiseResolveBlock, reject: RCTPromiseRejectBlock) {
         do {
             walletsClient = try WaasSdk.MPCWalletService(
-                apiKeyName,
-                privateKey: privateKey)
+                apiKeyName as String,
+                privateKey: privateKey as String)
             resolve(nil)
         } catch {
             reject(walletsErr, error.localizedDescription, nil)
@@ -49,11 +49,11 @@ class MPCWalletService: NSObject {
             return
         }
         
-        Operation(self.walletsClient!.createMPCWallet(parent: parent, device: device)).bridge(resolve: resolve, reject: reject) { response in
+        Operation(self.walletsClient!.createMPCWallet(parent: parent as String, device: device as String)).any(resolve: resolve, reject: reject) { response in
             return [
                "DeviceGroup": response.deviceGroup as Any,
                "Operation": response.operation as Any
-           ]
+           ] as NSDictionary
         }
     }
 
@@ -69,12 +69,12 @@ class MPCWalletService: NSObject {
             return
         }
         
-        let res = self.walletsClient!.waitPendingMPCWallet(operation: operation)
-        Operation(res).bridge(resolve: resolve, reject: reject) { wallet in
+        let res = self.walletsClient!.waitPendingMPCWallet(operation: operation as String)
+        Operation(res).any(resolve: resolve, reject: reject) { wallet in
             return  [
                 "Name": wallet.name as Any,
                 "DeviceGroup": wallet.deviceGroup as Any
-            ]
+            ] as NSDictionary
         }
     }
 
@@ -90,7 +90,7 @@ class MPCWalletService: NSObject {
             return
         }
         
-        Operation(self.walletsClient!.generateAddress(mpcWallet, network: network)).bridge(resolve: resolve, reject: reject)
+        Operation(self.walletsClient!.generateAddress(mpcWallet as String, network: network as String)).swift(resolve: resolve, reject: reject)
     }
 
     /**
@@ -103,6 +103,6 @@ class MPCWalletService: NSObject {
             return
         }
         
-        Operation(self.walletsClient!.getAddress(name: name)).bridge(resolve: resolve, reject: reject)
+        Operation(self.walletsClient!.getAddress(name: name as String)).swift(resolve: resolve, reject: reject)
     }
 }
