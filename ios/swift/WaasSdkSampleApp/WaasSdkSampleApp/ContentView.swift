@@ -11,6 +11,8 @@ let API_KEY = ""
 let PRIVATE_KEY = ""
 // DO NOT COMMIT THIS.
 
+let PASSCODE = "123456"
+
 @MainActor
 struct ContentView: View {
     
@@ -98,14 +100,14 @@ struct ContentView: View {
                 
                 // 1. create a pool.
                 let poolService = try PoolService(API_KEY, privateKey: PRIVATE_KEY)
-                let pool = try await poolService.createPool(displayName: "Test Pool", poolID: "test-pool-102").value
+                let pool = try await poolService.createPool(displayName: "Test Pool", poolID: "test-pool-\(Int.random(in: 0..<1000))").value
                 poolId = pool.name
                 
                 // 2. register the device
                 let mpcSdk = try MPCSdk(true)
                 let mpcKeyService = try MPCKeyService(API_KEY, privateKey: PRIVATE_KEY)
                 let mpcWalletService = try MPCWalletService(API_KEY, privateKey: PRIVATE_KEY)
-                _ = try await mpcSdk.bootstrapDevice("123456").value // user-provided passcode.
+                _ = try await mpcSdk.bootstrapDevice(PASSCODE).value // user-provided passcode.
                 let device = try await mpcKeyService.registerDevice().value
                 deviceId = device.Name
                 
@@ -115,6 +117,23 @@ struct ContentView: View {
                 generatedArtifact = "creating mpc wallet..."
                 let walletOperation = try await mpcWalletService.createMPCWallet(parent: pool.name, device: device.Name).value
                 deviceGroupId = walletOperation.deviceGroup
+                
+                generatedArtifact = "running mpc operations..."
+                //      3b: call compute pending operations
+                let pendingDeviceGroups = try await mpcKeyService.pollForPendingDeviceGroup(deviceGroupId!, pollInterval: 1.0).value;
+                
+                // TODO: should use a promise-merging strategy, instead
+                // of sequential waiting.
+                for pendingDeviceGroup in pendingDeviceGroups {
+                    try await
+                    mpcSdk.computeMPCOperation(pendingDeviceGroup.MPCData).value
+                }
+                
+                let pendingDeviceArchives = try await mpcKeyService.pollForPendingDeviceArchives(deviceGroupId!, pollInterval: 1.0).value
+                for pendingArchive in pendingDeviceArchives {
+                    try await
+                    mpcSdk.computePrepareDeviceArchiveMPCOperation(pendingArchive.MPCData, passcode: PASSCODE).value
+                }
                 
                 //      3b: call waitPendingMPCWallet to wait for this to process.
                 generatedArtifact = "waiting for wallet to finalize (\(walletOperation.operation))"
@@ -143,8 +162,8 @@ struct ContentView: View {
                 generatedAddress = address.Address
                 generatedAddressName = address.Name
                 isLoading = false
-            } catch {
-                errorMessage = "Error: \(error.localizedDescription)"
+            } catch let err as WaasError {
+                errorMessage = "Error: \(err.code): \(err.description)"
                 isLoading = false
             }
         }
@@ -193,8 +212,8 @@ struct ContentView: View {
                 // spin until the signature is authorized
                 signature = try await mpcKeyService.waitPendingSignature(signatureOp!.Operation).value
                 isLoading = false
-            } catch {
-                errorMessage = "Error: \(error.localizedDescription)"
+            } catch let err as WaasError {
+                errorMessage = "Error: \(err.code): \(err.description)"
                 isLoading = false
             }
         }
@@ -214,10 +233,10 @@ struct ContentView: View {
                 let mpcKeyService = try MPCKeyService(API_KEY, privateKey: PRIVATE_KEY)
                 let deviceGroup = try await mpcKeyService.getDeviceGroup(deviceGroupId!).value
                 let keyExportMetadata = deviceGroup.mpcKeyExportMetadata
-                let exportedKeys = try await mpcSdk.exportPrivateKeys(keyExportMetadata, passcode: "123456").value
+                let exportedKeys = try await mpcSdk.exportPrivateKeys(keyExportMetadata, passcode: PASSCODE).value
                 isLoading = false
-            } catch {
-                errorMessage = "Error: \(error.localizedDescription)"
+            } catch let err as WaasError {
+                errorMessage = "Error: \(err.code): \(err.description)"
                 isLoading = false
             }
         }
@@ -234,8 +253,8 @@ struct ContentView: View {
                 let mpcSdk = try MPCSdk(true)
                 backup = try await mpcSdk.exportDeviceBackup().value
                 isLoading = false
-            } catch {
-                errorMessage = "Error: \(error.localizedDescription)"
+            } catch let err as WaasError {
+                errorMessage = "Error: \(err.code): \(err.description)"
                 isLoading = false
             }
         }
@@ -264,10 +283,10 @@ struct ContentView: View {
                     }
                 }
                 
-                try await mpcSdk.computeAddDeviceMPCOperation(mpcOperationData!, passcode: "123456", deviceBackup: backup!).value
+                try await mpcSdk.computeAddDeviceMPCOperation(mpcOperationData!, passcode: PASSCODE, deviceBackup: backup!).value
                 isLoading = false
-            } catch {
-                errorMessage = "Error: \(error.localizedDescription)"
+            } catch let err as WaasError {
+                errorMessage = "Error: \(err.code): \(err.description)"
                 isLoading = false
             }
         }

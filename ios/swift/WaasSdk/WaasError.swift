@@ -33,8 +33,10 @@ public enum WaasError: Error {
             return "The wallet service failed to initialize"
         case .walletServiceUnspecifiedError(let error):
             return "Wallet service experienced an error: \(error.localizedDescription)"
-        default:
-            return "Unknown error"
+        case .mpcSdkUnspecifiedError(let error):
+            return "MPCSdk experienced an error: \(error.localizedDescription)"
+        case .mpcSdkFailedToInitialize(let error):
+            return "MPCSdk failed to initialize: \(error.localizedDescription)"
         }
     }
     

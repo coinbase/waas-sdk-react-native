@@ -9,7 +9,7 @@ EXTERNAL SOURCES:
     :path: "../../../WaasSdk.podspec"
 
 SPEC CHECKSUMS:
-  WaasSdk: dd418dbaf90d3476d378761f53c49b6d43199823
+  WaasSdk: 53bcb83b04d82c49f9a80ae4aa4dc1a52be24f30
 
 PODFILE CHECKSUM: f821f0058a15dc9180036297267bb378bed524bf
 
