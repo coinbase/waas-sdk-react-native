@@ -3,7 +3,6 @@ import WaasSdk
 import WaasSdkGo
 import Combine
 
-
 // DO NOT COMMIT THIS.
 /* (this is the "name" from your credentials JSON)*/
 let API_KEY = ""
@@ -15,33 +14,58 @@ let PASSCODE = "123456"
 
 @MainActor
 struct ContentView: View {
-    
-    @State var signature: V1Signature? = nil;
-    @State var poolId: String? = nil
-    @State var deviceId: String? = nil
-    @State var deviceGroupId: String? = nil
-    @State var walletId: String? = nil
-    @State var generatedAddress: String? = nil
-    @State var generatedAddressName: String? = nil
-    
-    @State var backup: String? = nil
-    
-    @State var errorMessage: String? = nil
+
+    @State var waas: Waas?
+    @State var device: WaasDevice?
+
+    @State var signature: V1Signature?
+    @State var poolId: String?
+    @State var deviceId: String?
+    @State var deviceGroupId: String?
+    @State var walletId: String?
+    @State var generatedAddress: String?
+    @State var generatedAddressName: String?
+
+    @State var backup: WaasBackupData?
+
+    @State var errorMessage: String?
     @State var isLoading: Bool = false
-    @State var generatedArtifact: String? = nil
-    
+    @State var generatedArtifact: String?
+
     func Demo(_ title: String, enabled: Bool, _ action: @escaping (() -> Void)) -> some View {
         return Button(title, action: action)
                 .padding(10)
                 .border(.black)
                 .accessibilityLabel("demo-\(title.lowercased())")
-                .disabled(isLoading || !enabled)
+                .disabled(isLoading || waas == nil || !enabled)
     }
-    
+
+    func asyncInitWaas() {
+        Task {
+            do {
+                let waas = try await Waas.create(apiKey: API_KEY, privateKey: PRIVATE_KEY, passcode: PASSCODE, isSimulator: true)
+                let device = try await waas.device().value
+
+                self.waas = waas
+                self.device = device
+                Task {@MainActor in
+                    self.generatedArtifact = "Ready!"
+                }
+            } catch let error as WaasError {
+                Task {@MainActor in
+                    self.errorMessage = "Error initializing(\(error.code)): \(error.description)"
+                }
+            }
+        }
+    }
+
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 15) {
                 Text("Coinbase WaaS").bold().font(.title)
+                .onAppear {
+                    self.asyncInitWaas()
+                }
                 Text("Native Swift").font(.caption)
                 VStack(alignment: .leading, spacing: 3) {
                     HStack {
@@ -70,8 +94,8 @@ struct ContentView: View {
                     }
                 }
                 VStack {
-                    Text(errorMessage ?? "").bold().accessibilityLabel("error").font(.caption2).foregroundColor(.red)
-                    Text(generatedArtifact ?? "").bold().accessibilityLabel("generated-artifact").font(.caption2)
+                    Text(self.errorMessage ?? "").bold().accessibilityLabel("error").font(.caption2).foregroundColor(.red)
+                    Text(self.generatedArtifact ?? "").bold().accessibilityLabel("generated-artifact").font(.caption2)
                     if isLoading {
                         ProgressView()
                     }
@@ -86,69 +110,36 @@ struct ContentView: View {
             .padding(25)
         }
     }
-    
-    var activeTask: Cancellable? = nil
-    
+
+    var activeTask: Cancellable?
+
     /**
           Creates a new pool, registers the current device, and creates a wallet for this device.
      */
     func onboarding() {
         Task {
             do {
-                // Waas exposes Combine futures, that can easily be used with swift 5.5+'s async/await.
                 isLoading = true
-                
+
                 // 1. create a pool.
-                let poolService = try PoolService(API_KEY, privateKey: PRIVATE_KEY)
-                let pool = try await poolService.createPool(displayName: "Test Pool", poolID: "test-pool-\(Int.random(in: 0..<1000))").value
+                let pool = try await waas!.pool().createPool(displayName: "Test Pool", poolID: "test-pool-\(Int.random(in: 0..<1000))").value
                 poolId = pool.name
-                
-                // 2. register the device
-                let mpcSdk = try MPCSdk(true)
-                let mpcKeyService = try MPCKeyService(API_KEY, privateKey: PRIVATE_KEY)
-                let mpcWalletService = try MPCWalletService(API_KEY, privateKey: PRIVATE_KEY)
-                _ = try await mpcSdk.bootstrapDevice(PASSCODE).value // user-provided passcode.
-                let device = try await mpcKeyService.registerDevice().value
-                deviceId = device.Name
-                
-                // 3. create a wallet / device group.
-                
-                //      3a: call createMPCWallet to kick off the process
-                generatedArtifact = "creating mpc wallet..."
-                let walletOperation = try await mpcWalletService.createMPCWallet(parent: pool.name, device: device.Name).value
-                deviceGroupId = walletOperation.deviceGroup
-                
-                generatedArtifact = "running mpc operations..."
-                //      3b: call compute pending operations
-                let pendingDeviceGroups = try await mpcKeyService.pollForPendingDeviceGroup(deviceGroupId!, pollInterval: 1.0).value;
-                
-                // TODO: should use a promise-merging strategy, instead
-                // of sequential waiting.
-                for pendingDeviceGroup in pendingDeviceGroups {
-                    try await
-                    mpcSdk.computeMPCOperation(pendingDeviceGroup.MPCData).value
-                }
-                
-                let pendingDeviceArchives = try await mpcKeyService.pollForPendingDeviceArchives(deviceGroupId!, pollInterval: 1.0).value
-                for pendingArchive in pendingDeviceArchives {
-                    try await
-                    mpcSdk.computePrepareDeviceArchiveMPCOperation(pendingArchive.MPCData, passcode: PASSCODE).value
-                }
-                
-                //      3b: call waitPendingMPCWallet to wait for this to process.
-                generatedArtifact = "waiting for wallet to finalize (\(walletOperation.operation))"
-                let wallet = try await mpcWalletService.waitPendingMPCWallet(operation: walletOperation.operation).value
+
+                // 2. create a wallet / device group.
+                let wallet = try await device!.createWallet(poolId: poolId!, passcode: PASSCODE)
                 walletId = wallet.name
                 generatedArtifact = walletId
+                deviceGroupId = wallet.deviceGroup
+                deviceId = device!.info().Name
                 isLoading = false
             } catch let err as WaasError {
                 errorMessage = "Error: \(err.code): \(err.description)"
                 isLoading = false
             }
         }
-        
+
     }
-    
+
     /**
      Generates a sample address on networks/ethereum-goerli, for the wallet you made previously.
      */
@@ -157,8 +148,7 @@ struct ContentView: View {
             do {
                 generatedArtifact = ""
                 isLoading = true
-                let mpcWalletService = try MPCWalletService(API_KEY, privateKey: PRIVATE_KEY)
-                let address = try await mpcWalletService.generateAddress(walletId!, network: "networks/ethereum-goerli").value
+                let address = try await waas!.wallet().generateAddress(walletId!, network: "networks/ethereum-goerli").value
                 generatedAddress = address.Address
                 generatedAddressName = address.Name
                 isLoading = false
@@ -168,7 +158,7 @@ struct ContentView: View {
             }
         }
     }
-    
+
     /**
      Signs an example EIP-1559 transaction using the previously created wallet.
      */
@@ -177,16 +167,8 @@ struct ContentView: View {
             do {
                 isLoading = true
                 generatedArtifact = ""
-                
-                let mpcWalletService = try MPCWalletService(API_KEY, privateKey: PRIVATE_KEY)
-                let mpcSdk = try MPCSdk(true)
-                let mpcKeyService = try MPCKeyService(API_KEY, privateKey: PRIVATE_KEY)
-                
-                let address = try await mpcWalletService.getAddress(name: generatedAddressName!).value
-                let key = address.MPCKeys[0]
-                
-                let txn = [
-                    "ChainID": "0x5",
+                let txn: [String: Any] = [
+                  "ChainID": "0x5",
                   "Nonce": 0,
                   "MaxPriorityFeePerGas": "0x400",
                   "MaxFeePerGas": "0x400",
@@ -194,23 +176,10 @@ struct ContentView: View {
                   "To": "0xd8ddbfd00b958e94a024fb8c116ae89c70c60257",
                   "Value": "0x1000",
                   "Data": ""
-                ] as NSDictionary
-                let signatureOpName = try await mpcKeyService.createSignatureFromTx(key, transaction: txn).value
-                
-                let pendingOps = try await mpcKeyService.pollForPendingSignatures(deviceGroupId!, pollInterval: 3.0).value
-                var signatureOp: PendingSignature? = nil
-                
-                pendingOps.forEach { op in
-                    if (op.Operation == signatureOpName) {
-                        signatureOp = op
-                    }
-                }
-                
-                // compute the mpc data
-                try await mpcSdk.computeMPCOperation(signatureOp!.MPCData).value
-                
-                // spin until the signature is authorized
-                signature = try await mpcKeyService.waitPendingSignature(signatureOp!.Operation).value
+                ]
+
+                let signature = try await device?.sign(txn: txn, addressName: generatedAddressName!)
+                generatedArtifact = "Signature: \(signature!.signedPayload)"
                 isLoading = false
             } catch let err as WaasError {
                 errorMessage = "Error: \(err.code): \(err.description)"
@@ -218,22 +187,19 @@ struct ContentView: View {
             }
         }
     }
-    
+
     /**
         Exports the private keys on the device.
      */
     func exportKeys() {
         Task {
-            // to export keys, you first need to fetch the device group,
-            // and then call exportPrivateKeys()
             do {
                 isLoading = true
                 generatedArtifact = ""
-                let mpcSdk = try MPCSdk(true)
-                let mpcKeyService = try MPCKeyService(API_KEY, privateKey: PRIVATE_KEY)
-                let deviceGroup = try await mpcKeyService.getDeviceGroup(deviceGroupId!).value
-                let keyExportMetadata = deviceGroup.mpcKeyExportMetadata
-                let exportedKeys = try await mpcSdk.exportPrivateKeys(keyExportMetadata, passcode: PASSCODE).value
+
+                let keys: [PrivateKey] = try await device!.exportPrivateKeys(deviceGroupId: deviceGroupId!, passcode: PASSCODE)
+                generatedArtifact = "Private Key: \(keys[0].Address): \(keys[0].PrivateKey)"
+
                 isLoading = false
             } catch let err as WaasError {
                 errorMessage = "Error: \(err.code): \(err.description)"
@@ -241,7 +207,7 @@ struct ContentView: View {
             }
         }
     }
-        
+
     /**
         Produces a backup, for use with `restoreDevice` (see below) on another device.
      */
@@ -250,8 +216,10 @@ struct ContentView: View {
             do {
                 isLoading = true
                 generatedArtifact = ""
-                let mpcSdk = try MPCSdk(true)
-                backup = try await mpcSdk.exportDeviceBackup().value
+
+                backup = try await device!.exportBackup(passcode: PASSCODE)
+                generatedArtifact = "Backup: \(backup!)"
+
                 isLoading = false
             } catch let err as WaasError {
                 errorMessage = "Error: \(err.code): \(err.description)"
@@ -259,7 +227,7 @@ struct ContentView: View {
             }
         }
     }
-    
+
     /**
         Restores the device, from a backup taken via the method in `backupDevice` (see above).
      */
@@ -267,23 +235,9 @@ struct ContentView: View {
         Task {
             do {
                 isLoading = true
-                generatedArtifact = ""
-                let mpcSdk = try MPCSdk(true)
-                let mpcKeyService = try MPCKeyService(API_KEY, privateKey: PRIVATE_KEY)
-                
-                // call addDevice() with the previous device group ID, and the current device ID.
-                let operation = try await mpcKeyService.addDevice(deviceGroupId!, device: deviceId!).value
-                
-                // poll for the associated operation
-                let pendingDevices = try await mpcKeyService.pollForPendingDevices(deviceGroupId!, pollInterval: 3.0 as NSNumber).value
-                var mpcOperationData: String? = nil
-                pendingDevices.forEach { device in
-                    if device.Operation == operation {
-                        mpcOperationData = device.MPCData
-                    }
-                }
-                
-                try await mpcSdk.computeAddDeviceMPCOperation(mpcOperationData!, passcode: PASSCODE, deviceBackup: backup!).value
+                // this `backup` should be from another device.
+                try await device!.restoreFromBackup(deviceGroup: deviceGroupId!, passcode: PASSCODE, data: self.backup!)
+                generatedArtifact = "Restored from backup!"
                 isLoading = false
             } catch let err as WaasError {
                 errorMessage = "Error: \(err.code): \(err.description)"

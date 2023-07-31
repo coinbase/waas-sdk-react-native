@@ -1,4 +1,3 @@
-
 import Foundation
 
 // represents a unique device on waas, by the server.

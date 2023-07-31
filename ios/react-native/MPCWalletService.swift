@@ -32,7 +32,7 @@ class MPCWalletService: NSObject {
             reject(walletsErr, error.localizedDescription, nil)
         }
     }
-    
+
     @objc static func requiresMainQueueSetup() -> Bool {
         return true
     }
@@ -48,7 +48,7 @@ class MPCWalletService: NSObject {
             reject(self.walletsErr, self.uninitializedErr, nil)
             return
         }
-        
+
         Operation(self.walletsClient!.createMPCWallet(parent: parent as String, device: device as String)).any(resolve: resolve, reject: reject) { response in
             return [
                "DeviceGroup": response.deviceGroup as Any,
@@ -68,7 +68,7 @@ class MPCWalletService: NSObject {
             reject(self.walletsErr, self.uninitializedErr, nil)
             return
         }
-        
+
         let res = self.walletsClient!.waitPendingMPCWallet(operation: operation as String)
         Operation(res).any(resolve: resolve, reject: reject) { wallet in
             return  [
@@ -89,7 +89,7 @@ class MPCWalletService: NSObject {
             reject(self.walletsErr, self.uninitializedErr, nil)
             return
         }
-        
+
         Operation(self.walletsClient!.generateAddress(mpcWallet as String, network: network as String)).swift(resolve: resolve, reject: reject)
     }
 
@@ -102,7 +102,7 @@ class MPCWalletService: NSObject {
             reject(self.walletsErr, self.uninitializedErr, nil)
             return
         }
-        
+
         Operation(self.walletsClient!.getAddress(name: name as String)).swift(resolve: resolve, reject: reject)
     }
 }

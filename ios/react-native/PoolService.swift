@@ -24,7 +24,7 @@ class PoolService: NSObject {
             reject(poolsErr, error.localizedDescription, nil)
         }
     }
-    
+
     @objc static func requiresMainQueueSetup() -> Bool {
         return true
     }
@@ -40,7 +40,7 @@ class PoolService: NSObject {
             reject(self.poolsErr, "pool service must be initialized", nil)
             return
         }
-        
+
         Operation(self.poolsClient!.createPool(displayName: displayName as String, poolID: poolID as String)).any(resolve: resolve, reject: reject) { pool in
             return [
                 "name": pool.name as Any,

@@ -57,14 +57,14 @@ let _queue = DispatchQueue(label: "WaasOperation", qos: .userInitiated)
 
 class Operation<Output> {
     var cancellable: Cancellable?
-    var future: Future<Output, WaasError>;
-    
+    var future: Future<Output, WaasError>
+
     let E_TRANSFORM = "E_TRANSFORM"
-    
+
     init(_ future: Future<Output, WaasError>) {
-        self.future = future;
+        self.future = future
     }
-    
+
     // map any arbitrary type to something that we can send to React.
     public func any(resolve: @escaping RCTPromiseResolveBlock, reject: @escaping RCTPromiseRejectBlock, map: @escaping ((Output) throws -> JSONValue)) {
         _queue.async {
@@ -88,7 +88,7 @@ class Operation<Output> {
             }
         }
     }
-    
+
     public func swift(resolve: @escaping RCTPromiseResolveBlock, reject: @escaping RCTPromiseRejectBlock, map: ((Output) throws -> any Encodable)? = nil) where Output: Encodable {
         _queue.async {
             do {
@@ -115,7 +115,7 @@ class Operation<Output> {
             }
         }
     }
-    
+
 }
 
 // convenience functions for bridging the `Void` case correctly.
@@ -162,4 +162,3 @@ extension Operation where Output == [Encodable] {
         }
     }
 }
-

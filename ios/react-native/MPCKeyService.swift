@@ -7,22 +7,22 @@ class MPCKeyService: NSObject {
 
     // The error code for MPCKeyService-related errors.
     let mpcKeyServiceErr = "E_MPC_KEY_SERVICE"
-    
+
     let uninitializedErr = "uninitialized"
 
     // The handle to the Go MPCKeyService client.
     var keyClient: WaasSdk.MPCKeyService?
-    
+
     // bails if keyClient isn't initialized.
     func failIfUnitialized(_ reject: RCTPromiseRejectBlock) -> Bool {
-        if (keyClient == nil) {
+        if keyClient == nil {
             reject(self.mpcKeyServiceErr, self.uninitializedErr, nil)
-            return true;
+            return true
         }
-        
-        return false;
+
+        return false
     }
-    
+
     @objc static func requiresMainQueueSetup() -> Bool {
         return true
     }
@@ -52,7 +52,7 @@ class MPCKeyService: NSObject {
         if failIfUnitialized(reject) {
             return
         }
-        
+
         Operation(self.keyClient!.registerDevice()).swift(resolve: resolve, reject: reject)
     }
 
@@ -68,7 +68,7 @@ class MPCKeyService: NSObject {
         if failIfUnitialized(reject) {
             return
         }
-        
+
         Operation(self.keyClient!.pollForPendingDeviceGroup(
             deviceGroup as String,
             pollInterval: pollInterval)).swift(resolve: resolve, reject: reject)
@@ -99,7 +99,7 @@ class MPCKeyService: NSObject {
         if failIfUnitialized(reject) {
             return
         }
-        
+
         Operation(self.keyClient!.createSignatureFromTx(parent as String, transaction: transaction)).swift(resolve: resolve, reject: reject)
     }
 
@@ -115,12 +115,12 @@ class MPCKeyService: NSObject {
         if failIfUnitialized(reject) {
             return
         }
-        
+
         Operation(self.keyClient!.pollForPendingSignatures(
             deviceGroup as String,
             pollInterval: pollInterval)).any(resolve: resolve, reject: reject) {
                 pendingSignatures in
-                pendingSignatures.map({pendingSignature in pendingSignatures.asDictionary()}) as NSArray
+                pendingSignatures.map({_ in pendingSignatures.asDictionary()}) as NSArray
             }
     }
 
@@ -145,11 +145,11 @@ class MPCKeyService: NSObject {
      */
     @objc(waitPendingSignature:withResolver:withRejecter:)
     func waitPendingSignature(_ operation: NSString,
-                              resolve:@escaping RCTPromiseResolveBlock, reject:@escaping RCTPromiseRejectBlock) {
+                              resolve: @escaping RCTPromiseResolveBlock, reject: @escaping RCTPromiseRejectBlock) {
         if failIfUnitialized(reject) {
             return
         }
-        
+
         Operation(self.keyClient!.waitPendingSignature(operation as String)).any(resolve: resolve, reject: reject) { signature in
             return [
                 "Name": signature.name,
@@ -168,7 +168,7 @@ class MPCKeyService: NSObject {
         if failIfUnitialized(reject) {
             return
         }
-        
+
         Operation(self.keyClient!.getSignedTransaction(transaction, signature: signature)).any(resolve: resolve, reject: reject) { signedTransaction in
             return [
                 "Transaction": transaction,
@@ -187,7 +187,7 @@ class MPCKeyService: NSObject {
         if failIfUnitialized(reject) {
             return
         }
-        
+
         Operation(self.keyClient!.getDeviceGroup(name as String)).any(resolve: resolve, reject: reject) { deviceGroupRes in
             let devices = try JSONSerialization.jsonObject(with: deviceGroupRes.devices! as Data)
             return [
@@ -208,7 +208,7 @@ class MPCKeyService: NSObject {
         if failIfUnitialized(reject) {
             return
         }
-        
+
         Operation(self.keyClient!.prepareDeviceArchive(
             deviceGroup as String, device: device as String)).swift(resolve: resolve, reject: reject)
     }
@@ -225,7 +225,7 @@ class MPCKeyService: NSObject {
         if failIfUnitialized(reject) {
             return
         }
-        
+
         Operation(self.keyClient!.pollForPendingDeviceArchives(deviceGroup as String, pollInterval: pollInterval)).any(resolve: resolve, reject: reject) {
             pendingDeviceArchives in
             pendingDeviceArchives.map({deviceArchive in deviceArchive.asDictionary()}) as NSArray
@@ -256,7 +256,7 @@ class MPCKeyService: NSObject {
         if failIfUnitialized(reject) {
             return
         }
-        
+
         Operation(
         self.keyClient!.prepareDeviceBackup(
             deviceGroup as String, device: device as String)).swift(resolve: resolve, reject: reject)
@@ -274,7 +274,7 @@ class MPCKeyService: NSObject {
         if failIfUnitialized(reject) {
             return
         }
-        
+
         Operation(self.keyClient!.pollForPendingDeviceBackups(
             deviceGroup as String,
             pollInterval: pollInterval)).any(resolve: resolve, reject: reject) {
@@ -293,7 +293,7 @@ class MPCKeyService: NSObject {
         if failIfUnitialized(reject) {
             return
         }
-        
+
         Operation(self.keyClient!.stopPollingForPendingDeviceBackups()).swift(resolve: resolve, reject: reject)
     }
 
@@ -324,7 +324,7 @@ class MPCKeyService: NSObject {
         if failIfUnitialized(reject) {
             return
         }
-        
+
         Operation(self.keyClient!.pollForPendingDevices(
             deviceGroup as String,
             pollInterval: pollInterval)).any(resolve: resolve, reject: reject) {

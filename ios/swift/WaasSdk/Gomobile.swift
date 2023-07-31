@@ -33,4 +33,3 @@ func goReturnsString(promise: @escaping Future<String, WaasError>.Promise, wrapA
     }
     return ApiResponseReceiverWrapper(callback: callback)
 }
-

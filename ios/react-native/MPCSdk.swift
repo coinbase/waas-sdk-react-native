@@ -15,7 +15,7 @@ class MPCSdk: NSObject {
 
     // The handle to the Go MPCSdk class.
     var sdk: WaasSdk.MPCSdk?
-    
+
     func failIfUninitialized(_ reject: RCTPromiseRejectBlock) -> Bool {
         if self.sdk == nil {
             reject(self.mpcSdkErr, self.uninitializedErr, nil)
@@ -27,7 +27,7 @@ class MPCSdk: NSObject {
     @objc static func requiresMainQueueSetup() -> Bool {
         return true
     }
-    
+
     /**
      Initializes the MPCSdk  with the given parameters.
      Resolves with the string "success" on success; rejects with an error otherwise.
@@ -53,9 +53,9 @@ class MPCSdk: NSObject {
     @objc(bootstrapDevice:withResolver:withRejecter:)
     func bootstrapDevice(_ passcode: NSString, resolve: @escaping RCTPromiseResolveBlock, reject: @escaping RCTPromiseRejectBlock) {
         if failIfUninitialized(reject) {
-            return;
+            return
         }
-        
+
         Operation(self.sdk!.bootstrapDevice(passcode as String)).swift(resolve: resolve, reject: reject)
     }
 
@@ -69,9 +69,9 @@ class MPCSdk: NSObject {
     @objc(resetPasscode:withResolver:withRejecter:)
     func resetPasscode(_ newPasscode: NSString, resolve: @escaping RCTPromiseResolveBlock, reject: @escaping RCTPromiseRejectBlock) {
         if failIfUninitialized(reject) {
-            return;
+            return
         }
-        
+
         Operation(self.sdk!.resetPasscode(newPasscode as String)).void(resolve: resolve, reject: reject)
     }
 
@@ -82,9 +82,9 @@ class MPCSdk: NSObject {
     @objc(getRegistrationData:withRejecter:)
     func getRegistrationData(_ resolve: @escaping RCTPromiseResolveBlock, reject: @escaping RCTPromiseRejectBlock) {
         if failIfUninitialized(reject) {
-            return;
+            return
         }
-        
+
         Operation(self.sdk!.getRegistrationData()).swift(resolve: resolve, reject: reject)
     }
 
@@ -96,9 +96,9 @@ class MPCSdk: NSObject {
     @objc(computeMPCOperation:withResolver:withRejecter:)
     func computeMPCOperation(_ mpcData: NSString, resolve: @escaping  RCTPromiseResolveBlock, reject: @escaping  RCTPromiseRejectBlock) {
         if failIfUninitialized(reject) {
-            return;
+            return
         }
-        
+
         Operation(self.sdk!.computeMPCOperation(mpcData as String)).void(resolve: resolve, reject: reject)
     }
 
@@ -109,9 +109,9 @@ class MPCSdk: NSObject {
     @objc(computePrepareDeviceArchiveMPCOperation:withPasscode:withResolver:withRejecter:)
     func computePrepareDeviceArchiveMPCOperation(_ mpcData: NSString, passcode: NSString, resolve: @escaping  RCTPromiseResolveBlock, reject: @escaping RCTPromiseRejectBlock) {
         if failIfUninitialized(reject) {
-            return;
+            return
         }
-        
+
         Operation(self.sdk!.computePrepareDeviceArchiveMPCOperation(mpcData as String, passcode: passcode as String)).void(resolve: resolve, reject: reject)
     }
 
@@ -122,9 +122,9 @@ class MPCSdk: NSObject {
     @objc(computePrepareDeviceBackupMPCOperation:withPasscode:withResolver:withRejecter:)
     func computePrepareDeviceBackupMPCOperation(_ mpcData: NSString, passcode: NSString, resolve: @escaping RCTPromiseResolveBlock, reject: @escaping RCTPromiseRejectBlock) {
         if failIfUninitialized(reject) {
-            return;
+            return
         }
-        
+
         Operation(self.sdk!.computePrepareDeviceBackupMPCOperation(mpcData as String, passcode: passcode as String)).void(resolve: resolve, reject: reject)
     }
 
@@ -135,9 +135,9 @@ class MPCSdk: NSObject {
     @objc(computeAddDeviceMPCOperation:withPasscode:withDeviceBackup:withResolver:withRejecter:)
     func computeAddDeviceMPCOperation(_ mpcData: NSString, passcode: NSString, deviceBackup: NSString, resolve: @escaping  RCTPromiseResolveBlock, reject: @escaping RCTPromiseRejectBlock) {
         if failIfUninitialized(reject) {
-            return;
+            return
         }
-        
+
         Operation(self.sdk!.computeAddDeviceMPCOperation(
             mpcData as String,
             passcode: passcode as String,
@@ -153,9 +153,9 @@ class MPCSdk: NSObject {
     func exportPrivateKeys(_ mpcKeyExportMetadata: NSString, passcode: NSString, resolve: @escaping RCTPromiseResolveBlock,
                            reject: @escaping RCTPromiseRejectBlock) {
         if failIfUninitialized(reject) {
-            return;
+            return
         }
-        
+
         Operation(self.sdk!.exportPrivateKeys(
             mpcKeyExportMetadata as String,
             passcode: passcode as String)).any(resolve: resolve, reject: reject) { keys in
@@ -170,7 +170,7 @@ class MPCSdk: NSObject {
     @objc(exportDeviceBackup:withRejecter:)
     func exportDeviceBackup(_ resolve: @escaping RCTPromiseResolveBlock, reject: @escaping RCTPromiseRejectBlock) {
         if failIfUninitialized(reject) {
-            return;
+            return
         }
 
         Operation(self.sdk!.exportDeviceBackup()).swift(resolve: resolve, reject: reject)

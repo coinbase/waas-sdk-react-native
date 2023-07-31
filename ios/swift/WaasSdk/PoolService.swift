@@ -16,19 +16,19 @@ public class PoolService: NSObject {
     public init(_ apiKeyName: String, privateKey: String) throws {
         var error: NSError?
         let _poolsClient = V1NewPoolService(poolServiceUrl, apiKeyName, privateKey, &error)
-        if (_poolsClient == nil) {
+        if _poolsClient == nil {
             throw WaasError.poolServiceFailedToInitialize
         }
-        
+
         poolsClient = _poolsClient!
     }
-    
+
     /**
      Creates a Pool with the given parameters.  Resolves with the created Pool object on success; rejects with an error
      otherwise.
      */
     public func createPool(displayName: String, poolID: String) -> Future<V1Pool, WaasError> {
-        return Future() { promise in
+        return Future { promise in
             Job.background().async(execute: {
                 do {
                     let pool = try self.poolsClient.createPool(displayName, poolID: poolID)

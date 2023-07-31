@@ -3,24 +3,28 @@ import Foundation
 public enum WaasError: Error {
     // Thrown when an invalid password is entered
     case mpcKeyServiceFailedToInitialize
-    
+
     // Thrown when key service experiences an error.
     case mpcKeyServiceUnspecifiedError(_ error: Error)
-    
+
     case walletServiceFailedToInitialize(_ error: Error)
-    
+
     case walletServiceUnspecifiedError(_ error: Error)
-    
+
     case poolServiceFailedToInitialize
-    
+
     case poolServiceUnspecifiedError(_ error: Error)
-    
+
     case mpcSdkFailedToInitialize(_ error: Error)
-    
+
+    case mpcSdkDeviceAlreadyRegistered
+
     case mpcSdkUnspecifiedError(_ error: Error)
-    
+
     public var description: String {
         switch self {
+        case .mpcSdkDeviceAlreadyRegistered:
+            return "The device was already registered."
         case .mpcKeyServiceFailedToInitialize:
             return "The provided password is not valid."
         case .mpcKeyServiceUnspecifiedError(let error):
@@ -39,9 +43,11 @@ public enum WaasError: Error {
             return "MPCSdk failed to initialize: \(error.localizedDescription)"
         }
     }
-    
+
     public var code: String {
         switch self {
+        case .mpcSdkDeviceAlreadyRegistered:
+            fallthrough
         case .mpcKeyServiceFailedToInitialize:
             fallthrough
         case .mpcKeyServiceUnspecifiedError:

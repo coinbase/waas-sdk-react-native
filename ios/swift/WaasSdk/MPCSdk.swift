@@ -25,10 +25,10 @@ public class MPCSdk: NSObject {
         if error != nil {
             throw WaasError.mpcSdkFailedToInitialize(error!)
         }
-        
+
         sdk = _sdk!
     }
-    
+
     func wrapError(err: Error) -> WaasError {
         return WaasError.mpcSdkUnspecifiedError(err as NSError)
     }
@@ -42,7 +42,7 @@ public class MPCSdk: NSObject {
      or a rejection otherwise.
      */
     public func bootstrapDevice(_ passcode: String) -> Future<String, WaasError> {
-        return Future() { promise in
+        return Future { promise in
             Job.main().async(execute: {
                 self.sdk.bootstrapDevice(passcode, receiver: goReturnsString(promise: promise, wrapAsError: self.wrapError))
             })
@@ -57,7 +57,7 @@ public class MPCSdk: NSObject {
      It resolves on success; a rejection otherwise.
      */
     public func resetPasscode(_ newPasscode: String) -> Future<Void, WaasError> {
-        return Future() { promise in
+        return Future { promise in
             Job.main().async(execute: {
                 do {
                     try self.sdk.resetPasscode(newPasscode)
@@ -74,7 +74,7 @@ public class MPCSdk: NSObject {
      Resolves with the RegistrationData on success; rejects with an error otherwise.
      */
     public func getRegistrationData() -> Future<String, WaasError> {
-        return Future() { promise in
+        return Future { promise in
             Job.main().async(execute: {
                 self.sdk.getRegistrationData(goReturnsString(promise: promise, wrapAsError: self.wrapError))
             })
@@ -87,7 +87,7 @@ public class MPCSdk: NSObject {
      Resolves on success; rejects with an error otherwise.
      */
     public func computeMPCOperation(_ mpcData: String) -> Future<Void, WaasError> {
-        return Future() { promise in
+        return Future { promise in
             Job.backgroundHighPri().async(execute: {
                 do {
                     try self.sdk.computeMPCOperation(mpcData)
@@ -104,7 +104,7 @@ public class MPCSdk: NSObject {
      MPCKeyService and passcode of the Device. Resolves on success; rejects with an error otherwise.
      */
     public func computePrepareDeviceArchiveMPCOperation(_ mpcData: String, passcode: String) -> Future<Void, WaasError> {
-        return Future() { promise in
+        return Future { promise in
             Job.backgroundHighPri().async(execute: {
                 do {
                     try self.sdk.computePrepareDeviceArchiveMPCOperation(mpcData, passcode: passcode)
@@ -121,7 +121,7 @@ public class MPCSdk: NSObject {
      MPCKeyService and passcode of the Device. Resolves on success; rejects with an error otherwise.
      */
     public func computePrepareDeviceBackupMPCOperation(_ mpcData: String, passcode: String) -> Future<Void, WaasError> {
-        return Future() { promise in
+        return Future { promise in
             Job.backgroundHighPri().async(execute: {
                 do {
                     try self.sdk.computePrepareDeviceBackupMPCOperation(mpcData, passcode: passcode)
@@ -138,7 +138,7 @@ public class MPCSdk: NSObject {
      MPCKeyService, passcode of the Device and device backup created with PrepareDeviceBackup operation. Resolves on success; rejects with an error otherwise.
      */
     public func computeAddDeviceMPCOperation(_ mpcData: String, passcode: String, deviceBackup: String) -> Future<Void, WaasError> {
-        return Future() { promise in
+        return Future { promise in
             Job.backgroundHighPri().async(execute: {
                 do {
                     try self.sdk.computeAddDeviceMPCOperation(
@@ -151,7 +151,7 @@ public class MPCSdk: NSObject {
                 }
             })
         }
-        
+
     }
 
     /**
@@ -160,7 +160,7 @@ public class MPCSdk: NSObject {
      rejects with an error otherwise.
      */
     public func exportPrivateKeys(_ mpcKeyExportMetadata: String, passcode: String) -> Future<[PrivateKey], WaasError> {
-        return Future() { promise in
+        return Future { promise in
             Job.backgroundHighPri().async(execute: {
                 do {
                     let response = try self.sdk.exportPrivateKeys(
@@ -180,7 +180,7 @@ public class MPCSdk: NSObject {
      Resolves with backup data as a hex-encoded string on success; rejects with an error otherwise.
      */
     public func exportDeviceBackup() -> Future<String, WaasError> {
-        return Future() { promise in
+        return Future { promise in
             Job.backgroundHighPri().async(execute: {
                 self.sdk.exportDeviceBackup(goReturnsString(promise: promise, wrapAsError: self.wrapError))
             })

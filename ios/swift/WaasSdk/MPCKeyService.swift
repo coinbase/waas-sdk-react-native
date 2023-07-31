@@ -31,16 +31,16 @@ public class MPCKeyService: NSObject {
             throw WaasError.mpcKeyServiceFailedToInitialize
         }
     }
-    
+
     private func wrapError(err: Error) -> WaasError {
-        return WaasError.mpcKeyServiceUnspecifiedError(err as NSError);
+        return WaasError.mpcKeyServiceUnspecifiedError(err as NSError)
     }
 
     /**
      Registers the current Device. Resolves with the Device object on success; rejects with an error otherwise.
      */
     public func registerDevice() -> Future<Device, WaasError> {
-        return Future() { promise in
+        return Future { promise in
             Job.background().async(execute: {
                 do {
                     let device = try self.keyClient?.registerDevice()
@@ -48,7 +48,7 @@ public class MPCKeyService: NSObject {
                 } catch {
                     promise(Result.failure(WaasError.mpcKeyServiceUnspecifiedError(error as NSError)))
                 }
-            });
+            })
         }
     }
 
@@ -59,7 +59,7 @@ public class MPCKeyService: NSObject {
      Resolves with a list of the pending CreateDeviceGroupOperations on success; rejects with an error otherwise.
      */
     public func pollForPendingDeviceGroup(_ deviceGroup: String, pollInterval: NSNumber) -> Future<[CreateDeviceGroupOperation], WaasError> {
-        return Future() { promise in
+        return Future { promise in
             Job.background().async(execute: {
                 do {
                     let pendingDeviceGroupData = try self.keyClient?.pollPendingDeviceGroup(
@@ -81,7 +81,7 @@ public class MPCKeyService: NSObject {
      resolves with the empty string otherwise.
      */
     public func stopPollingForPendingDeviceGroup() -> Future<String, WaasError> {
-        return Future() { promise in
+        return Future { promise in
             Job.background().async(execute: {
                 self.keyClient?.stopPollingPendingDeviceBackups(goReturnsString(promise: promise, wrapAsError: self.wrapError))
             })
@@ -93,7 +93,7 @@ public class MPCKeyService: NSObject {
      Resolves with the resource name of the WaaS operation creating the Signature on successful initiation; rejects with an error otherwise.
      */
     public func createSignatureFromTx(_ parent: String, transaction: NSDictionary) -> Future<String, WaasError> {
-        return Future() { promise in
+        return Future { promise in
             Job.background().async(execute: {
                 do {
                     let serializedTx = try JSONSerialization.data(withJSONObject: transaction)
@@ -112,7 +112,7 @@ public class MPCKeyService: NSObject {
      function. Resolves with a list of the pending Signatures on success; rejects with an error otherwise.
      */
     public func pollForPendingSignatures(_ deviceGroup: String, pollInterval: NSNumber) -> Future<[PendingSignature], WaasError> {
-        return Future() { promise in
+        return Future { promise in
             Job.background().async(execute: {
                 do {
                     let pendingSignaturesData = try self.keyClient?.pollPendingSignatures(
@@ -134,7 +134,7 @@ public class MPCKeyService: NSObject {
      resolves with the empty string otherwise.
      */
     public func stopPollingForPendingSignatures() -> Future<String, WaasError> {
-        return Future() { promise in
+        return Future { promise in
             Job.background().async(execute: {
                 self.keyClient?.stopPollingPendingSignatures(goReturnsString(promise: promise, wrapAsError: self.wrapError))
             })
@@ -146,7 +146,7 @@ public class MPCKeyService: NSObject {
      rejects with an error otherwise.
      */
     public func waitPendingSignature(_ operation: String) -> Future<V1Signature, WaasError> {
-        return Future() { promise in
+        return Future { promise in
             Job.background().async(execute: {
                 var signature: V1Signature?
                 do {
@@ -163,7 +163,7 @@ public class MPCKeyService: NSObject {
      Resolves with the SignedTransaction on success; rejects with an error otherwise.
      */
     public func getSignedTransaction(_ transaction: NSDictionary, signature: NSDictionary) -> Future<V1SignedTransaction, WaasError> {
-        return Future() { promise in
+        return Future { promise in
             Job.background().async(execute: {
                 do {
                     let serializedTx = try JSONSerialization.data(withJSONObject: transaction)
@@ -186,8 +186,8 @@ public class MPCKeyService: NSObject {
     /**
      Gets a DeviceGroup with the given name. Resolves with the DeviceGroup object on success; rejects with an error otherwise.
      */
-    public func getDeviceGroup(_ name: String) -> Future<V1DeviceGroup, WaasError>{
-        return Future() { promise in
+    public func getDeviceGroup(_ name: String) -> Future<V1DeviceGroup, WaasError> {
+        return Future { promise in
             Job.background().async(execute: {
                 do {
                     let deviceGroupRes = try self.keyClient?.getDeviceGroup(name)
@@ -204,7 +204,7 @@ public class MPCKeyService: NSObject {
      an error otherwise.
      */
     public func prepareDeviceArchive(_ deviceGroup: String, device: String) -> Future<String, WaasError> {
-        return Future() { promise in
+        return Future { promise in
             Job.background().async(execute: {
                 self.keyClient?.prepareDeviceArchive(
                     deviceGroup, device: device, receiver: goReturnsString(promise: promise, wrapAsError: self.wrapError))
@@ -219,7 +219,7 @@ public class MPCKeyService: NSObject {
      Resolves with a list of the pending DeviceArchives on success; rejects with an error otherwise.
      */
     public func pollForPendingDeviceArchives(_ deviceGroup: String, pollInterval: NSNumber) -> Future<[PendingDeviceArchive], WaasError> {
-        return Future() { promise in
+        return Future { promise in
             Job.background().async(execute: {
                 do {
                     let pendingDeviceArchiveData = try self.keyClient?.pollPendingDeviceArchives(
@@ -240,7 +240,7 @@ public class MPCKeyService: NSObject {
      Resolves with string "stopped polling for pending Device Archives" if polling is stopped successfully; resolves with the empty string otherwise.
      */
     public func stopPollingForPendingDeviceArchives() -> Future<String, WaasError> {
-        return Future() { promise in
+        return Future { promise in
             Job.background().async(execute: {
                 self.keyClient?.stopPollingPendingDeviceArchives(goReturnsString(promise: promise, wrapAsError: self.wrapError))
             })
@@ -252,7 +252,7 @@ public class MPCKeyService: NSObject {
      successful initiation; rejects with an error otherwise.
      */
     public func prepareDeviceBackup(_ deviceGroup: String, device: String) -> Future<String, WaasError> {
-        return Future() { promise in
+        return Future { promise in
             Job.background().async(execute: {
                 self.keyClient?.prepareDeviceBackup(
                     deviceGroup, device: device, receiver: goReturnsString(promise: promise, wrapAsError: self.wrapError))
@@ -267,7 +267,7 @@ public class MPCKeyService: NSObject {
      Resolves with a list of the pending DeviceBackups on success; rejects with an error otherwise.
      */
     public func pollForPendingDeviceBackups(_ deviceGroup: String, pollInterval: NSNumber) -> Future<[PendingDeviceBackup], WaasError> {
-        return Future() { promise in
+        return Future { promise in
             Job.background().async(execute: {
                 do {
                     let pendingDeviceBackupData = try self.keyClient?.pollPendingDeviceBackups(
@@ -290,7 +290,7 @@ public class MPCKeyService: NSObject {
      Resolves with string "stopped polling for pending Device Backups" if polling is stopped successfully; resolves with the empty string otherwise.
      */
     public func stopPollingForPendingDeviceBackups() -> Future<String, WaasError> {
-        return Future() { promise in
+        return Future { promise in
             Job.background().async(execute: {
                 self.keyClient?.stopPollingPendingDeviceBackups(goReturnsString(promise: promise, wrapAsError: self.wrapError))
             })
@@ -302,7 +302,7 @@ public class MPCKeyService: NSObject {
      an error otherwise.
      */
     public func addDevice(_ deviceGroup: String, device: String) -> Future<String, WaasError> {
-        return Future() { promise in
+        return Future { promise in
             Job.background().async(execute: {
                 self.keyClient?.addDevice(
                     deviceGroup, device: device, receiver: goReturnsString(promise: promise, wrapAsError: self.wrapError))
@@ -321,7 +321,7 @@ public class MPCKeyService: NSObject {
         MPCData: the provided mpc data for adding this device (to use with MPCSdk.computeAddDeviceMPCOperation)
      */
     public func pollForPendingDevices(_ deviceGroup: String, pollInterval: NSNumber) -> Future<[PendingDevice], WaasError> {
-        return Future() { promise in
+        return Future { promise in
             Job.background().async(execute: {
                 do {
                     let pendingDeviceData = try self.keyClient?.pollPendingDevices(
@@ -342,7 +342,7 @@ public class MPCKeyService: NSObject {
      Resolves with string "stopped polling for pending Devices" if polling is stopped successfully; resolves with the empty string otherwise.
      */
     public func stopPollingForPendingDevices() -> Future<String, WaasError> {
-        return Future() { promise in
+        return Future { promise in
             Job.background().async(execute: {
                 self.keyClient?.stopPollingPendingDevices(goReturnsString(promise: promise, wrapAsError: self.wrapError))
             })

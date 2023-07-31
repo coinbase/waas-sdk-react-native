@@ -1,6 +1,9 @@
 import Foundation
+import WaasSdkGo
+import Combine
 
-public struct PendingSignature: Codable {
+public struct PendingSignature: Codable, MPCOperation {
+
   // The resource name of the DeviceGroup.
   // Format: pools/{pool_id}/deviceGroups/{device_group_id}
   public var DeviceGroup: String
@@ -15,4 +18,17 @@ public struct PendingSignature: Codable {
   public var MPCData: String
   // The hex-encoded payload to be signed.
   public var Payload: String
-};
+
+    public func run(mpcSdk: MPCSdk) -> Future<Void, WaasError> {
+        return Future { promise in
+            Task {
+                do {
+                    try await mpcSdk.computeMPCOperation(self.MPCData).value
+                    promise(Result.success(()))
+                } catch {
+                    promise(Result.failure(WaasError.mpcSdkUnspecifiedError(error)))
+                }
+            }
+        }
+    }
+}

@@ -11,11 +11,11 @@ class Job {
     class func background() -> DispatchQueue {
         return DispatchQueue.global(qos: .background)
     }
-    
+
     class func backgroundHighPri() -> DispatchQueue {
         return DispatchQueue.global(qos: .userInteractive)
     }
-    
+
     /**
             Return a dispatch queue for running on the main/UI thread.
      */
@@ -23,4 +23,3 @@ class Job {
         DispatchQueue.main
     }
 }
-

@@ -8,7 +8,7 @@ Pod::Spec.new do |s|
   s.license      = "Apache-2.0"
   s.authors      = "Coinbase, Inc."
 
-  s.platforms    = { :ios => "13.0" }
+  s.platforms    = { :ios => "15.0" }
   s.source       = { :git => "https://github.com/coinbase/waas-sdk-react-native.git", :tag => "swift/#{s.version}" }
 
   s.swift_versions = ['5.5', '5.6', '5.7']

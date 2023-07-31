@@ -1,4 +1,3 @@
-
 import Foundation
 
 /**
@@ -10,13 +9,13 @@ import Foundation
 public struct Address: Codable {
     // the unique resource-name of this address
     public var Name: String
-    
+
     // the protocol-relevant address that this represents ("0xdeafbeef")
     public var Address: String
-    
+
     // an array of resource names of keys associated with this address.
     public var MPCKeys: [String]
-    
+
     // the resource name of the wallet associated with this address
     public var MPCWallet: String
 }

@@ -31,7 +31,7 @@ public class MPCWalletService: NSObject {
         if error != nil {
             throw WaasError.walletServiceFailedToInitialize(error!)
         }
-        
+
         walletsClient = _walletsClient!
     }
 
@@ -40,7 +40,7 @@ public class MPCWalletService: NSObject {
      otherwise.
      */
     public func createMPCWallet(parent: String, device: String) -> Future<V1CreateMPCWalletResponse, WaasError> {
-        return Future() { promise in
+        return Future { promise in
             Job.backgroundHighPri().async(execute: {
                 do {
                     let response = try self.walletsClient.createMPCWallet(parent, device: device)
@@ -57,7 +57,7 @@ public class MPCWalletService: NSObject {
      rejects with an error otherwise.
      */
     public func waitPendingMPCWallet(operation: String) -> Future<V1MPCWallet, WaasError> {
-        return Future() { promise in
+        return Future { promise in
             Job.background().async(execute: {
                 do {
                     let mpcWallet = try self.walletsClient.waitPendingMPCWallet(operation)
@@ -74,7 +74,7 @@ public class MPCWalletService: NSObject {
      rejects with an error otherwise.
      */
     public func generateAddress(_ mpcWallet: String, network: String) -> Future<Address, WaasError> {
-        return Future() { promise in
+        return Future { promise in
             Job.backgroundHighPri().async(execute: {
                 do {
                     // TODO: golang should return `V1Address` directly.
@@ -92,7 +92,7 @@ public class MPCWalletService: NSObject {
      Gets an Address with the given name. Resolves with the Address object on success; rejects with an error otherwise.
      */
     public func getAddress(name: String) -> Future<Address, WaasError> {
-        return Future() { promise in
+        return Future { promise in
             Job.background().async(execute: {
                 do {
                     // TODO: golang should return `V1Address` directly.

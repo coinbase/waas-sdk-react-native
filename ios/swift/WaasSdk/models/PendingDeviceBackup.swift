@@ -1,6 +1,11 @@
 import Foundation
+import Combine
 
-public struct PendingDeviceBackup: Codable {
+public struct PendingDeviceBackup: Codable, PasscodeMPCOperation {
+    func run(mpcSdk: MPCSdk, passcode: String) -> Future<Void, WaasError> {
+        mpcSdk.computePrepareDeviceBackupMPCOperation(MPCData, passcode: passcode)
+    }
+
   // The resource name of the DeviceGroup.
   // Format: pools/{pool_id}/deviceGroups/{device_group_id}
   public var DeviceGroup: String
@@ -14,4 +19,4 @@ public struct PendingDeviceBackup: Codable {
   // API has to be invoked with this data.
   // Format: base64 encoded string.
   public var MPCData: String
-};
+}

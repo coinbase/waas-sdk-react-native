@@ -1,4 +1,3 @@
-
 import Foundation
 
 /**
@@ -9,7 +8,7 @@ import Foundation
 public struct Signature: Codable {
     // the unique resource-name of this address
     public var Name: String
-    
+
     // the raw payload that was to be signed
     public var Payload: String
 
