@@ -22,6 +22,12 @@ public class WaasDevice {
         return device
     }
 
+    /**
+     Exports the private keys for this device.
+     
+                @param deviceGroupId: the device group to export keys for.
+                @param passcode: The current device's passcode.
+     */
     public func exportPrivateKeys(deviceGroupId: String, passcode: String) async throws -> [PrivateKey] {
         let deviceGroup = try await self.keys.getDeviceGroup(deviceGroupId).value
         let keyExportMetadata = deviceGroup.mpcKeyExportMetadata
@@ -29,6 +35,11 @@ public class WaasDevice {
         return res
     }
 
+    /**
+     Exports a backup of the current device, for use in restoring to another device.
+     
+            @param passcode: The device's passcode.
+     */
     public func exportBackup(passcode: String) async throws -> WaasBackupData {
         let operation = try await keys.prepareDeviceBackup(group!, device: device.Name).value
         let pendingDeviceBackups = try await keys.pollForPendingDeviceBackups(group!, pollInterval: 3.0).value
@@ -41,6 +52,12 @@ public class WaasDevice {
         return try await mpc.exportDeviceBackup().value
     }
 
+    /**
+     Creates a wallet for the current device, in the given pool.
+
+           poolId: the id of the pool to create the wallet in
+           passcode: the device passcode
+     */
     public func createWallet(poolId: String, passcode: String) async throws -> V1MPCWallet {
         let walletOperation = try await wallet.createMPCWallet(parent: poolId, device: device.Name).value
         group = walletOperation.deviceGroup
@@ -61,6 +78,13 @@ public class WaasDevice {
         return try await wallet.waitPendingMPCWallet(operation: walletOperation.operation).value
     }
 
+    /**
+        Restores the keys from another device which has produced a `WaasBackupData` (see `exportBackup`).
+     
+                 @param deviceGroup: The device group that the previous, backed-up device is part of.
+                 @param passcode: The passcode created on the previous device.
+                 @param data: The backup data created by the `exportBackup` function.
+     */
     public func restoreFromBackup(deviceGroup: String, passcode: String, data: WaasBackupData) async throws {
         let operation = try await self.keys.addDevice(deviceGroup, device: self.device.Name).value
         let pendingDevices = try await self.keys.pollForPendingDevices(deviceGroup, pollInterval: 3.0 as NSNumber).value
@@ -70,6 +94,12 @@ public class WaasDevice {
         try await op!.run(mpcSdk: self.mpc, passcode: passcode, backupData: data as String).value
     }
 
+    /**
+            Signs an EIP-1559 transaction, using the keys in the address whose resource identifier is `addressName`
+     
+                @param txn: the data of the eip-1559 transaction to sign.
+                @param addressName: The address name (i.e as returned from `Waas.wallet().generateAddress(...)`)
+     */
     public func sign(txn: [String: Any], addressName: String) async throws -> V1Signature {
         let address = try await wallet.getAddress(name: addressName).value
         let key = address.MPCKeys[0]

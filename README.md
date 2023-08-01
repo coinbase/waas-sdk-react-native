@@ -10,6 +10,7 @@ required for the completion of MPC operations such as Seed generation and Transa
 - [yarn classic 1.22+](https://classic.yarnpkg.com/en/docs/install)
 
 For iOS development:
+- iOS 15+
 - [Xcode 14.0+](https://developer.apple.com/xcode/)
   - iOS15.2+ simulator (iPhone 14 recommended)
 - [CocoaPods](https://guides.cocoapods.org/using/getting-started.html)

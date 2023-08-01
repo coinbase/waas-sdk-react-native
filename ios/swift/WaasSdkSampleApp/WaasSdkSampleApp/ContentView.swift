@@ -39,8 +39,7 @@ struct ContentView: View {
                 .accessibilityLabel("demo-\(title.lowercased())")
                 .disabled(isLoading || waas == nil || !enabled)
     }
-    
-    
+
     func asyncExample(_ block: @escaping () async throws -> Void) {
         Task {
             do {
@@ -48,8 +47,7 @@ struct ContentView: View {
                 isLoading = true
                 try await block()
                 isLoading = false
-            }
-            catch let error as WaasError {
+            } catch let error as WaasError {
                 Task {@MainActor in
                     self.errorMessage = "Error initializing(\(error.code)): \(error.description)"
                 }
@@ -61,13 +59,12 @@ struct ContentView: View {
     func asyncInitWaas() {
         self.asyncExample {
             let waas = try await Waas.create(apiKey: API_KEY, privateKey: PRIVATE_KEY, passcode: PASSCODE, isSimulator: true)
-            let device = try await waas.device().value
+            let device = try await waas.device()
             self.waas = waas
             self.device = device
             self.generatedArtifact = "Ready!"
         }
     }
-    
 
     var body: some View {
         ScrollView {
@@ -131,7 +128,7 @@ struct ContentView: View {
             // 1. create a pool.
             let pool = try await waas!.pool().createPool(displayName: "Test Pool", poolID: "test-pool-\(Int.random(in: 0..<1000))").value
             poolId = pool.name
-            
+
             // 2. create a wallet / device group.
             let wallet = try await device!.createWallet(poolId: poolId!, passcode: PASSCODE)
             walletId = wallet.name
@@ -170,7 +167,7 @@ struct ContentView: View {
                 "Value": "0x1000",
                 "Data": ""
             ]
-            
+
             let signature = try await device?.sign(txn: txn, addressName: generatedAddressName!)
             generatedArtifact = "Signature: \(signature!.signedPayload)"
         }

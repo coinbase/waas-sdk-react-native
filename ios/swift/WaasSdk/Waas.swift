@@ -6,6 +6,7 @@ import Combine
  */
 public class Waas {
 
+    // nsuserdefaults key to store the user-id between runs.
     static let DEVICE_ID_KEY = "com.coinbase.deviceid"
 
     private var keys: MPCKeyService
@@ -59,36 +60,30 @@ public class Waas {
     /**
         Returns the current device.
      */
-    public func device() -> Future<WaasDevice, Error> {
-        return Future { promise in
-            if let device = self._device {
-                promise(Result.success(device))
-                return
-            }
+    public func device() async throws -> WaasDevice {
+        if let device = self._device {
+            return device
+        }
 
-            // register and load the device.
-            Task {
-                do {
-                    let device = try await self.keys.registerDevice().value
-                    self._device = WaasDevice(_device: device, _mpcSdk: self.mpc, _keys: self.keys, _wallet: self.wallets)
-                    UserDefaults.standard.set(device.Name, forKey: Waas.DEVICE_ID_KEY)
-                    promise(Result.success(self._device!))
-                } catch let error as WaasError {
-                    // TODO: we need better separation between normal-operation errors
-                    // and 'real' errors.
-                    if error.description.contains("device already registered") {
-                        let previousDeviceId = UserDefaults.standard.string(forKey: Waas.DEVICE_ID_KEY)
-                        if let deviceId = previousDeviceId {
-                            self._device = WaasDevice(_device: Device(Name: deviceId), _mpcSdk: self.mpc, _keys: self.keys, _wallet: self.wallets)
-                            promise(Result.success(self._device!))
-                        } else {
-                            promise(Result.failure(WaasError.mpcSdkDeviceAlreadyRegistered))
-                            return
-                        }
-                    } else {
-                        promise(Result.failure(error))
-                    }
+        // register and load the device.
+        do {
+            let device = try await self.keys.registerDevice().value
+            self._device = WaasDevice(_device: device, _mpcSdk: self.mpc, _keys: self.keys, _wallet: self.wallets)
+            UserDefaults.standard.set(device.Name, forKey: Waas.DEVICE_ID_KEY)
+            return self._device!
+        } catch let error as WaasError {
+            // TODO: we need better separation between normal-operation errors
+            // and 'real' errors.
+            if error.description.contains("device already registered") {
+                let previousDeviceId = UserDefaults.standard.string(forKey: Waas.DEVICE_ID_KEY)
+                if let deviceId = previousDeviceId {
+                    self._device = WaasDevice(_device: Device(Name: deviceId), _mpcSdk: self.mpc, _keys: self.keys, _wallet: self.wallets)
+                    return self._device!
+                } else {
+                    throw WaasError.mpcSdkDeviceAlreadyRegistered
                 }
+            } else {
+                throw error
             }
         }
     }
