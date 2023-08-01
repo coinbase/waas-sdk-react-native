@@ -39,25 +39,35 @@ struct ContentView: View {
                 .accessibilityLabel("demo-\(title.lowercased())")
                 .disabled(isLoading || waas == nil || !enabled)
     }
-
-    func asyncInitWaas() {
+    
+    
+    func asyncExample(_ block: @escaping () async throws -> Void) {
         Task {
             do {
-                let waas = try await Waas.create(apiKey: API_KEY, privateKey: PRIVATE_KEY, passcode: PASSCODE, isSimulator: true)
-                let device = try await waas.device().value
-
-                self.waas = waas
-                self.device = device
-                Task {@MainActor in
-                    self.generatedArtifact = "Ready!"
-                }
-            } catch let error as WaasError {
+                generatedArtifact = ""
+                isLoading = true
+                try await block()
+                isLoading = false
+            }
+            catch let error as WaasError {
                 Task {@MainActor in
                     self.errorMessage = "Error initializing(\(error.code)): \(error.description)"
                 }
+                isLoading = false
             }
         }
     }
+
+    func asyncInitWaas() {
+        self.asyncExample {
+            let waas = try await Waas.create(apiKey: API_KEY, privateKey: PRIVATE_KEY, passcode: PASSCODE, isSimulator: true)
+            let device = try await waas.device().value
+            self.waas = waas
+            self.device = device
+            self.generatedArtifact = "Ready!"
+        }
+    }
+    
 
     var body: some View {
         ScrollView {
@@ -117,45 +127,30 @@ struct ContentView: View {
           Creates a new pool, registers the current device, and creates a wallet for this device.
      */
     func onboarding() {
-        Task {
-            do {
-                isLoading = true
-
-                // 1. create a pool.
-                let pool = try await waas!.pool().createPool(displayName: "Test Pool", poolID: "test-pool-\(Int.random(in: 0..<1000))").value
-                poolId = pool.name
-
-                // 2. create a wallet / device group.
-                let wallet = try await device!.createWallet(poolId: poolId!, passcode: PASSCODE)
-                walletId = wallet.name
-                generatedArtifact = walletId
-                deviceGroupId = wallet.deviceGroup
-                deviceId = device!.info().Name
-                isLoading = false
-            } catch let err as WaasError {
-                errorMessage = "Error: \(err.code): \(err.description)"
-                isLoading = false
-            }
+        self.asyncExample {
+            // 1. create a pool.
+            let pool = try await waas!.pool().createPool(displayName: "Test Pool", poolID: "test-pool-\(Int.random(in: 0..<1000))").value
+            poolId = pool.name
+            
+            // 2. create a wallet / device group.
+            let wallet = try await device!.createWallet(poolId: poolId!, passcode: PASSCODE)
+            walletId = wallet.name
+            generatedArtifact = walletId
+            deviceGroupId = wallet.deviceGroup
+            deviceId = device!.info().Name
         }
-
     }
 
     /**
      Generates a sample address on networks/ethereum-goerli, for the wallet you made previously.
      */
     func getAddress() {
-        Task {
-            do {
-                generatedArtifact = ""
-                isLoading = true
-                let address = try await waas!.wallet().generateAddress(walletId!, network: "networks/ethereum-goerli").value
-                generatedAddress = address.Address
-                generatedAddressName = address.Name
-                isLoading = false
-            } catch let err as WaasError {
-                errorMessage = "Error: \(err.code): \(err.description)"
-                isLoading = false
-            }
+        self.asyncExample {
+            generatedArtifact = ""
+            isLoading = true
+            let address = try await waas!.wallet().generateAddress(walletId!, network: "networks/ethereum-goerli").value
+            generatedAddress = address.Address
+            generatedAddressName = address.Name
         }
     }
 
@@ -163,28 +158,21 @@ struct ContentView: View {
      Signs an example EIP-1559 transaction using the previously created wallet.
      */
     func signTxn() {
-        Task {
-            do {
-                isLoading = true
-                generatedArtifact = ""
-                let txn: [String: Any] = [
-                  "ChainID": "0x5",
-                  "Nonce": 0,
-                  "MaxPriorityFeePerGas": "0x400",
-                  "MaxFeePerGas": "0x400",
-                  "Gas": 63000,
-                  "To": "0xd8ddbfd00b958e94a024fb8c116ae89c70c60257",
-                  "Value": "0x1000",
-                  "Data": ""
-                ]
-
-                let signature = try await device?.sign(txn: txn, addressName: generatedAddressName!)
-                generatedArtifact = "Signature: \(signature!.signedPayload)"
-                isLoading = false
-            } catch let err as WaasError {
-                errorMessage = "Error: \(err.code): \(err.description)"
-                isLoading = false
-            }
+        self.asyncExample {
+            // an EIP-1559 example txn
+            let txn: [String: Any] = [
+                "ChainID": "0x5",
+                "Nonce": 0,
+                "MaxPriorityFeePerGas": "0x400",
+                "MaxFeePerGas": "0x400",
+                "Gas": 63000,
+                "To": "0xd8ddbfd00b958e94a024fb8c116ae89c70c60257",
+                "Value": "0x1000",
+                "Data": ""
+            ]
+            
+            let signature = try await device?.sign(txn: txn, addressName: generatedAddressName!)
+            generatedArtifact = "Signature: \(signature!.signedPayload)"
         }
     }
 
@@ -192,19 +180,9 @@ struct ContentView: View {
         Exports the private keys on the device.
      */
     func exportKeys() {
-        Task {
-            do {
-                isLoading = true
-                generatedArtifact = ""
-
-                let keys: [PrivateKey] = try await device!.exportPrivateKeys(deviceGroupId: deviceGroupId!, passcode: PASSCODE)
-                generatedArtifact = "Private Key: \(keys[0].Address): \(keys[0].PrivateKey)"
-
-                isLoading = false
-            } catch let err as WaasError {
-                errorMessage = "Error: \(err.code): \(err.description)"
-                isLoading = false
-            }
+        self.asyncExample {
+            let keys: [PrivateKey] = try await device!.exportPrivateKeys(deviceGroupId: deviceGroupId!, passcode: PASSCODE)
+            generatedArtifact = "Private Key: \(keys[0].Address): \(keys[0].PrivateKey)"
         }
     }
 
@@ -212,19 +190,9 @@ struct ContentView: View {
         Produces a backup, for use with `restoreDevice` (see below) on another device.
      */
     func backupDevice() {
-        Task {
-            do {
-                isLoading = true
-                generatedArtifact = ""
-
-                backup = try await device!.exportBackup(passcode: PASSCODE)
-                generatedArtifact = "Backup: \(backup!)"
-
-                isLoading = false
-            } catch let err as WaasError {
-                errorMessage = "Error: \(err.code): \(err.description)"
-                isLoading = false
-            }
+        self.asyncExample {
+            backup = try await device!.exportBackup(passcode: PASSCODE)
+            generatedArtifact = "Backup: \(backup!)"
         }
     }
 
@@ -232,17 +200,10 @@ struct ContentView: View {
         Restores the device, from a backup taken via the method in `backupDevice` (see above).
      */
     func restoreDevice() {
-        Task {
-            do {
-                isLoading = true
-                // this `backup` should be from another device.
-                try await device!.restoreFromBackup(deviceGroup: deviceGroupId!, passcode: PASSCODE, data: self.backup!)
-                generatedArtifact = "Restored from backup!"
-                isLoading = false
-            } catch let err as WaasError {
-                errorMessage = "Error: \(err.code): \(err.description)"
-                isLoading = false
-            }
+        self.asyncExample {
+            // this `backup` should be from another device.
+            try await device!.restoreFromBackup(deviceGroup: deviceGroupId!, passcode: PASSCODE, data: self.backup!)
+            generatedArtifact = "Restored from backup!"
         }
     }
 }
