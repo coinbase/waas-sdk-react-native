@@ -118,10 +118,7 @@ class MPCKeyService: NSObject {
 
         Operation(self.keyClient!.pollForPendingSignatures(
             deviceGroup as String,
-            pollInterval: pollInterval)).any(resolve: resolve, reject: reject) {
-                pendingSignatures in
-                pendingSignatures.map({_ in pendingSignatures.asDictionary()}) as NSArray
-            }
+            pollInterval: pollInterval)).swift(resolve: resolve, reject: reject)
     }
 
     /**
@@ -226,10 +223,7 @@ class MPCKeyService: NSObject {
             return
         }
 
-        Operation(self.keyClient!.pollForPendingDeviceArchives(deviceGroup as String, pollInterval: pollInterval)).any(resolve: resolve, reject: reject) {
-            pendingDeviceArchives in
-            pendingDeviceArchives.map({deviceArchive in deviceArchive.asDictionary()}) as NSArray
-        }
+        Operation(self.keyClient!.pollForPendingDeviceArchives(deviceGroup as String, pollInterval: pollInterval)).swift(resolve: resolve, reject: reject)
     }
 
     /**

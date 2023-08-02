@@ -27,8 +27,6 @@ private func convertToObjc(_ value: Any) -> JSONValue {
         return value as NSNumber
     case let value as Bool:
         return value as NSNumber
-    case let value as Encodable:
-        return value.asDictionary()
     case let value as [Encodable]:
         return value.map { convertToObjc($0) } as NSArray
     case let value as [String: Encodable]:
@@ -37,6 +35,8 @@ private func convertToObjc(_ value: Any) -> JSONValue {
             result[key] = convertToObjc(val)
         }
         return result as NSDictionary
+    case let value as Encodable:
+        return value.asDictionary()
     default:
         fatalError("Unsupported type \(type(of: value))")
     }

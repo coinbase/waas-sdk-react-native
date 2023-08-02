@@ -158,9 +158,7 @@ class MPCSdk: NSObject {
 
         Operation(self.sdk!.exportPrivateKeys(
             mpcKeyExportMetadata as String,
-            passcode: passcode as String)).any(resolve: resolve, reject: reject) { keys in
-                keys.map({key in key.asDictionary()}) as NSArray
-            }
+            passcode: passcode as String)).swift(resolve: resolve, reject: reject)
     }
 
     /**

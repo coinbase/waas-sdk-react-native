@@ -361,7 +361,7 @@ PODS:
   - RNScreens (3.20.0):
     - React-Core
     - React-RCTImage
-  - waas-sdk-react-native (2.0.2):
+  - waas-sdk-react-native (2.1.2):
     - React-Core
     - WaasSdk
   - WaasSdk (0.0.1)
@@ -534,10 +534,10 @@ SPEC CHECKSUMS:
   ReactCommon: 6f65ea5b7d84deb9e386f670dd11ce499ded7b40
   RNCClipboard: 2834e1c4af68697089cdd455ee4a4cdd198fa7dd
   RNScreens: 218801c16a2782546d30bd2026bb625c0302d70f
-  waas-sdk-react-native: ea64aee8cb37e98eb49ec56bca4260d721a01d13
+  waas-sdk-react-native: b36951b05453bfba34cc2030d54a90fd2d08652b
   WaasSdk: 3b56a5a526e5b49feb1fdb47facace999f115856
   Yoga: 5ed1699acbba8863755998a4245daa200ff3817b
 
-PODFILE CHECKSUM: 1a09ea5037ead0e34eed71ab7eb81bf44f72b83a
+PODFILE CHECKSUM: 6fb5adc847878f5ad4cab74c0aeeea61537db634
 
 COCOAPODS: 1.12.0
