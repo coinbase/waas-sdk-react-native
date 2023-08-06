@@ -16,6 +16,8 @@ Pod::Spec.new do |s|
 
   s.source_files = "ios/react-native/*.{h,m,mm,swift}"
 
+  s.swift_versions = ['5.5', '5.6', '5.7']
+
   s.framework = "LocalAuthentication"
   s.libraries = 'resolv'
 

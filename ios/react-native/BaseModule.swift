@@ -25,6 +25,7 @@ public class BaseModule: NSObject {
         Runs an operation, while taking care to retain the 
      */
     func run(_ op: AnyOperation) {
+        print(type(of: self))
         let hashableOp = AnyHashableOperation(op)
         ops.insert(hashableOp)
         op.onFinish {

@@ -60,7 +60,7 @@ protocol AnyOperation {
 
     func start()
 
-    func onFinish(_ callback: @escaping () -> Void)
+    func onFinish(_ callback: @escaping () -> Void) -> Self
 }
 
 class Operation<Output>: AnyOperation {
@@ -82,8 +82,9 @@ class Operation<Output>: AnyOperation {
         return identifier.uuidString
     }
 
-    func onFinish(_ callback: @escaping () -> Void) {
+    func onFinish(_ callback: @escaping () -> Void) -> Self {
         _onFinish = callback
+        return self
     }
 
     func start() {

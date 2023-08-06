@@ -48,6 +48,7 @@ target 'WaasSdkReactNativeExample' do
   target 'WaasSdkReactNativeExampleTests' do
     inherit! :complete
     pod 'WaasSdk', :path => "../../WaasSdk.podspec", :testspecs => ['Tests']
+    pod 'waas-sdk-react-native', :path => "../../waas-sdk-react-native.podspec", :testspecs => ['Tests']
   end
 
   post_install do |installer|

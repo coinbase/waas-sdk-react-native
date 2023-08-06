@@ -13,7 +13,7 @@
 		13B07FBF1A68108700A75B9A /* Images.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 13B07FB51A68108700A75B9A /* Images.xcassets */; };
 		13B07FC11A68108700A75B9A /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 13B07FB71A68108700A75B9A /* main.m */; };
 		472AE5A22A0D91600023749E /* libresolv.tbd in Frameworks */ = {isa = PBXBuildFile; fileRef = 6015926029CCC1BB00A5AE8E /* libresolv.tbd */; };
-		4C3DFA692A6A1F3600D51E7D /* openssl_libcrypto.xcframework in Frameworks */ = {isa = PBXBuildFile; fileRef = 4C3DFA682A6A1F3600D51E7D /* openssl_libcrypto.xcframework */; };
+		4C8925AB2A7FF5DF00601A2A /* OperationTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C8925AA2A7FF5DE00601A2A /* OperationTests.swift */; };
 		7699B88040F8A987B510C191 /* libPods-WaasSdkReactNativeExample-WaasSdkReactNativeExampleTests.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 19F6CBCC0A4E27FBF8BF4A61 /* libPods-WaasSdkReactNativeExample-WaasSdkReactNativeExampleTests.a */; };
 		81AB9BB82411601600AC10FF /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 81AB9BB72411601600AC10FF /* LaunchScreen.storyboard */; };
 /* End PBXBuildFile section */
@@ -42,6 +42,7 @@
 		3B4392A12AC88292D35C810B /* Pods-WaasSdkReactNativeExample.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-WaasSdkReactNativeExample.debug.xcconfig"; path = "Target Support Files/Pods-WaasSdkReactNativeExample/Pods-WaasSdkReactNativeExample.debug.xcconfig"; sourceTree = "<group>"; };
 		47FCE5062A0D6BAF003BA6B3 /* WaasSdkGo.xcframework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcframework; name = WaasSdkGo.xcframework; path = Pods/WaasSdkGo/WaasSdkGo.xcframework; sourceTree = "<group>"; };
 		4C3DFA682A6A1F3600D51E7D /* openssl_libcrypto.xcframework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcframework; path = openssl_libcrypto.xcframework; sourceTree = "<group>"; };
+		4C8925AA2A7FF5DE00601A2A /* OperationTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = OperationTests.swift; path = "../../../ios/react-native/Tests/OperationTests.swift"; sourceTree = "<group>"; };
 		5709B34CF0A7D63546082F79 /* Pods-WaasSdkReactNativeExample.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-WaasSdkReactNativeExample.release.xcconfig"; path = "Target Support Files/Pods-WaasSdkReactNativeExample/Pods-WaasSdkReactNativeExample.release.xcconfig"; sourceTree = "<group>"; };
 		5B7EB9410499542E8C5724F5 /* Pods-WaasSdkReactNativeExample-WaasSdkReactNativeExampleTests.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-WaasSdkReactNativeExample-WaasSdkReactNativeExampleTests.debug.xcconfig"; path = "Target Support Files/Pods-WaasSdkReactNativeExample-WaasSdkReactNativeExampleTests/Pods-WaasSdkReactNativeExample-WaasSdkReactNativeExampleTests.debug.xcconfig"; sourceTree = "<group>"; };
 		5DCACB8F33CDC322A6C60F78 /* libPods-WaasSdkReactNativeExample.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-WaasSdkReactNativeExample.a"; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -57,7 +58,6 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				4C3DFA692A6A1F3600D51E7D /* openssl_libcrypto.xcframework in Frameworks */,
 				7699B88040F8A987B510C191 /* libPods-WaasSdkReactNativeExample-WaasSdkReactNativeExampleTests.a in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -77,6 +77,7 @@
 		00E356EF1AD99517003FC87E /* WaasSdkReactNativeExampleTests */ = {
 			isa = PBXGroup;
 			children = (
+				4C8925AA2A7FF5DE00601A2A /* OperationTests.swift */,
 				00E356F21AD99517003FC87E /* WaasSdkReactNativeExampleTests.m */,
 				00E356F01AD99517003FC87E /* Supporting Files */,
 			);
@@ -216,6 +217,7 @@
 				TargetAttributes = {
 					00E356ED1AD99517003FC87E = {
 						CreatedOnToolsVersion = 6.2;
+						LastSwiftMigration = 1420;
 						TestTargetID = 13B07F861A680F5B00A75B9A;
 					};
 					13B07F861A680F5B00A75B9A = {
@@ -417,6 +419,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				00E356F31AD99517003FC87E /* WaasSdkReactNativeExampleTests.m in Sources */,
+				4C8925AB2A7FF5DF00601A2A /* OperationTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -445,6 +448,8 @@
 			baseConfigurationReference = 5B7EB9410499542E8C5724F5 /* Pods-WaasSdkReactNativeExample-WaasSdkReactNativeExampleTests.debug.xcconfig */;
 			buildSettings = {
 				BUNDLE_LOADER = "$(TEST_HOST)";
+				CLANG_ENABLE_MODULES = YES;
+				GCC_GENERATE_TEST_COVERAGE_FILES = NO;
 				GCC_PREPROCESSOR_DEFINITIONS = (
 					"DEBUG=1",
 					"$(inherited)",
@@ -499,7 +504,7 @@
 					"\"$(PODS_TARGET_SRCROOT)/include/\"",
 				);
 				INFOPLIST_FILE = WaasSdkReactNativeExampleTests/Info.plist;
-				IPHONEOS_DEPLOYMENT_TARGET = 12.4;
+				IPHONEOS_DEPLOYMENT_TARGET = 15.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -512,6 +517,8 @@
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = "org.reactjs.native.example.$(PRODUCT_NAME:rfc1034identifier)";
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_VERSION = 5.0;
 				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/WaasSdkReactNativeExample.app/WaasSdkReactNativeExample";
 			};
 			name = Debug;
@@ -521,7 +528,9 @@
 			baseConfigurationReference = 89C6BE57DB24E9ADA2F236DE /* Pods-WaasSdkReactNativeExample-WaasSdkReactNativeExampleTests.release.xcconfig */;
 			buildSettings = {
 				BUNDLE_LOADER = "$(TEST_HOST)";
+				CLANG_ENABLE_MODULES = YES;
 				COPY_PHASE_STRIP = NO;
+				GCC_GENERATE_TEST_COVERAGE_FILES = NO;
 				HEADER_SEARCH_PATHS = (
 					"$(inherited)",
 					"/opt/homebrew/opt/openssl@1.1/include",
@@ -572,7 +581,7 @@
 					"\"$(PODS_TARGET_SRCROOT)/include/\"",
 				);
 				INFOPLIST_FILE = WaasSdkReactNativeExampleTests/Info.plist;
-				IPHONEOS_DEPLOYMENT_TARGET = 12.4;
+				IPHONEOS_DEPLOYMENT_TARGET = 15.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -585,6 +594,7 @@
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = "org.reactjs.native.example.$(PRODUCT_NAME:rfc1034identifier)";
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_VERSION = 5.0;
 				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/WaasSdkReactNativeExample.app/WaasSdkReactNativeExample";
 			};
 			name = Release;
