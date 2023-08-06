@@ -90,9 +90,7 @@ public class MPCSdk: NSObject {
         return Future { promise in
             Job.background().async(execute: {
                 do {
-                    print("[Operation] Start computeMPCOperation")
                     try self.sdk.computeMPCOperation(mpcData)
-                    print("[Operation] End computeMPCOperation")
                     promise(Result.success(()))
                 } catch {
                     promise(Result.failure(WaasError.mpcSdkUnspecifiedError(error)))

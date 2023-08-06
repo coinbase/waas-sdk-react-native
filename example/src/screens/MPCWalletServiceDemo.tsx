@@ -77,8 +77,6 @@ export const MPCWalletServiceDemo = () => {
           setDeviceGroupName(createMpcWalletResponse.DeviceGroup);
           setShowStep5(true);
 
-          console.log(createMpcWalletResponse);
-
           if (prepareDeviceArchiveEnforced) {
             await computeMPCWallet(
               createMpcWalletResponse.DeviceGroup,
