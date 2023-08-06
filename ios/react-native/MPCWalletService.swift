@@ -3,7 +3,7 @@ import WaasSdk
 import WaasSdkGo
 
 @objc(MPCWalletService)
-class MPCWalletService: NSObject {
+class MPCWalletService: BaseModule {
     // The URL of the MPCWalletService.
     let mpcWalletServiceUrl = "https://api.developer.coinbase.com/waas/mpc_wallets"
 
@@ -49,12 +49,12 @@ class MPCWalletService: NSObject {
             return
         }
 
-        Operation(self.walletsClient!.createMPCWallet(parent: parent as String, device: device as String)).any(resolve: resolve, reject: reject) { response in
+        run(Operation(self.walletsClient!.createMPCWallet(parent: parent as String, device: device as String)).any(resolve: resolve, reject: reject) { response in
             return [
                "DeviceGroup": response.deviceGroup as Any,
                "Operation": response.operation as Any
            ] as NSDictionary
-        }
+        })
     }
 
     /**
@@ -70,12 +70,12 @@ class MPCWalletService: NSObject {
         }
 
         let res = self.walletsClient!.waitPendingMPCWallet(operation: operation as String)
-        Operation(res).any(resolve: resolve, reject: reject) { wallet in
+        run(Operation(res).any(resolve: resolve, reject: reject) { wallet in
             return  [
                 "Name": wallet.name as Any,
                 "DeviceGroup": wallet.deviceGroup as Any
             ] as NSDictionary
-        }
+        })
     }
 
     /**
@@ -90,7 +90,7 @@ class MPCWalletService: NSObject {
             return
         }
 
-        Operation(self.walletsClient!.generateAddress(mpcWallet as String, network: network as String)).swift(resolve: resolve, reject: reject)
+        run(Operation(self.walletsClient!.generateAddress(mpcWallet as String, network: network as String)).swift(resolve: resolve, reject: reject))
     }
 
     /**
@@ -103,6 +103,6 @@ class MPCWalletService: NSObject {
             return
         }
 
-        Operation(self.walletsClient!.getAddress(name: name as String)).swift(resolve: resolve, reject: reject)
+        run(Operation(self.walletsClient!.getAddress(name: name as String)).swift(resolve: resolve, reject: reject))
     }
 }

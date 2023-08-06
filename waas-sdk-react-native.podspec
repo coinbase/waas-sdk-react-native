@@ -22,6 +22,10 @@ Pod::Spec.new do |s|
   s.dependency "React-Core"
   s.dependency "WaasSdk"
 
+  s.test_spec 'Tests' do |test_spec|
+    test_spec.source_files = 'ios/react-native/Tests/*.{swift}'
+  end
+
   # Don't install the dependencies when we run `pod install` in the old architecture.
   if ENV['RCT_NEW_ARCH_ENABLED'] == '1' then
     s.compiler_flags = folly_compiler_flags + " -DRCT_NEW_ARCH_ENABLED=1"

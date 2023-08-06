@@ -53,112 +53,161 @@ private func convertToObjc(_ value: Any) -> JSONValue {
  - As a fallback, we have `.any(..)` which accepts any type and lets you convert it to a JSONValue.
  */
 
-let _queue = DispatchQueue(label: "WaasOperation", qos: .userInitiated)
+let _queue = DispatchQueue(label: "WaasOperation", qos: .background)
 
-class Operation<Output> {
+protocol AnyOperation {
+    func getIdentifier() -> String
+
+    func start()
+
+    func onFinish(_ callback: @escaping () -> Void)
+}
+
+class Operation<Output>: AnyOperation {
     var cancellable: Cancellable?
     var future: Future<Output, WaasError>
 
+    private let identifier = UUID()
+
     let E_TRANSFORM = "E_TRANSFORM"
+
+    var invoke: (() -> Void)?
+    var _onFinish: (() -> Void)?
 
     init(_ future: Future<Output, WaasError>) {
         self.future = future
     }
 
+    func getIdentifier() -> String {
+        return identifier.uuidString
+    }
+
+    func onFinish(_ callback: @escaping () -> Void) {
+        _onFinish = callback
+    }
+
+    func start() {
+        invoke!()
+    }
+
     // map any arbitrary type to something that we can send to React.
-    public func any(resolve: @escaping RCTPromiseResolveBlock, reject: @escaping RCTPromiseRejectBlock, map: @escaping ((Output) throws -> JSONValue)) {
-        _queue.async {
-            do {
-                self.cancellable = self.future.sink { completion in
-                    switch completion {
-                    case .failure(let err):
-                        reject(err.code, err.description, err)
-                    case .finished:
-                        // future returned, wait for receiveValue.
-                        break
-                    }
-                } receiveValue: { val in
-                    do {
-                        let mappedVal = try map(val)
-                        resolve(mappedVal)
-                    } catch {
-                        reject(self.E_TRANSFORM, error.localizedDescription, error)
-                    }
-                }
-            }
-        }
-    }
+    public func any(resolve: @escaping RCTPromiseResolveBlock, reject: @escaping RCTPromiseRejectBlock, map: @escaping ((Output) throws -> JSONValue)) -> Self {
 
-    public func swift(resolve: @escaping RCTPromiseResolveBlock, reject: @escaping RCTPromiseRejectBlock, map: ((Output) throws -> any Encodable)? = nil) where Output: Encodable {
-        _queue.async {
-            do {
-                self.cancellable = self.future.sink { completion in
-                    switch completion {
-                    case .failure(let err):
-                        reject(err.code, err.description, err)
-                    case .finished:
-                        // future returned, wait for receiveValue.
-                        break
-                    }
-                } receiveValue: { val in
-                    do {
-                        if map != nil {
-                            let mappedVal = try map!(val)
-                            resolve(convertToObjc(mappedVal))
-                        } else {
-                            resolve(convertToObjc(val))
+        invoke = {
+            _queue.async {
+                do {
+                    self.cancellable = self.future.sink { completion in
+                        switch completion {
+                        case .failure(let err):
+                            reject(err.code, err.description, err)
+                            self._onFinish?()
+                        case .finished:
+                            // future returned, wait for receiveValue.
+                            break
                         }
-                    } catch {
-                        reject(self.E_TRANSFORM, error.localizedDescription, error)
+                    } receiveValue: { val in
+                        do {
+                            let mappedVal = try map(val)
+                            resolve(mappedVal)
+                        } catch {
+                            reject(self.E_TRANSFORM, error.localizedDescription, error)
+                        }
+
+                        self._onFinish?()
                     }
                 }
             }
         }
+
+        return self
     }
 
+    public func swift(resolve: @escaping RCTPromiseResolveBlock, reject: @escaping RCTPromiseRejectBlock, map: ((Output) throws -> any Encodable)? = nil) -> Self where Output: Encodable {
+        invoke = {
+            _queue.async {
+                do {
+                    self.cancellable = self.future.sink { completion in
+                        switch completion {
+                        case .failure(let err):
+                            reject(err.code, err.description, err)
+                            self._onFinish?()
+                        case .finished:
+                            // future returned, wait for receiveValue.
+                            break
+                        }
+                    } receiveValue: { val in
+                        do {
+                            if map != nil {
+                                let mappedVal = try map!(val)
+                                resolve(convertToObjc(mappedVal))
+                            } else {
+                                resolve(convertToObjc(val))
+                            }
+                        } catch {
+                            reject(self.E_TRANSFORM, error.localizedDescription, error)
+                        }
+
+                        self._onFinish?()
+                    }
+                }
+            }
+        }
+
+        return self
+    }
 }
 
 // convenience functions for bridging the `Void` case correctly.
 extension Operation where Output == Void {
-    func void(resolve: @escaping RCTPromiseResolveBlock, reject: @escaping RCTPromiseRejectBlock) {
-        _queue.async {
-            do {
-                self.cancellable = self.future.sink { completion in
-                    switch completion {
-                    case .failure(let err):
-                        reject(err.code, err.description, err)
-                    case .finished:
-                        resolve(nil)
-                        break
+    func void(resolve: @escaping RCTPromiseResolveBlock, reject: @escaping RCTPromiseRejectBlock) -> Self {
+        invoke = {
+            _queue.async {
+                do {
+                    self.cancellable = self.future.sink { completion in
+                        switch completion {
+                        case .failure(let err):
+                            reject(err.code, err.description, err)
+                            self._onFinish?()
+                        case .finished:
+                            resolve(nil)
+                            self._onFinish?()
+                            break
+                        }
+                    } receiveValue: { _ in
+                        // this should never happen on a `Void` promise!
                     }
-                } receiveValue: { _ in
-                    // this should never happen on a `Void` promise!
+                    return
                 }
-                return
             }
         }
+        return self
     }
 }
 
 extension Operation where Output == [Encodable] {
-    func modelList(resolve: @escaping RCTPromiseResolveBlock, reject: @escaping RCTPromiseRejectBlock) {
-        _queue.async {
-            do {
-                self.cancellable = self.future.sink { completion in
-                    switch completion {
-                    case .failure(let err):
-                        reject(err.code, err.description, err)
-                    case .finished:
-                        break
+    func modelList(resolve: @escaping RCTPromiseResolveBlock, reject: @escaping RCTPromiseRejectBlock) -> Self {
+        invoke = {
+            _queue.async {
+                do {
+                    self.cancellable = self.future.sink { completion in
+                        switch completion {
+                        case .failure(let err):
+                            reject(err.code, err.description, err)
+                            self._onFinish?()
+                        case .finished:
+                            break
+                        }
+                    } receiveValue: { val in
+                        resolve((val as NSArray).map({ elt in
+                            // each element is WaasModel
+                            (elt as! Encodable).asDictionary()
+                        }))
+                        self._onFinish?()
                     }
-                } receiveValue: { val in
-                    resolve((val as NSArray).map({ elt in
-                        // each element is WaasModel
-                        (elt as! Encodable).asDictionary()
-                    }))
+                    return
                 }
-                return
             }
         }
+        return self
     }
 }

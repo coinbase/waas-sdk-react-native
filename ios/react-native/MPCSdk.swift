@@ -2,7 +2,7 @@ import Foundation
 import WaasSdk
 
 @objc(MPCSdk)
-class MPCSdk: NSObject {
+class MPCSdk: BaseModule {
 
     // The config to be used for MPCSdk initialization.
     let mpcSdkConfig = "default"
@@ -56,7 +56,7 @@ class MPCSdk: NSObject {
             return
         }
 
-        Operation(self.sdk!.bootstrapDevice(passcode as String)).swift(resolve: resolve, reject: reject)
+        run(Operation(self.sdk!.bootstrapDevice(passcode as String)).swift(resolve: resolve, reject: reject))
     }
 
     /**
@@ -85,8 +85,10 @@ class MPCSdk: NSObject {
             return
         }
 
-        Operation(self.sdk!.getRegistrationData()).swift(resolve: resolve, reject: reject)
+        run(Operation(self.sdk!.getRegistrationData()).swift(resolve: resolve, reject: reject))
     }
+
+    static var op: Any?
 
     /**
      Computes an MPC operation, given mpcData from the response of ListMPCOperations API on
@@ -98,8 +100,7 @@ class MPCSdk: NSObject {
         if failIfUninitialized(reject) {
             return
         }
-
-        Operation(self.sdk!.computeMPCOperation(mpcData as String)).void(resolve: resolve, reject: reject)
+        run(Operation(self.sdk!.computeMPCOperation(mpcData as String)).void(resolve: resolve, reject: reject))
     }
 
     /**
@@ -112,7 +113,7 @@ class MPCSdk: NSObject {
             return
         }
 
-        Operation(self.sdk!.computePrepareDeviceArchiveMPCOperation(mpcData as String, passcode: passcode as String)).void(resolve: resolve, reject: reject)
+        run(Operation(self.sdk!.computePrepareDeviceArchiveMPCOperation(mpcData as String, passcode: passcode as String)).void(resolve: resolve, reject: reject))
     }
 
     /**
@@ -125,7 +126,7 @@ class MPCSdk: NSObject {
             return
         }
 
-        Operation(self.sdk!.computePrepareDeviceBackupMPCOperation(mpcData as String, passcode: passcode as String)).void(resolve: resolve, reject: reject)
+        run(Operation(self.sdk!.computePrepareDeviceBackupMPCOperation(mpcData as String, passcode: passcode as String)).void(resolve: resolve, reject: reject))
     }
 
     /**
@@ -138,10 +139,10 @@ class MPCSdk: NSObject {
             return
         }
 
-        Operation(self.sdk!.computeAddDeviceMPCOperation(
+        run(Operation(self.sdk!.computeAddDeviceMPCOperation(
             mpcData as String,
             passcode: passcode as String,
-            deviceBackup: deviceBackup as String)).void(resolve: resolve, reject: reject)
+            deviceBackup: deviceBackup as String)).void(resolve: resolve, reject: reject))
     }
 
     /**
@@ -156,9 +157,9 @@ class MPCSdk: NSObject {
             return
         }
 
-        Operation(self.sdk!.exportPrivateKeys(
+        run(Operation(self.sdk!.exportPrivateKeys(
             mpcKeyExportMetadata as String,
-            passcode: passcode as String)).swift(resolve: resolve, reject: reject)
+            passcode: passcode as String)).swift(resolve: resolve, reject: reject))
     }
 
     /**
@@ -171,6 +172,6 @@ class MPCSdk: NSObject {
             return
         }
 
-        Operation(self.sdk!.exportDeviceBackup()).swift(resolve: resolve, reject: reject)
+        run(Operation(self.sdk!.exportDeviceBackup()).swift(resolve: resolve, reject: reject))
     }
 }

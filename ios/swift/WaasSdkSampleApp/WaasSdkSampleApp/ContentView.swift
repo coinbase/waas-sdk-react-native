@@ -58,6 +58,11 @@ struct ContentView: View {
 
     func asyncInitWaas() {
         self.asyncExample {
+            if API_KEY == "" || PRIVATE_KEY == "" {
+                self.errorMessage = "Please set API_KEY and PRIVATE_KEY at the top of ContentView.swift!"
+                return
+            }
+
             let waas = try await Waas.create(apiKey: API_KEY, privateKey: PRIVATE_KEY, passcode: PASSCODE, isSimulator: true)
             let device = try await waas.device()
             self.waas = waas
@@ -143,8 +148,6 @@ struct ContentView: View {
      */
     func getAddress() {
         self.asyncExample {
-            generatedArtifact = ""
-            isLoading = true
             let address = try await waas!.wallet().generateAddress(walletId!, network: "networks/ethereum-goerli").value
             generatedAddress = address.Address
             generatedAddressName = address.Name
@@ -189,7 +192,7 @@ struct ContentView: View {
     func backupDevice() {
         self.asyncExample {
             backup = try await device!.exportBackup(passcode: PASSCODE)
-            generatedArtifact = "Backup: \(backup!)"
+            generatedArtifact = "Backed up!"
         }
     }
 

@@ -365,6 +365,7 @@ PODS:
     - React-Core
     - WaasSdk
   - WaasSdk (0.0.1)
+  - WaasSdk/Tests (0.0.1)
   - Yoga (1.14.0)
 
 DEPENDENCIES:
@@ -408,6 +409,7 @@ DEPENDENCIES:
   - RNScreens (from `../node_modules/react-native-screens`)
   - waas-sdk-react-native (from `../..`)
   - WaasSdk (from `../../WaasSdk.podspec`)
+  - WaasSdk/Tests (from `../../WaasSdk.podspec`)
   - Yoga (from `../node_modules/react-native/ReactCommon/yoga`)
 
 SPEC REPOS:
@@ -534,10 +536,10 @@ SPEC CHECKSUMS:
   ReactCommon: 6f65ea5b7d84deb9e386f670dd11ce499ded7b40
   RNCClipboard: 2834e1c4af68697089cdd455ee4a4cdd198fa7dd
   RNScreens: 218801c16a2782546d30bd2026bb625c0302d70f
-  waas-sdk-react-native: b36951b05453bfba34cc2030d54a90fd2d08652b
-  WaasSdk: 3b56a5a526e5b49feb1fdb47facace999f115856
+  waas-sdk-react-native: e60c29162f0e376b9e7903055b6fdb5087521bcc
+  WaasSdk: ea205e06adeb558e9261a0e644bec49bf0f1edd0
   Yoga: 5ed1699acbba8863755998a4245daa200ff3817b
 
-PODFILE CHECKSUM: 6fb5adc847878f5ad4cab74c0aeeea61537db634
+PODFILE CHECKSUM: 24908eb2f75b4f590ce35365b836bd23a19951b6
 
 COCOAPODS: 1.12.0
