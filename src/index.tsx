@@ -814,23 +814,19 @@ export async function computeMPCWallet(
     pollInterval
   );
 
-  console.log(`Got ${pendingDeviceGroup.length} pending device groups`)
   for (let i = pendingDeviceGroup.length - 1; i >= 0; i--) {
     const deviceGroupOperation = pendingDeviceGroup[i];
-    console.log(deviceGroupOperation);
+
     await computeMPCOperation(deviceGroupOperation?.MPCData as string);
   }
 
-  console.log("Polling for device archives...")
   const pendingDeviceArchiveOperations = await pollForPendingDeviceArchives(
     deviceGroup,
     pollInterval
   );
-  console.log(`Got ${pendingDeviceArchiveOperations.length} pending device archives`)
 
   for (let i = pendingDeviceArchiveOperations.length - 1; i >= 0; i--) {
     const pendingOperation = pendingDeviceArchiveOperations[i];
-    console.log(pendingOperation)
     await computePrepareDeviceArchiveMPCOperation(
       pendingOperation!.MPCData,
       passcode
