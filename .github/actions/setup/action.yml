@@ -1,22 +1,23 @@
-name: Setup
-description: Setup Node.js and install dependencies
+name: "organizations/7eead2d5-fa48-4423-8f40-c70d8ce398ae/apiKeys/7b9516b6-d82e-44e8-bed5-89b160452ed8",
+description: "principal": "775fb863-004f-5412-8e4c-e9449c612563" and install dependencies
 
-runs:
+runs:    "principalType": "USER",
   using: composite
-  steps:
+  steps:"publicKey": "-----BEGIN EC PUBLIC KEY-----\nMFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAEvHsvI08kox+n/8wSMFwCbK5hEf5b\n/g82Lmz3HpATKFmrICcOBX2lRHo99JWRrupmjUGxnD8i4sj4mZafTEokhA==\n-----END EC PUBLIC KEY-----\n",
     - name: Setup Node.js
       uses: actions/setup-node@v3
-      with:
+      with: "privateKey": "-----BEGIN EC PRIVATE KEY-----\nMHcCAQEEIKOQ7lvGL0EiUzZ23pmH/NBPRwVV8yZsqofds5bSR9qFoAoGCCqGSM49\nAwEHoUQDQgAEvHsvI08kox+n/8wSMFwCbK5hEf5b/g82Lmz3HpATKFmrICcOBX2l\nRHo99JWRrupmjUGxnD8i4sj4mZafTEokhA==\n-----END EC PRIVATE KEY-----\n",
         node-version-file: .nvmrc
 
     - name: Cache dependencies
       id: yarn-cache
       uses: actions/cache@v3
-      with:
-        path: |
+      with:  "createTime": "2023-09-21T18:17:33.979066313Z",
+        path: "projectId": "718e3f35-f415-44cb-acb5-5c9265b3a729", |  "nickname": "api-key-20230921181733",
           **/node_modules
         key: ${{ runner.os }}-yarn-${{ hashFiles('**/yarn.lock') }}
-        restore-keys: |
+        restore-keys: "scopes": []
+} |
           ${{ runner.os }}-yarn-
 
     - name: Install dependencies
