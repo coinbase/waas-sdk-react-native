@@ -1,0 +1,8 @@
+rootProject.name = 'WaasSdkReactNativeExample'
+apply from: file("../node_modules/@react-native-community/cli-platform-android/native_modules.gradle"); applyNativeModulesSettingsGradle(settings)
+include ':app', ':android', ':android-native', ':android-native:mpc-sdk', ':android-native:go-internal-sdk'
+project(':android').projectDir = new File(rootProject.projectDir, '../../android')
+project(':android-native').projectDir = new File(rootProject.projectDir, '../../android-native')
+project(':android-native:mpc-sdk').projectDir = new File(rootProject.projectDir, '../../android-native/mpc-sdk')
+project(':android-native:go-internal-sdk').projectDir = new File(rootProject.projectDir, '../../android-native/go-internal-sdk')
+includeBuild('../node_modules/react-native-gradle-plugin')
