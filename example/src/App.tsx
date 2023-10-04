@@ -1,5 +1,4 @@
-import * as React from 'react';
-
+import React, { useState, useEffect, useContext } from 'react';
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { HomeScreen } from './screens/HomeScreen';
@@ -11,25 +10,42 @@ import { MPCKeyExportDemo } from './screens/MPCKeyExportDemo';
 import AppContext from './components/AppContext';
 import { DeviceBackupDemo } from './screens/DeviceBackupDemo';
 import { DeviceAdditionDemo } from './screens/DeviceAdditionDemo';
+import { ModeSelectionScreen } from './screens/ModeSelectionScreen';
+import { ModeContext } from './utils/ModeProvider';
+import { ModeProvider } from './utils/ModeProvider';
 
 /** The navigation stack. */
 const Stack = createNativeStackNavigator();
 
-const cloudAPIKey = require('./.coinbase_cloud_api_key.json');
+function SetupApp() {
+  const [apiKeyData, setApiKeyData] = useState<any>({});
+  const [proxyUrlData, setProxyUrlData] = useState<string>('');
+  const { selectedMode } = useContext(ModeContext);
 
-export default function App() {
-  const apiKeyName = cloudAPIKey.name;
-  const privateKey = cloudAPIKey.privateKey;
+  useEffect(() => {
+    if (selectedMode === 'direct-mode') {
+      const cloudAPIKey = require('./.coinbase_cloud_api_key.json');
 
-  const userCredentials = {
-    apiKeyName,
-    privateKey,
-  };
+      setApiKeyData(cloudAPIKey);
+    } else {
+      const config = require('./config.json');
+
+      setProxyUrlData(config.proxyUrl);
+    }
+  }, [selectedMode]);
+
+  const apiKeyName = apiKeyData.name || '';
+  const privateKey = apiKeyData.privateKey || '';
+  const proxyUrl = proxyUrlData || '';
 
   return (
-    <AppContext.Provider value={userCredentials}>
+    <AppContext.Provider value={{ apiKeyName, privateKey, proxyUrl }}>
       <NavigationContainer>
-        <Stack.Navigator>
+        <Stack.Navigator initialRouteName="ModeSelectionScreen">
+          <Stack.Screen
+            name="ModeSelectionScreen"
+            component={ModeSelectionScreen}
+          />
           <Stack.Screen name="Home" component={HomeScreen} />
           <Stack.Screen name="PoolServiceDemo" component={PoolServiceDemo} />
           <Stack.Screen
@@ -50,5 +66,13 @@ export default function App() {
         </Stack.Navigator>
       </NavigationContainer>
     </AppContext.Provider>
+  );
+}
+
+export default function App() {
+  return (
+    <ModeProvider>
+      <SetupApp />
+    </ModeProvider>
   );
 }

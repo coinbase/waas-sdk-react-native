@@ -27,6 +27,8 @@ import { LargeInputText } from '../components/LargeInputText';
 import { Note } from '../components/Note';
 import { PageTitle } from '../components/PageTitle';
 import { MonospaceText } from '../components/MonospaceText';
+import { ModeContext } from '../utils/ModeProvider';
+import { directMode, proxyMode } from '../constants';
 
 export const MPCSignatureDemo = () => {
   // The initial transaction text.
@@ -64,28 +66,39 @@ export const MPCSignatureDemo = () => {
   const [showStep9, setShowStep9] = React.useState<boolean>();
   const [showError, setShowError] = React.useState<boolean>();
 
-  const credentials = React.useContext(AppContext);
-  const apiKeyName = credentials.apiKeyName as string;
-  const privateKey = credentials.privateKey as string;
+  const { selectedMode } = React.useContext(ModeContext);
+  const {
+    apiKeyName: apiKeyName,
+    privateKey: privateKey,
+    proxyUrl: proxyUrl,
+  } = React.useContext(AppContext) as {
+    apiKeyName: string;
+    privateKey: string;
+    proxyUrl: string;
+  };
 
   // Runs the Signature demo.
   React.useEffect(() => {
     let demoFn = async function () {
+      if (addressName === '' || deviceGroupName === '' || !showStep3) {
+        return;
+      }
+
       if (
-        addressName === '' ||
-        deviceGroupName === '' ||
-        apiKeyName === '' ||
-        privateKey === '' ||
-        !showStep3
+        selectedMode === directMode &&
+        (apiKeyName === '' || privateKey === '')
       ) {
         return;
       }
 
       try {
+        const apiKey = selectedMode === proxyMode ? '' : apiKeyName;
+        const privKey = selectedMode === proxyMode ? '' : privateKey;
+
         // Initialize the MPCSdk, MPCKeyService and MPCWalletService.
         await initMPCSdk(true);
-        await initMPCKeyService(apiKeyName, privateKey);
-        await initMPCWalletService(apiKeyName, privateKey);
+        await initMPCKeyService(apiKey, privKey, proxyUrl);
+        await initMPCWalletService(apiKey, privKey, proxyUrl);
         const retrievedAddress = await getAddress(addressName);
         const keyName = retrievedAddress.MPCKeys[0]!;
         // Initiate the operation to create a signature.
@@ -147,9 +160,11 @@ export const MPCSignatureDemo = () => {
     deviceGroupName,
     apiKeyName,
     privateKey,
+    proxyUrl,
     tx,
     initialTx,
     showStep3,
+    selectedMode,
   ]);
 
   const requiredDemos = [

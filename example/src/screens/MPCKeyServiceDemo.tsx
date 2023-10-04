@@ -18,6 +18,8 @@ import { CopyButton } from '../components/CopyButton';
 import { InputText } from '../components/InputText';
 import AppContext from '../components/AppContext';
 import { MonospaceText } from '../components/MonospaceText';
+import { ModeContext } from '../utils/ModeProvider';
+import { directMode, proxyMode } from '../constants';
 
 export const MPCKeyServiceDemo = () => {
   const [registrationData, setRegistrationData] = React.useState<string>('');
@@ -32,21 +34,39 @@ export const MPCKeyServiceDemo = () => {
   const [showStep5, setShowStep5] = React.useState<boolean>();
   const [showError, setShowError] = React.useState<boolean>();
 
-  const credentials = React.useContext(AppContext);
-  const apiKeyName = credentials.apiKeyName as string;
-  const privateKey = credentials.privateKey as string;
+  const {
+    apiKeyName: apiKeyName,
+    privateKey: privateKey,
+    proxyUrl: proxyUrl,
+  } = React.useContext(AppContext) as {
+    apiKeyName: string;
+    privateKey: string;
+    proxyUrl: string;
+  };
+
+  const { selectedMode } = React.useContext(ModeContext);
 
   // Runs the MPCKeyService demo.
   React.useEffect(() => {
     let demoFn = async function () {
-      if (apiKeyName === '' || privateKey === '' || !showStep2) {
+      if (!showStep2) {
+        return;
+      }
+
+      if (
+        selectedMode === directMode &&
+        (apiKeyName === '' || privateKey === '')
+      ) {
         return;
       }
 
       try {
+        const apiKey = selectedMode === proxyMode ? '' : apiKeyName;
+        const privKey = selectedMode === proxyMode ? '' : privateKey;
+
         // Initialize the MPCKeyService and MPCSdk.
         await initMPCSdk(true);
-        await initMPCKeyService(apiKeyName, privateKey);
+        await initMPCKeyService(apiKey, privKey, proxyUrl);
 
         await bootstrapDevice(passcode);
 
@@ -66,7 +86,7 @@ export const MPCKeyServiceDemo = () => {
     };
 
     demoFn();
-  }, [showStep2, apiKeyName, passcode, privateKey]);
+  }, [showStep2, apiKeyName, passcode, privateKey, proxyUrl, selectedMode]);
 
   return (
     <ScrollView

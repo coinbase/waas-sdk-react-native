@@ -15,6 +15,8 @@ import { PageTitle } from '../components/PageTitle';
 import { CopyButton } from '../components/CopyButton';
 import AppContext from '../components/AppContext';
 import { MonospaceText } from '../components/MonospaceText';
+import { ModeContext } from '../utils/ModeProvider';
+import { directMode, proxyMode } from '../constants';
 
 export const PoolServiceDemo = () => {
   const [poolDisplayName, setPoolDisplayName] = React.useState<string>('');
@@ -27,25 +29,38 @@ export const PoolServiceDemo = () => {
   const [showStep3, setShowStep3] = React.useState<boolean>();
   const [showError, setShowError] = React.useState<boolean>();
 
-  const credentials = React.useContext(AppContext);
-  const apiKeyName = credentials.apiKeyName as string;
-  const privateKey = credentials.privateKey as string;
+  const { selectedMode } = React.useContext(ModeContext);
+  const {
+    apiKeyName: apiKeyName,
+    privateKey: privateKey,
+    proxyUrl: proxyUrl,
+  } = React.useContext(AppContext) as {
+    apiKeyName: string;
+    privateKey: string;
+    proxyUrl: string;
+  };
 
   // Creates a Pool once the API key, API secret, and Pool display name are defined.
   React.useEffect(() => {
     let createPoolFn = async function () {
+      if (!showStep2 || poolDisplayName === '') {
+        return;
+      }
+
       if (
-        apiKeyName === '' ||
-        privateKey === '' ||
-        poolDisplayName === '' ||
-        !showStep2
+        selectedMode === directMode &&
+        (apiKeyName === '' || privateKey === '')
       ) {
         return;
       }
 
       try {
-        await initPoolService(apiKeyName, privateKey);
+        const apiKey = selectedMode === proxyMode ? '' : apiKeyName;
+        const privKey = selectedMode === proxyMode ? '' : privateKey;
+
+        await initPoolService(apiKey, privKey, proxyUrl);
         const createdPool = await createPool(poolDisplayName);
+
         setResultPool(createdPool);
         setShowStep3(true);
       } catch (error) {
@@ -55,7 +70,14 @@ export const PoolServiceDemo = () => {
     };
 
     createPoolFn();
-  }, [apiKeyName, privateKey, poolDisplayName, showStep2]);
+  }, [
+    apiKeyName,
+    privateKey,
+    poolDisplayName,
+    proxyUrl,
+    showStep2,
+    selectedMode,
+  ]);
 
   return (
     <ScrollView
@@ -104,9 +126,6 @@ export const PoolServiceDemo = () => {
   );
 };
 
-/**
- * The styles for the App container.
- */
 const styles = StyleSheet.create({
   container: {
     backgroundColor: 'white',

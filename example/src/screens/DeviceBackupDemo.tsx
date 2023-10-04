@@ -20,6 +20,8 @@ import { PageTitle } from '../components/PageTitle';
 import AppContext from '../components/AppContext';
 import { CopyButton } from '../components/CopyButton';
 import { Note } from '../components/Note';
+import { ModeContext } from '../utils/ModeProvider';
+import { directMode, proxyMode } from '../constants';
 
 export const DeviceBackupDemo = () => {
   const [deviceGroupName, setDeviceGroupName] = React.useState<string>('');
@@ -37,9 +39,16 @@ export const DeviceBackupDemo = () => {
   const [showStep6, setShowStep6] = React.useState<boolean>();
   const [showError, setShowError] = React.useState<boolean>();
 
-  const credentials = React.useContext(AppContext);
-  const apiKeyName = credentials.apiKeyName as string;
-  const privateKey = credentials.privateKey as string;
+  const { selectedMode } = React.useContext(ModeContext);
+  const {
+    apiKeyName: apiKeyName,
+    privateKey: privateKey,
+    proxyUrl: proxyUrl,
+  } = React.useContext(AppContext) as {
+    apiKeyName: string;
+    privateKey: string;
+    proxyUrl: string;
+  };
 
   //  Runs the DeviceBackupDemo.
   React.useEffect(() => {
@@ -48,19 +57,27 @@ export const DeviceBackupDemo = () => {
         deviceGroupName === '' ||
         deviceName === '' ||
         passcode === '' ||
-        apiKeyName === '' ||
-        privateKey === '' ||
         !showStep4 ||
         showStep5
       ) {
         return;
       }
 
+      if (
+        selectedMode === directMode &&
+        (apiKeyName === '' || privateKey === '')
+      ) {
+        return;
+      }
+
       try {
+        const apiKey = selectedMode === proxyMode ? '' : apiKeyName;
+        const privKey = selectedMode === proxyMode ? '' : privateKey;
+
         // Initialize the MPCKeyService and MPCSdk.
         await initMPCSdk(true);
-        await initMPCKeyService(apiKeyName, privateKey);
-        await initMPCWalletService(apiKeyName, privateKey);
+        await initMPCKeyService(apiKey, privKey, proxyUrl);
+        await initMPCWalletService(apiKey, privKey, proxyUrl);
         let operationName = await prepareDeviceBackup(
           deviceGroupName,
           deviceName
@@ -112,10 +129,12 @@ export const DeviceBackupDemo = () => {
     deviceGroupName,
     apiKeyName,
     privateKey,
+    proxyUrl,
     showStep4,
     showStep5,
     deviceName,
     passcode,
+    selectedMode,
   ]);
 
   const requiredDemos = [

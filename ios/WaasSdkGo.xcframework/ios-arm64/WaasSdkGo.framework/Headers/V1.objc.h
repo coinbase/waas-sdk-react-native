@@ -471,7 +471,7 @@ Note: This is NOT a WaaS Address resource of the form
 /**
  * NewMPCKeyService returns a MPCKeyService from a given url.
  */
-FOUNDATION_EXPORT id<V1MPCKeyService> _Nullable V1NewMPCKeyService(NSString* _Nullable mpcKeyServiceURL, NSString* _Nullable apiKeyName, NSString* _Nullable privateKey, NSError* _Nullable* _Nullable error);
+FOUNDATION_EXPORT id<V1MPCKeyService> _Nullable V1NewMPCKeyService(NSString* _Nullable mpcKeyServiceURL, NSString* _Nullable apiKeyName, NSString* _Nullable privateKey, BOOL insecure, NSError* _Nullable* _Nullable error);
 
 /**
  * NewMPCSdk returns an instance of MPCSdk corresponding to the given url.
@@ -482,13 +482,13 @@ FOUNDATION_EXPORT id<V1MPCSdk> _Nullable V1NewMPCSdk(NSString* _Nullable config,
  * NewMPCWalletService returns a MPCWalletService from a given url, Cloud API Key,
 and private key.
  */
-FOUNDATION_EXPORT id<V1MPCWalletService> _Nullable V1NewMPCWalletService(NSString* _Nullable url, NSString* _Nullable apiKeyName, NSString* _Nullable privateKey, NSError* _Nullable* _Nullable error);
+FOUNDATION_EXPORT id<V1MPCWalletService> _Nullable V1NewMPCWalletService(NSString* _Nullable url, NSString* _Nullable apiKeyName, NSString* _Nullable privateKey, BOOL insecure, NSError* _Nullable* _Nullable error);
 
 /**
  * NewPoolService returns a PoolService from a given url, Cloud APIKey name,
 and private key.
  */
-FOUNDATION_EXPORT id<V1PoolService> _Nullable V1NewPoolService(NSString* _Nullable url, NSString* _Nullable apiKeyName, NSString* _Nullable privateKey, NSError* _Nullable* _Nullable error);
+FOUNDATION_EXPORT id<V1PoolService> _Nullable V1NewPoolService(NSString* _Nullable url, NSString* _Nullable apiKeyName, NSString* _Nullable privateKey, BOOL insecure, NSError* _Nullable* _Nullable error);
 
 @class V1AndroidCallbacks;
 

@@ -3,8 +3,8 @@ import WaasSdkGo
 
 @objc(PoolService)
 class PoolService: NSObject {
-    // The URL of the PoolService.
-    let poolServiceUrl = "https://api.developer.coinbase.com/waas/pools"
+    // The URL of the PoolService when running in "direct mode".
+    let poolServiceWaaSUrl = "https://api.developer.coinbase.com/waas/pools"
 
     // The error code for PoolService-related errors.
     let poolsErr = "E_POOL_SERVICE"
@@ -13,15 +13,34 @@ class PoolService: NSObject {
     var poolsClient: V1PoolServiceProtocol?
 
     /**
-     Initializes the PoolService with the given Cloud API Key parameters. Resolves with the string "success" on success;
-     rejects with an error otherwise.
+     * Initializes the PoolService with the given Cloud API Key parameters or proxy URL.
+     * Utilizes `proxyUrl` and operates in insecure mode if either `apiKeyName` or `privateKey` is missing.
+     * Uses direct WaaS URL with the API keys if both are provided.
+     * Resolves with the string "success" on success; rejects with an error otherwise.
      */
-    @objc(initialize:withPrivateKey:withResolver:withRejecter:)
-    func initialize(_ apiKeyName: NSString, privateKey: NSString,
+    @objc(initialize:withPrivateKey:withProxyUrl:withResolver:withRejecter:)
+    func initialize(_ apiKeyName: NSString, privateKey: NSString, proxyUrl: NSString,
                     resolve: RCTPromiseResolveBlock, reject: RCTPromiseRejectBlock) {
         var error: NSError?
 
-        poolsClient = V1NewPoolService(poolServiceUrl as String, apiKeyName as String, privateKey as String, &error)
+        let insecure: Bool
+
+        let poolServiceUrl: String
+
+        if apiKeyName as String == "" || privateKey as String == "" {
+            poolServiceUrl = proxyUrl as String
+            insecure = true
+        } else {
+            poolServiceUrl = poolServiceWaaSUrl
+            insecure = false
+        }
+
+        poolsClient = V1NewPoolService(
+            poolServiceUrl as String,
+            apiKeyName as String,
+            privateKey as String,
+            insecure as Bool,
+            &error)
 
         if error != nil {
             reject(poolsErr, error!.localizedDescription, nil)

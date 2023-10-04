@@ -17,7 +17,8 @@ import java.util.concurrent.Future;
  * Methods for creating and managing MPC wallets with Coinbase.
  */
 public class MPCWalletService {
-  public static final String mpcWalletServiceUrl = "https://api.developer.coinbase.com/waas/mpc_wallets";
+  // The URL of the MPCWalletService when running in "direct mode".
+  public static final String mpcWalletServiceWaaSUrl = "https://api.developer.coinbase.com/waas/mpc_wallets";
 
   com.waassdkinternal.v1.MPCWalletService walletsClient;
 
@@ -27,15 +28,27 @@ public class MPCWalletService {
     return executor.submit(callable);
   }
 
-
   /**
-   * Initializes the MPCWalletService with the given Cloud API Key parameters.
-   * NOTE: You should almost-never include these credentials in your app, and instead
-   * delegate to a proxy server to perform these calls.
+   * Initializes the MPCWalletService with the given Cloud API Key parameters or proxy URL.
+   * Utilizes `proxyUrl` and operates in insecure mode if either `apiKeyName` or `privateKey` is missing.
+   * NOTE: You should almost never include these credentials in your app, and instead
+   *       delegate to a proxy server to perform these calls.
    */
-  public MPCWalletService(String apiKeyName, String privateKey, ExecutorService executor) throws WaasException {
+  public MPCWalletService(String apiKeyName, String privateKey, String proxyUrl, ExecutorService executor) throws WaasException {
+    Bool insecure;
+
+    String mpcWalletServiceUrl;
+    
+    if (apiKeyName == "" && privateKey == "") {
+      mpcWalletServiceUrl = proxyUrl;
+      insecure = true;
+    } else {
+      mpcWalletServiceUrl = mpcWalletServiceWaaSUrl;
+      insecure = false;
+    }
+
     try {
-      walletsClient = newMPCWalletService(mpcWalletServiceUrl, apiKeyName, privateKey);
+      walletsClient = newMPCWalletService(mpcWalletServiceUrl, apiKeyName, privateKey, insecure);
       this.executor = executor;
     } catch (Exception e) {
       throw new WaasException("initialize MPC wallet service failed : ", e.getMessage());

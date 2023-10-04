@@ -22,6 +22,8 @@ import AppContext from '../components/AppContext';
 import { CopyButton } from '../components/CopyButton';
 import { Note } from '../components/Note';
 import { MonospaceText } from '../components/MonospaceText';
+import { ModeContext } from '../utils/ModeProvider';
+import { directMode, proxyMode } from '../constants';
 
 export const MPCKeyExportDemo = () => {
   const [deviceGroupName, setDeviceGroupName] = React.useState<string>('');
@@ -51,28 +53,39 @@ export const MPCKeyExportDemo = () => {
   const [showStep7, setShowStep7] = React.useState<boolean>();
   const [showError, setShowError] = React.useState<boolean>();
 
-  const credentials = React.useContext(AppContext);
-  const apiKeyName = credentials.apiKeyName as string;
-  const privateKey = credentials.privateKey as string;
+  const { selectedMode } = React.useContext(ModeContext);
+  const {
+    apiKeyName: apiKeyName,
+    privateKey: privateKey,
+    proxyUrl: proxyUrl,
+  } = React.useContext(AppContext) as {
+    apiKeyName: string;
+    privateKey: string;
+    proxyUrl: string;
+  };
 
   //  Runs the MPCKeyExportDemo.
   React.useEffect(() => {
     let demoFn = async function () {
+      if (deviceGroupName === '' || !showStep2 || showStep7) {
+        return;
+      }
+
       if (
-        deviceGroupName === '' ||
-        apiKeyName === '' ||
-        privateKey === '' ||
-        !showStep2 ||
-        showStep7
+        selectedMode === directMode &&
+        (apiKeyName === '' || privateKey === '')
       ) {
         return;
       }
 
       try {
+        const apiKey = selectedMode === proxyMode ? '' : apiKeyName;
+        const privKey = selectedMode === proxyMode ? '' : privateKey;
+
         // Initialize the MPCKeyService and MPCSdk.
         await initMPCSdk(true);
-        await initMPCKeyService(apiKeyName, privateKey);
-        await initMPCWalletService(apiKeyName, privateKey);
+        await initMPCKeyService(apiKey, privKey, proxyUrl);
+        await initMPCWalletService(apiKey, privKey, proxyUrl);
 
         if (!showStep3) {
           const operationName = (await prepareDeviceArchive(
@@ -137,6 +150,7 @@ export const MPCKeyExportDemo = () => {
     deviceGroupName,
     apiKeyName,
     privateKey,
+    proxyUrl,
     showStep2,
     showStep3,
     showStep4,
@@ -145,6 +159,7 @@ export const MPCKeyExportDemo = () => {
     mpcKeyExportMetadata,
     passcode,
     mpcKeyExportMetadataInput,
+    selectedMode,
   ]);
 
   const requiredDemos = [

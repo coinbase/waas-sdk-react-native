@@ -194,15 +194,16 @@ export type Pool = {
  * any PoolService functions are called.
  * @param apiKeyName The API key name.
  * @param privateKey The private key.
- * @param url The URL of the PoolService. Optional.
+ * @param proxyUrl The URL of the proxy service. Required when in proxy mode and not needed in direct mode.
  * @returns A void promise, that either succeeds or rejects.
  * otherwise.
  */
 export function initPoolService(
   apiKeyName: string,
-  privateKey: string
+  privateKey: string,
+  proxyUrl: string
 ): Promise<void> {
-  return PoolService.initialize(apiKeyName, privateKey);
+  return PoolService.initialize(apiKeyName, privateKey, proxyUrl);
 }
 
 /**
@@ -241,14 +242,18 @@ const MPCKeyService = NativeModules.MPCKeyService
 /**
  * Initializes the MPCKeyService.
  * This function must be invoked before any MPCKeyService functions are called.
+ * @param apiKeyName The API key name.
+ * @param privateKey The private key.
+ * @param proxyUrl The URL of the proxy service. Required when in proxy mode and not needed in direct mode.
  * @returns A void promise, that either succeeds or rejects.
  * otherwise.
  */
 export function initMPCKeyService(
   apiKeyName: string,
-  privateKey: string
+  privateKey: string,
+  proxyUrl: string
 ): Promise<void> {
-  return MPCKeyService.initialize(apiKeyName, privateKey);
+  return MPCKeyService.initialize(apiKeyName, privateKey, proxyUrl);
 }
 
 /**
@@ -767,15 +772,16 @@ export type MPCWallet = {
  * any MPCWalletService functions are called.
  * @param apiKeyName The API key name.
  * @param privateKey The private key.
- * @param url The URL of the WalletService. Optional.
+ * @param proxyUrl The URL of the proxy service. Required when in proxy mode and not needed in direct mode.
  * @returns A void promise, that either succeeds or rejects.
  * otherwise.
  */
 export function initMPCWalletService(
   apiKeyName: string,
-  privateKey: string
+  privateKey: string,
+  proxyUrl: string
 ): Promise<void> {
-  return MPCWalletService.initialize(apiKeyName, privateKey);
+  return MPCWalletService.initialize(apiKeyName, privateKey, proxyUrl);
 }
 
 /**

@@ -12,21 +12,35 @@ import java.util.concurrent.Future;
  * A pool represents a group of related wallets.
  */
 public class PoolService {
-  // The URL of the PoolService.
-  public static String poolServiceUrl = "https://api.developer.coinbase.com/waas/pools";
-
+  // The URL of the PoolService when running in "direct mode".
+  public static final String poolServiceWaaSUrl = "https://api.developer.coinbase.com/waas/pools";
   // The handle to the Go PoolService client.
   com.waassdkinternal.v1.PoolService poolClient;
   ExecutorService executor;
 
   /**
-   * Initializes the PoolService with the given Cloud API Key parameters. Resolves with the string "success" on success;
-   * rejects with an error otherwise.
+   * Initializes the PoolService with the given Cloud API Key parameters or proxy URL.
+   * Utilizes `proxyUrl` and operates in insecure mode if either `apiKeyName` or `privateKey` is missing.
+   * Uses direct WaaS URL with the API keys if both are provided.
+   * Resolves with the string "success" on success; rejects with an error otherwise.
    */
-  public PoolService(String apiKeyName, String privateKey, ExecutorService executor) throws WaasException {
+  public PoolService(String apiKeyName, String privateKey, String proxyUrl, ExecutorService executor) throws WaasException {
     this.executor = executor;
+
+    Bool insecure;
+
+    String poolServiceUrl;
+    
+    if (apiKeyName == "" && privateKey == "") {
+      poolServiceUrl = proxyUrl;
+      insecure = true;
+    } else {
+      poolServiceUrl = poolServiceWaaSUrl;
+      insecure = false;
+    }
+
     try {
-      poolClient = newPoolService(poolServiceUrl, apiKeyName, privateKey);
+      poolClient = newPoolService(poolServiceUrl, apiKeyName, privateKey, insecure);
     } catch (Exception e) {
       throw new WaasException("initialize pool failed : ", e.getMessage());
     }

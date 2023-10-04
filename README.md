@@ -63,6 +63,21 @@ This repository provides an example app that demonstrates how the APIs should be
 > To run the example app, populate, or replace, this file with the Cloud API Key file provided to you
 > by Coinbase.
 
+### Running in Proxy-Mode (recommended)
+
+To run the example app using `proxy-mode`:
+
+1. Ensure the proxy server is correctly set up and active at the designated endpoint. The default endpoint is `localhost:8091`.
+2. If your proxy server endpoint differs from the default, update the `proxyUrl` in the `config.json` file accordingly.
+3. On app startup, choose `Proxy Mode` from the Mode Selection screen.
+
+### Running in Direct-Mode (not recommended)
+
+To run the example app using `direct-mode`:
+
+1. Populate the `.coinbase_cloud_api_key.json` file with your personal API credentials.
+2. On app startup, select `Direct Mode` from the Mode Selection screen.
+
 ### iOS
 Ensure you have XCode open and run the following from the root directory of the repository:
 
@@ -103,6 +118,8 @@ yarn example start # Start the Metro server
 yarn example android # Build and start the app on Android emulator
 ```
 
+By following the above steps, you should be able to run the example app either in proxy-mode or direct-mode based on your preference and setup.
+
 ## Recommended Architecture
 
 Broadly speaking, there are two possible approaches to using the WaaS SDK:
@@ -131,6 +148,25 @@ The methods from the WaaS SDK which are _required_ to be used for participation 
 2. `bootstrapDevice`
 3. `getRegistrationData`
 4. `computeMPCOperation`
+
+## Proxy-Mode vs. Direct-Mode
+
+Users can switch between two distinct operating modes: `proxy-mode` and `direct-mode`.
+
+### Proxy-Mode (recommended)
+
+**Proxy-mode** allows the application to connect to the Coinbase WaaS API through a proxy server. The primary features of this mode include:
+
+- Initiate the SDK without needing the Coinbase Cloud API key details in the app itself. Communication will be authenticated during Proxy-Server <> WaaS API.
+- The SDK, by default, points to a proxy server endpoint at `localhost:8091`. Update this `proxyUrl` in the `config.json` file.
+- Cloud credentials are stored in the proxy server, eliminating the need to have them on the application side.
+
+### Direct-Mode (not recommended)
+
+**Direct-mode** enables the app to connect directly to the Coinbase WaaS API, bypassing the need for a proxy server. Key aspects of this mode are:
+
+- The app communicates directly with the Coinbase WaaS API, with no involvement of a proxy server.
+- Users must provide the API Key and private key for communication, retrieved from the `.coinbase_cloud_api_key.json` file.
 
 # Native Waas SDK
 

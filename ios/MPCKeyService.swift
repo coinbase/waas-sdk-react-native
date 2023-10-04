@@ -2,9 +2,13 @@ import Foundation
 import WaasSdkGo
 
 @objc(MPCKeyService)
+// swiftlint:disable type_body_length
 class MPCKeyService: NSObject {
-    // The URL of the MPCKeyService.
-    let mpcKeyServiceUrl = "https://api.developer.coinbase.com/waas/mpc_keys"
+    // The URL of the MPCKeyService when running in "direct mode".
+    let mpcKeyServiceWaaSUrl = "https://api.developer.coinbase.com/waas/mpc_keys"
+
+    // The URL of the MPCKeyService when running in "proxy mode".
+    let mpcKeyServiceProxyUrl = "http://localhost:8091"
 
     // The error code for MPCKeyService-related errors.
     let mpcKeyServiceErr = "E_MPC_KEY_SERVICE"
@@ -16,17 +20,33 @@ class MPCKeyService: NSObject {
     var keyClient: V1MPCKeyServiceProtocol?
 
     /**
-     Initializes the MPCKeyService  with the given parameters.
-     Resolves with the string "success" on success; rejects with an error otherwise.
+     * Initializes the MPCKeyService with the given Cloud API Key parameters or proxy URL.
+     * Utilizes `proxyUrl` and operates in insecure mode if either `apiKeyName` or `privateKey` is missing.
+     * Uses direct WaaS URL with the API keys if both are provided.
+     * Resolves with the string "success" on success; rejects with an error otherwise.
      */
-    @objc(initialize:withPrivateKey:withResolver:withRejecter:)
-    func initialize(_ apiKeyName: NSString, privateKey: NSString,
+    @objc(initialize:withPrivateKey:withProxyUrl:withResolver:withRejecter:)
+    func initialize(_ apiKeyName: NSString, privateKey: NSString, proxyUrl: NSString,
                     resolve: RCTPromiseResolveBlock, reject: RCTPromiseRejectBlock) {
         var error: NSError?
+
+        let insecure: Bool
+
+        let mpcKeyServiceUrl: String
+
+        if apiKeyName as String == "" || privateKey as String == "" {
+            mpcKeyServiceUrl = proxyUrl as String
+            insecure = true
+        } else {
+            mpcKeyServiceUrl = mpcKeyServiceWaaSUrl
+            insecure = false
+        }
+
         keyClient = V1NewMPCKeyService(
             mpcKeyServiceUrl as String,
             apiKeyName as String,
             privateKey as String,
+            insecure as Bool,
             &error)
 
         if error != nil {

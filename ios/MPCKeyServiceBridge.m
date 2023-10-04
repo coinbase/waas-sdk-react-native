@@ -5,6 +5,7 @@
 
 RCT_EXTERN_METHOD(initialize:(NSString)apiKeyName
                   withPrivateKey:(NSString)privateKey
+                  withProxyUrl: (NSString)proxyUrl
                   withResolver:(RCTPromiseResolveBlock)resolve
                   withRejecter:(RCTPromiseRejectBlock)reject)
 

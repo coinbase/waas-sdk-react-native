@@ -24,6 +24,8 @@ import AppContext from '../components/AppContext';
 import { CopyButton } from '../components/CopyButton';
 import { MonospaceText } from '../components/MonospaceText';
 import { Note } from '../components/Note';
+import { ModeContext } from '../utils/ModeProvider';
+import { directMode, proxyMode } from '../constants';
 
 export const MPCWalletServiceDemo = () => {
   const [deviceName, setDeviceName] = React.useState<string>('');
@@ -43,30 +45,42 @@ export const MPCWalletServiceDemo = () => {
   const [showStep7, setShowStep7] = React.useState<boolean>();
   const [showError, setShowError] = React.useState<boolean>();
 
-  const credentials = React.useContext(AppContext);
-  const apiKeyName = credentials.apiKeyName as string;
-  const privateKey = credentials.privateKey as string;
+  const {
+    apiKeyName: apiKeyName,
+    privateKey: privateKey,
+    proxyUrl: proxyUrl,
+  } = React.useContext(AppContext) as {
+    apiKeyName: string;
+    privateKey: string;
+    proxyUrl: string;
+  };
+
+  const { selectedMode } = React.useContext(ModeContext);
 
   const prepareDeviceArchiveEnforced = true;
 
   //  Runs the WalletService demo.
   React.useEffect(() => {
     let demoFn = async function () {
+      if (poolName === '' || deviceName === '' || !showStep4) {
+        return;
+      }
+
       if (
-        poolName === '' ||
-        deviceName === '' ||
-        apiKeyName === '' ||
-        privateKey === '' ||
-        !showStep4
+        selectedMode === directMode &&
+        (apiKeyName === '' || privateKey === '')
       ) {
         return;
       }
 
       try {
+        const apiKey = selectedMode === proxyMode ? '' : apiKeyName;
+        const privKey = selectedMode === proxyMode ? '' : privateKey;
+
         // Initialize the MPCSdk, MPCKeyService and MPCWalletService.
         await initMPCSdk(true);
-        await initMPCKeyService(apiKeyName, privateKey);
-        await initMPCWalletService(apiKeyName, privateKey);
+        await initMPCKeyService(apiKey, privKey, proxyUrl);
+        await initMPCWalletService(apiKey, privKey, proxyUrl);
 
         // Create MPCWallet if Device Group is not set.
         if (deviceGroupName === '') {
@@ -119,11 +133,13 @@ export const MPCWalletServiceDemo = () => {
     deviceName,
     apiKeyName,
     privateKey,
+    proxyUrl,
     showStep4,
     deviceGroupName,
     passcode,
     poolName,
     prepareDeviceArchiveEnforced,
+    selectedMode,
   ]);
 
   const requiredDemos = ['Pool Creation', 'Device Registration'];

@@ -3,8 +3,8 @@ import WaasSdkGo
 
 @objc(MPCWalletService)
 class MPCWalletService: NSObject {
-    // The URL of the MPCWalletService.
-    let mpcWalletServiceUrl = "https://api.developer.coinbase.com/waas/mpc_wallets"
+    // The URL of the MPCWalletService when running in "direct mode".
+    let mpcWalletServiceWaaSUrl = "https://api.developer.coinbase.com/waas/mpc_wallets"
 
     // The error code for MPCWalletService-related errors.
     let walletsErr = "E_MPC_WALLET_SERVICE"
@@ -14,20 +14,34 @@ class MPCWalletService: NSObject {
 
     // The handle to the Go MPCWalletService client.
     var walletsClient: V1MPCWalletServiceProtocol?
-
     /**
-     Initializes the MPCWalletService with the given Cloud API Key parameters. Resolves with the string "success"
-     on success; rejects with an error otherwise.
+     * Initializes the MPCWalletService with the given Cloud API Key parameters or proxy URL.
+     * Utilizes `proxyUrl` and operates in insecure mode if either `apiKeyName` or `privateKey` is missing.
+     * Uses direct WaaS URL with the API keys if both are provided.
+     * Resolves with the string "success" on success; rejects with an error otherwise.
      */
-    @objc(initialize:withPrivateKey:withResolver:withRejecter:)
-    func initialize(_ apiKeyName: NSString, privateKey: NSString,
+    @objc(initialize:withPrivateKey:withProxyUrl:withResolver:withRejecter:)
+    func initialize(_ apiKeyName: NSString, privateKey: NSString, proxyUrl: NSString,
                     resolve: RCTPromiseResolveBlock, reject: RCTPromiseRejectBlock) {
         var error: NSError?
+
+        let insecure: Bool
+
+        let mpcWalletServiceUrl: String
+
+        if apiKeyName as String == "" || privateKey as String == "" {
+            mpcWalletServiceUrl = proxyUrl as String
+            insecure = true
+        } else {
+            mpcWalletServiceUrl = mpcWalletServiceWaaSUrl
+            insecure = false
+        }
 
         walletsClient = V1NewMPCWalletService(
             mpcWalletServiceUrl as String,
             apiKeyName as String,
             privateKey as String,
+            insecure as Bool,
             &error)
 
         if error != nil {

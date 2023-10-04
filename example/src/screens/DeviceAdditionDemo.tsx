@@ -17,6 +17,8 @@ import { InputText } from '../components/InputText';
 import { PageTitle } from '../components/PageTitle';
 import AppContext from '../components/AppContext';
 import { Note } from '../components/Note';
+import { ModeContext } from '../utils/ModeProvider';
+import { directMode, proxyMode } from '../constants';
 
 export const DeviceAdditionDemo = () => {
   const [deviceGroupName, setDeviceGroupName] = React.useState<string>('');
@@ -36,29 +38,40 @@ export const DeviceAdditionDemo = () => {
   const [showStep6, setShowStep6] = React.useState<boolean>();
   const [showError, setShowError] = React.useState<boolean>();
 
-  const credentials = React.useContext(AppContext);
-  const apiKeyName = credentials.apiKeyName as string;
-  const privateKey = credentials.privateKey as string;
+  const { selectedMode } = React.useContext(ModeContext);
+  const {
+    apiKeyName: apiKeyName,
+    privateKey: privateKey,
+    proxyUrl: proxyUrl,
+  } = React.useContext(AppContext) as {
+    apiKeyName: string;
+    privateKey: string;
+    proxyUrl: string;
+  };
 
   //  Runs the DeviceAdditionDemo.
   React.useEffect(
     () => {
       let demoFn = async function () {
+        if (!showStep2 || showStep6 || deviceGroupName) {
+          return;
+        }
+
         if (
-          deviceGroupName === '' ||
-          apiKeyName === '' ||
-          privateKey === '' ||
-          !showStep2 ||
-          showStep6
+          selectedMode === directMode &&
+          (apiKeyName === '' || privateKey === '')
         ) {
           return;
         }
 
         try {
+          const apiKey = selectedMode === proxyMode ? '' : apiKeyName;
+          const privKey = selectedMode === proxyMode ? '' : privateKey;
+
           // Initialize the MPCKeyService and MPCSdk.
           await initMPCSdk(true);
-          await initMPCKeyService(apiKeyName, privateKey);
-          await initMPCWalletService(apiKeyName, privateKey);
+          await initMPCKeyService(apiKey, privKey, proxyUrl);
+          await initMPCWalletService(apiKey, privKey, proxyUrl);
 
           if (!showStep5) {
             const operationName = await addDevice(deviceGroupName, deviceName);
@@ -99,10 +112,12 @@ export const DeviceAdditionDemo = () => {
       deviceGroupName,
       apiKeyName,
       privateKey,
+      proxyUrl,
       showStep2,
       deviceName,
       deviceBackup,
       passcode,
+      selectedMode,
     ]
   );
 
