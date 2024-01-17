@@ -1,5 +1,5 @@
-include(":go-internal-sdk")
-project(':go-internal-sdk').projectDir = new File(settingsDir, 'go-internal-sdk')
+include ":android-native", ":android-native:go-internal-sdk", ":android-native:mpc-sdk" 
 
-include(":mpc-sdk")
-project(':mpc-sdk').projectDir = new File(settingsDir, 'mpc-sdk')
+project(':android-native').projectDir = new File(rootProject.projectDir, '../node_modules/@coinbase/waas-sdk-react-native/android-native')
+project(':android-native:mpc-sdk').projectDir = new File(rootProject.projectDir, '../node_modules/@coinbase/waas-sdk-react-native/android-native/mpc-sdk')
+project(':android-native:go-internal-sdk').projectDir = new File(rootProject.projectDir, '../node_modules/@coinbase/waas-sdk-react-native/android-native/go-internal-sdk')
